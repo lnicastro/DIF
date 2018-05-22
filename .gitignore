@@ -1,0 +1,18 @@
+# The cmake buildig dir
+Build
+
+# Dependencies
+src/.deps
+src/.libs
+
+# Compiled Object files
+*.lo
+*.o
+
+# Compiled Static libraries
+*.la
+*.a
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
