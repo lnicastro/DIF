@@ -1,0 +1,1509 @@
+#!@PERL@ -W -l
+
+# ----------------------------------------------------------------------^
+# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
+# Giorgio Calderone <giorgio.calderone@google.com>
+# Luciano Nicastro <nicastro@iasfbo.inaf.it>
+# 
+# This file is part of DIF.
+# 
+# DIF is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later vxersion.
+# 
+# DIF is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with DIF; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# 
+# ----------------------------------------------------------------------$
+
+use strict;
+use DBI();
+
+#http://search.cpan.org/~capttofu/DBD-mysql/
+#
+#rpm:
+#perl-DBI
+#perl-DBD-MySQL
+# 
+#cpan
+#install DBD::mysql
+#force install DBD::mysql
+#
+
+
+# ---- Global variables
+my $root= "root";
+my $pass= "";
+my $dbname = "";
+my $user = ""; 
+my $host = "";
+my $group = ""; 
+my $su = "";
+my $descr = "";
+my $email = "";
+my $table = "";
+my $view = "";
+my $flist = "";
+my $param = 0;
+my $htmtype = "";
+my $healptype = "";
+my $field_ra = "";
+my $field_dec = "";
+my $id_type = 0;   # Which index is to be added: 1 --> HTM, 2 --> Healpix
+my $id_opt = 0;    #HEALPIX scheme: 0 --> RING, 1 --> NESTED
+my $id_opttx = ''; #HEALPIX scheme: "ring" or "nest"
+my $createHTMIndex = 0;
+my $createHEALPIndex = 0;
+my $miv = 0;  #Create Multiple Index View (default)
+my $siv = 1;  #Create Single Index View (default)
+my $trig = 1; #Create insert trigger (default)
+my $read_cnf = 0;  #Read user and/or password from ~/.my.cnf (first section found)
+my $addra_key = 0; #Add RA column to the index (i.e. ID+RA)
+my $dbh = 0;
+
+my $difver = '@VERSION@';
+my $DIFhead = "\nDIF - Dynamic Indexing Facilities, ver. $difver" .
+            "\nGiorgio Calderone - giorgio.calderone\@gmail.com and Luciano Nicastro - nicastro\@iasfbo.inaf.it\n";
+
+my $pre = '@prefix@/share/dif/sql';
+my $logfileName = "dif.log";
+my $logfd;
+
+my $dif_checked = 0;
+
+my $rolog = 0;   # readonly logging?
+my $dif_tmp = 0; # use DIF.tmp table?
+
+# ---- Options variables
+my $optinteractive = 0;
+my $optreadonly = 0;
+my $optlog = 0;
+my $optlogfile = 0;
+
+my $optnotrig = 1;  # Create/update insert trigger (see input options). v.0.5.4 set to 1.
+my $optnomiv = 1;   # Create/update multiple index view (see input options). v.0.5.4 set to 1.
+my $view_only = 0;  # Only recreate table views - table and indices are not affected (see input commands)
+
+
+sub usage {
+print <<'EOT';
+Usage: dif [Options] [<Command1> [<Command2> [...]]]
+
+Options are:
+   -h | --help     print this usage message.
+   -v | --ver      print version number.
+   --interactive   use interactive interface.
+   --log           print SQL queries on standard output.
+   --logfile       print SQL queries on file dif.sql.
+   --multidx       create or update the multi-index view for HTM (TabName_htm).
+   --trigger       add or update the INSERT trigger for input table.
+   --no-multidx    do not create or update the multi-index view for HTM (TabName_htm). Default.
+   --no-trigger    do not add or update the INSERT trigger for input table. Default.
+   --views-only    recreate all the table views and trigger but do not touch table and indices.
+                   Must preceed "--index-htm" or "--index-healpix-xxx" commands.
+   --readonly      do not execute any query that would modify the database.
+   --cnf           read user and/or password from "~/.my.cnf".
+   --ra-key        add RA field to the index (i.e. ID+RA, def. ID only).
+
+   -u | --user <User>
+                   Perform operations below as User rather than as root.
+                   Assume that root granted User the required privileges for
+                   view creation and INSERT/DELETE operations on DIF.tbl.
+
+   -p | --pass <Password>
+                   root or User password.
+
+There can be any number of commands, each followed by its own arguments.
+When using the interactive interface the arguments must be given through
+stdin and those on command line will be ignored.
+
+
+----------------------------------------------------------------------
+Commands are:
+
+--install
+  install DIF facilities.
+
+--uninstall
+  uninstall DIF facilities.
+
+--upgrade
+  upgrade DIF from previous release.
+
+--grant-user <User> <DBName>
+  Grant minimal privileges on DBName to User in order to perform the
+  operations below. Must be root.
+
+
+--index-htm <DBName> <Table> <Depth> <Ra_deg> <Dec_deg>
+  Add an HTM index to a table. 
+
+--drop-index-htm <DBName> <Table> <Depth>
+  Drop an HTM index and related column from a table.
+
+--index-healpix-ring <DBName> <Table> <Order> <Ra_deg> <Dec_deg>
+  Add an Healpix index with RING scheme to a table. 
+
+--index-healpix-nested <DBName> <Table> <Order> <Ra_deg> <Dec_deg>
+  Add an Healpix index with NESTED scheme to a table. 
+
+--drop-index-healpix-ring <DBName> <Table> <Order>
+  Drop an Healpix RING index and related column from a table.
+
+--drop-index-healpix-nested <DBName> <Table> <Order>
+  Drop an Healpix NESTED index and related column from a table.
+
+----------------------------------------------------------------------
+Arguments are:
+  <DBName> name of the database which contains the table;
+  <Table> name of the table to which index should be added/dropped;
+  <Depth> depth of HTM pixelization (0 : 25);
+  <Order> order of HEALPIX pixelization (0 : 29);
+  <Ra_deg> SQL expression to compute the right ascension in degrees;
+  <Dec_deg> SQL expression to compute the declination in degrees;
+EOT
+}
+
+#
+#--views <DBName> <Table>
+#  recreate multiple index views.
+#
+#--single-index-views <DBName> <Table>
+#  (re)create single index views (only for multiple indexed tables).
+#
+#--drop-views <DBName> <Table>
+#  Drops DIF-related views and triggers from a table;
+#
+
+
+
+# ---- General routines
+sub trim {
+    $_ = shift(@_);
+    chomp;
+    s/\t+//g;
+    s/\t//g;
+    s/\r+//g;
+    s/\r//g;
+    s/^ +//g;
+    s/ +$//g;
+    s/^ //g;
+    s/ $//g;
+    return $_;
+}
+
+
+sub readUser {
+    my $my_cnf = $ENV{HOME} ."/.my.cnf";
+    my ($key, $val);
+    my $u = "";
+
+    if (-e $my_cnf) {
+      my $in;
+      open ($in, "< $my_cnf") || die("cannot open file $my_cnf");
+# Read first found
+      LINE: while(<$in>) {
+        next LINE if /^\[/;
+        ($key, $val) = split('=', $_);
+        $key =~ tr/ //ds;
+        $val =~ tr/ \n//ds;
+        if ($key eq "user") {
+          $u = $val;
+          last;
+        }
+      }
+      close $in;
+    }
+
+    return $u;
+}
+
+
+sub readPassword {
+    my $u = shift(@_);
+    my $my_cnf = $ENV{HOME} ."/.my.cnf";
+    my ($key, $val);
+    my $p = "";
+
+    if (-e $my_cnf) {
+      my $in;
+      open ($in, "< $my_cnf") || die("cannot open file $my_cnf");
+# Assume "user" tag before "password"
+      LINE: while(<$in>) {
+        next LINE if /^\[/;
+        ($key, $val) = split('=', $_);
+        $key =~ tr/ //ds;
+        $val =~ tr/ \n//ds;
+        if ($key eq "user" && $val ne $u) {
+          last;
+        }
+        if ($key eq "password") {
+          $p = $val;
+          last;
+        }
+      }
+      close $in;
+    }
+
+    return $p;
+}
+
+
+
+sub askPassword {
+    my $u = shift(@_);
+    print "";
+    system "stty -echo";
+    print "Insert password for user $u: ";
+    my $pass = <STDIN>;
+    system "stty echo";
+    print "";
+    chomp($pass);
+    return $pass;
+}
+     
+
+sub readFile {
+    my $fi = shift(@_);
+    my $in;
+    open ($in, "< $pre/$fi") || die("cannot open file $fi");
+
+    my $sql = '';
+    while(<$in>) {
+	$sql .= $_;
+    }
+
+    close $in;
+    return prepareQueries($sql);
+}
+
+
+sub readStdin {
+    my $v = <>;
+    chomp $v;
+    return trim($v);
+}
+
+
+# ---- Logging routines
+sub dif_log {
+    print shift(@_);
+
+#    if ($optforce == 0) {
+#	print "Continue with ENTER.";
+#	my $dummy = <STDIN>;
+#    }
+}
+
+sub logInfo {
+    dif_log("INFO: " . shift(@_));
+}
+
+sub logWarn {
+    dif_log("WARN: " . shift(@_));
+}
+
+sub logErr {
+    dif_log("ERR: " . shift(@_));
+}
+
+sub logFatal {
+    print "FATAL: " . shift(@_);
+    die;
+}
+
+
+
+
+
+
+
+
+# ---- Database routines
+sub connectToDB {
+    #my $user = $root; #shift(@_);
+    my $u = "";
+    my $p = "";
+
+    if ($user ne "") {
+      $u = $user;
+    } else {
+      if ($read_cnf) {
+        $u = readUser();
+      }
+    }
+
+    if ($u eq "") {
+      $u = $root;
+    }
+
+    if ($pass ne "") {
+      $p = $pass;
+    } else {
+      if ($read_cnf) {
+        $p = readPassword($u);
+      }
+
+      if ($p eq "") {
+        $p = askPassword($u);
+      }
+    }
+
+    my $dbna;
+    if ($#_ >= 0) {
+	$dbna = shift(@_);
+    }
+    else {
+	$dbna = "mysql";
+    }
+    
+    my $dbho = 'localhost'; #shift(@_);
+
+    #Search for the mysq.sock file
+    my $sock = "/tmp/mysql.sock";
+    unless (-e $sock) {
+      ($sock = `mysql_config --socket`) or logFatal("Error invoking mysql_config.");
+      chomp($sock);
+    }
+    if (-e $sock) {
+      $ENV{MYSQL_UNIX_PORT} = $sock;
+    } else {
+      logFatal("Can't find MySQL socket file '$sock'.");
+    }
+
+    my $db = DBI->connect("DBI:mysql:host=" . $dbho
+			  #. ";host=" . $dbho
+			  . ":mysql_server_prepare=1"
+			  , $u, $p,
+			  {'RaiseError' => 0, 'PrintError' => 0})
+
+	|| logFatal("Can't connect to DB." . printDBError());
+
+    print "MySQL server: $db->{mysql_serverinfo}";
+    print "MySQL used to compile DBD interface: $db->{mysql_clientversion}\n";
+
+    print "--> Login successful";
+    return $db;
+}
+
+
+
+sub useDB {
+    my $db = shift(@_);
+    exec_sql(qq{
+	\#\@ONERR_DIE|Database $db does not exists|
+	USE $db//
+    });
+}
+
+
+
+sub substKeyword {
+    $_ = shift(@_);
+    chomp;
+
+    #print $user, $host, $group, $su, $descr, $dbname, $table, $difver;
+    s/\@USER@/$user/g;
+    s/\@PASS@/$pass/g;
+    s/\@HOST@/$host/g;
+    s/\@GROUP@/$group/g;
+    s/\@SU@/$su/g;
+    s/\@DESCR@/$descr/g;
+    s/\@EMAIL@/$email/g;
+    s/\@DB@/$dbname/g;
+    s/\@TABLE@/$table/g;
+    s/\@VIEW@/$view/g;
+    s/\@FLIST@/$flist/g;
+    s/\@DIFVER@/$difver/g;
+    s/\@HTMDEPTH@/$param/g;
+    s/\@HEALPORDER@/$param/g;
+    s/\@HTMTYPE@/$htmtype/g;
+    s/\@HEALPTYPE@/$healptype/g;
+    s/\@RA@/$field_ra/g;
+    s/\@DEC@/$field_dec/g;
+    s/\@IDTYPE@/$id_type/g;
+    s/\@IDOPT@/$id_opt/g;
+    s/\@IDOPTTX@/$id_opttx/g;
+    
+    $_ = trim($_);
+    if ((substr($_, 0, 1) ne '#')   ||   (substr($_, 0, 2) eq '#@'))  { #Skip comments
+	if (($_ ne '')   &&   ($_ ne ' ')) { #Skip blank lines
+	    return $_;
+	}
+    }
+    return '';
+}
+
+
+
+sub prepareQueries {
+    my $sql = shift(@_);
+    my $ll = '';
+    my @v = split(/\n/, $sql);
+    $sql = '';
+    foreach $ll (@v) {
+        $sql .= substKeyword($ll) . ' ';
+    }
+    return $sql;
+}
+
+
+sub printDBError {
+    if ($DBI::errstr) {
+	return "\nMySQL error: $DBI::errstr\n";
+    }
+    else {
+	return ''; }
+}
+
+
+
+sub execute {
+    my @v = split(/\/\//, shift(@_));
+    my $ret = 1;
+    my $sql = '';
+    my $sth;
+    my $ifcount = 0;
+    my $ifres = 0;
+
+    LOOP: foreach $sql (@v) {
+	$sql = trim($sql);
+	if ($sql eq '') { next; }
+
+	my @vv = split(/\|/, trim($sql));
+	$sql = trim($vv[$#vv]);
+	
+	if ($vv[0] =~ /^\#\@IF/) {
+	    $ifcount += 1;
+	    shift @vv;
+	    $sql = join('|', @vv);
+	    #print "Evaluating: $sql|\n";
+	    $ifres = eval($sql);
+	    #print "Result: $ifres\n";
+	    next LOOP;
+	}
+
+	if ($vv[0] =~ /^\#\@ENDIF/) {
+	    #print "Matching ENDIF\n";
+	    $ifcount -= 1;
+	    $ifres = 0;
+	    next LOOP;
+	}
+
+	if (($ifcount > 0)   &&   (! $ifres)) {
+	    #print "Skipped: $sql//\n";
+	    next LOOP;
+	}
+
+	if ($optlog) { print "$sql//\n"; }
+	if ($optlogfile) { print $logfd "$sql//\n"; }
+
+	if (($optreadonly == 0)   ||   ($sql =~ /^SELECT/)   ||   ($sql =~ /^USE/)) {
+	    if (! $dbh->do($sql)) {
+		
+		if ($vv[0] =~ /^\#\@ONERR_IGNORE_RETURN/) {
+		    return 0;
+		}
+		if ($vv[0] =~ /^\#\@ONERR_IGNORE/) {
+		    ; #If no directive is specified this is the default
+		}
+		if ($vv[0] =~ /^\#\@ONERR_WARN/) {
+		    logWarn($vv[1] . printDBError());
+		}
+		if ($vv[0] =~ /^\#\@ONERR_INFO_RETURN/) {
+		    logInfo($vv[1]);
+		    return 0;
+		}
+		if ($vv[0] =~ /^\#\@ONERR_INFO/) {
+		    logInfo($vv[1]);
+		}
+		if ($vv[0] =~ /^\#\@ONERR_RETURN/) {
+		    logErr($vv[1] . printDBError());
+		    return 0;
+		}
+		if ($vv[0] =~ /^\#\@ONERR_DIE/) {
+		    logFatal($vv[1] . printDBError());
+		}
+	    }
+	}
+    }
+    return $ret;
+}
+    
+
+
+sub exec_sql {
+    my $sql = shift(@_);
+    return execute(prepareQueries($sql));
+}
+
+
+sub exec_file {
+    my $fi = shift(@_);
+    return execute(readFile("$fi"));
+}
+
+
+sub Exists {
+    my $table = shift(@_);
+    my $field = '';
+    if ($#_ >= 0) {
+	$field = shift(@_);
+    }
+    
+    if ($field eq '') {
+	return exec_sql(qq{
+	    \#\@ONERR_IGNORE_RETURN||
+	    SELECT COUNT(*) FROM $table//
+	});
+    }
+    else {
+	return exec_sql(qq{
+	    \#\@ONERR_IGNORE_RETURN||
+	    SELECT $field FROM $table//
+	});
+    }
+}
+
+
+
+
+sub query {
+    my $sql = shift(@_);
+    my $field = -1;
+    my @res;
+    
+    if ($#_ >= 0) {
+        $field = shift(@_);  }
+    
+    #print $out "$sql";
+#LN - for the temporary table do not show the query
+    my $dop = 1;
+    if ($dif_tmp) {
+      if ($sql =~ /DIF.tmp/) { $dop = 0; }
+    }
+    if ($optlog && $dop) { print "$sql//\n"; }
+    if ($optlogfile && $dop) { print $logfd "$sql//\n"; }
+    my $qry = $dbh->prepare($sql)  ||   die("Error in SQL query");
+    my ($i, $j);
+
+    if (! $qry->execute()) {
+	die "Error executing: $sql" . printDBError();
+    }
+    for ($i=0; $i<$qry->rows; $i++) {
+	my @row = $qry->fetchrow_array;
+	
+	for ($j=0; $j<=$#row; $j++) {
+	    if (! defined($row[$j])) {
+		$row[$j]  = '(NULL)'; 
+	    }
+	}
+	
+	if ($field == -1) {
+	    $res[$i] = join("\t", @row);
+	}
+	else {
+	    $res[$i] = $row[$field];
+	}
+    }
+    return @res;
+}
+
+
+
+
+
+# ---- Action routines
+sub init {
+    if ($dbh == 0) {
+	print $DIFhead;
+	$dbh = connectToDB($dbname);
+    }
+
+    if ($optlogfile) {
+	if (-e $logfileName) {
+	    die "Log file $logfileName already exists";
+	}
+	open ($logfd, "> $logfileName") || die("Cannot open file $logfileName");
+    }
+
+    if (($optlog || $optlogfile) && $optreadonly) { $rolog = 1; }
+}
+
+
+sub dif_check {
+    if ($dif_checked == 0) {
+	init();
+	exec_file("DIF_check.sql");
+	$dif_checked = 1;
+    }
+    return 1;
+}
+
+
+sub dif_uninstall {
+    init();
+
+    my @v = query("SELECT db, name, id_type, id_opt, param FROM DIF.tbl");
+    my $l;
+    my @rec;
+    my $mm;
+
+    if ($#v >= 0) {
+    	foreach $l (@v) {
+    	    @rec = split(/\t/, $l);
+            $id_type = $rec[2];
+            $id_opt = $rec[3];
+	    if ($id_type == 1) {
+              $mm = '--drop-index-htm';
+	    } else {
+              if ($id_opt == 1) {
+                $mm = '--drop-index-healpix-nested';
+              } else {
+                $mm = '--drop-index-healpix-ring';
+              }
+            }
+	    logErr("Table $rec[0].$rec[1] is still protected (try with $mm $rec[0] $rec[1] $rec[4])");
+	}
+    	logFatal "Must remove protection from tables before uninstalling DIF.";
+    }
+
+    print "--> Drop DIF facilities...";
+    exec_file("DIF_deinstall.sql");
+    return 1;
+}
+
+
+sub dif_install {
+    init();
+
+    # commentato perche' se dif non e' installato porta ad un errore
+    #dif_uninstall();  
+
+    print "--> Install DIF facilities...";
+    exec_file("DIF_create_dif.sql");
+    exec_file("DIF_udf.sql");
+    dif_funcdesc();
+    dif_messier();
+    return $1;
+}
+
+
+
+
+
+sub dif_getInput {
+    my $num = shift(@_);
+    my $stdin = shift(@_); 
+    my $i;
+    my $j;
+    my @ret;
+    my $s;
+
+    for ($i=0; $i<$num; $i++) {
+	if ($stdin == 0) {
+	    $ret[$i] = shift(@_);
+	}
+	else {
+	    $s = shift(@_);
+
+	    for ($j=0; $j<$i; $j++) {
+		$s =~ s/\\$j/$ret[$j]/g;
+	    }
+	    print $s;
+	    $ret[$i] = readStdin();
+	}
+
+	if ($i == 0) {
+	    if (! ($ret[$i])) { last; }
+	}
+    }
+    return @ret;
+}
+
+
+
+
+sub dif_trigger {
+    print "--> Updating triggers for table $dbname.$table...";
+
+    unless ($optnotrig) {
+
+      exec_sql(qq{
+	\#\@ONERR_IGNORE_INFO|Cannot drop trigger $dbname.difi_$table|
+	DROP TRIGGER $dbname.difi_$table//
+      });
+
+#LN - not sure about this, but could be necessary to avoid the "multiple triggers" error
+      exec_sql(qq{
+	\#\@ONERR_IGNORE_INFO|Cannot flush table $dbname.$table|
+	FLUSH TABLE $dbname.$table//
+      });
+
+
+      if ($trig) {
+	my @v = query("SELECT id_type,id_opt,param,Ra_field,Dec_field FROM DIF.tbl WHERE db='$dbname' AND name='$table'");
+#LN - read from the temporary table to get a correct log
+         if ($dif_tmp) {
+	    my @vt = query("SELECT id_type,id_opt,param,Ra_field,Dec_field FROM DIF.tmp WHERE db='$dbname' AND name='$table'");
+           if ($#vt >= 0) { push(@v,@vt); }
+         }
+#--
+	if ($#v >= 0) {
+	
+	    my $sql = qq{
+            \#\@ONERR_DIE|Cannot create trigger $dbname.difi_$table on table $dbname.$table|
+  	  CREATE TRIGGER $dbname.difi_$table BEFORE INSERT ON $dbname.$table FOR EACH ROW
+  	  BEGIN\n};
+	
+	    foreach my $l (@v) {
+		my @rec = split(/\t/, $l);
+		
+		if ($rec[0] eq '1') {  #HTM
+		    $sql .= qq{SET NEW.htmID_$rec[2] = HTMLookup($rec[2], NEW.$rec[3], NEW.$rec[4]);\n};
+		}
+		if ($rec[0] eq '2') {  #Healpix
+		    $id_opt = $rec[1];
+		    my $tmp = dif_healpScheme() . "_$rec[2]";
+		    $sql .= qq{SET NEW.healpID_$tmp = HEALPLookup($rec[1], $rec[2], NEW.$rec[3], NEW.$rec[4]);\n};
+		}
+	    }
+	    
+	    $sql .= "END//";
+	    
+	    my $dummy = exec_sql($sql);
+	}
+      }
+
+    }  # end unless optnotrig
+}
+
+
+
+
+sub dif_healpScheme {
+    if ($id_opt == 0) {
+	return "ring"; }
+    else {
+	return "nest"; }
+}
+
+
+
+sub dif_dropIndex {
+    dif_check();
+
+    if ($_[0] != 0) {
+	push @_, 'Insert database name (end with RETURN): ';
+	push @_, 'Insert table name: ';
+	push @_, 'Insert depth/order: ';
+    }
+    ($dbname, $table, $param) = dif_getInput(3, @_);
+
+    if (! ($dbname))
+    { return 1; }
+
+    if (! ($table))
+    { return 1; }
+
+    if (! ($param))
+    { return 1; }
+
+
+    my @param_list = split(',', $param);
+    foreach $param (@param_list) {
+	my $field_name = 'htmID';
+	if ($id_type == 2) { $field_name = 'healpID'; }
+	$id_opttx = dif_healpScheme();
+
+	my @v = query("SELECT * FROM DIF.tbl WHERE db='$dbname' AND name='$table' AND id_type=$id_type AND id_opt=$id_opt AND param=$param");
+	if ($#v >= 0) {
+	
+	    foreach my $l (@v) {
+		print "--> Drop $field_name $param index from table $dbname.$table...";
+		my $field_name2 = $field_name;
+		if ($id_type == 2) { $field_name2 .= "_$id_opttx"; }
+		$field_name2 .= "_$param";
+#LN - First drop the index, in case also RA was used. Assume DIF created, otherwise need to query for the key name.
+                exec_sql(qq{
+                        \#\@ONERR_WARN|Cannot drop index $field_name2 from table $dbname.$table|
+                        ALTER TABLE $dbname.$table DROP KEY $field_name2//
+                });
+		exec_sql(qq{
+   	                \#\@ONERR_DIE|Cannot drop field $field_name2 from table $dbname.$table|
+	                ALTER TABLE $dbname.$table DROP COLUMN $field_name2//
+                });
+	    }
+	    
+	    my $vv;
+	    if ($id_type == 1) {
+		$vv = "$dbname.$table" . "_htm_$param"; }
+	    else {
+		$vv = "$dbname.$table" . "_healp_$id_opttx" . "_$param"; }
+
+	    exec_sql(qq{
+   	            \#\@ONERR_WARN|Cannot drop view $vv|
+	            DROP VIEW $vv//
+            });
+	    
+	    exec_sql(qq{
+   	            \#\@ONERR_WARN|Cannot drop entry from DIF.tbl|
+	            DELETE FROM DIF.tbl WHERE db='$dbname' AND name='$table' AND id_type=$id_type AND id_opt=$id_opt AND param=$param//
+            });
+
+            if ($dif_tmp) {
+	      exec_sql(qq{
+   	            \#\@ONERR_WARN|Cannot drop entry from DIF.tmp|
+	            DELETE FROM DIF.tmp WHERE db='$dbname' AND name='$table' AND id_type=$id_type AND id_opt=$id_opt AND param=$param//
+              });
+            }
+
+# Also drop multiple index view
+	    if ($id_type == 1) {
+		$vv = "$dbname.$table" . "_htm";
+	        exec_sql(qq{
+   	            \#\@ONERR_WARN|Cannot drop view $vv|
+	            DROP VIEW IF EXISTS $vv//
+                });
+	    }
+	}
+    }
+
+    dif_views();
+    unless($optnotrig) {
+      dif_trigger();
+    }
+    return 1;
+}
+
+
+
+#sub views_trigger {
+#    dif_check();
+#
+#    if ($_[0] != 0) {
+#        push @_, 'Insert database name (end with RETURN): ';
+#        push @_, 'Insert table name: ';
+#    }
+#    ($dbname, $table) = dif_getInput(2, @_);
+#
+#    if (! ($dbname))
+#    { return 1; }
+#
+#    if (! ($table))
+#    { return 1; }
+#
+#    #print "--> Recreating views and triggers for table $dbname.$table...";
+#    
+#    dif_views();
+#    dif_trigger();
+#    return 1;
+#}
+
+
+
+
+sub dif_views {
+    print "--> Update views for table $dbname.$table...";
+
+    my @v;
+    my $l;
+    my @rec;
+    my $vname;
+    my $sql;
+    my $sivsql;
+    my $notfirst;
+    my $dummy;
+
+    if (($optlog || $optlogfile) && $optreadonly) { $rolog = 1; }
+
+    for ($id_type=1; $id_type<=2; $id_type++) {
+	for ($id_opt=0; $id_opt<$id_type; $id_opt++) {
+
+	    @v = query("SELECT param, Ra_field, Dec_field FROM DIF.tbl"
+		       . " WHERE db='$dbname' AND name='$table'"
+		       . " AND id_type=$id_type AND id_opt=$id_opt"
+		       . " ORDER BY param");
+#LN - read from the temporary table to get a correct log
+         if ($dif_tmp) {
+	    my @vt = query("SELECT param, Ra_field, Dec_field FROM DIF.tmp"
+		        . " WHERE db='$dbname' AND name='$table'"
+		        . " AND id_type=$id_type AND id_opt=$id_opt"
+		        . " ORDER BY param");
+           if ($#vt >= 0) { push(@v,@vt); }
+         }
+#--
+
+	    if ($#v >= 0) {
+
+		if ($id_type == 1) {
+		    $vname = "$dbname.$table" . "_htm"; }
+		else {
+		    $id_opttx = dif_healpScheme();
+		    $vname = "$dbname.$table" . "_healp" . "_$id_opttx";
+		}
+
+		$sql = qq{\#\@ONERR_DIE|Cannot create view $vname|} . "CREATE VIEW $vname AS ";
+		$notfirst = 0;
+		foreach $l (@v) {
+		    @rec = split(/\t/, $l);
+		    $param = $rec[0];
+		    $field_ra = $rec[1];
+		    $field_dec = $rec[2];
+#LN - This is just to deal with DEC, but a more generic check should be implemented
+                    if (substr($field_dec,0,1) ne '`' && $field_dec =~ /^(DEC)\b\W*/i) { substr($field_dec, 0, 3, "`Dec`"); }
+	    
+		    if ($notfirst) { $sql .= " UNION ALL "; }
+		    $notfirst = 1;
+
+		    $sivsql =  "SELECT $dbname.$table.*, $param AS HTM_Depth, DIF.dif.full AS HTM_Full"
+			. " FROM DIF.dif INNER JOIN $dbname.$table"
+			. "   ON ($dbname.$table.htmID_$param=DIF.dif.id AND DIF.dif.param=$param) "
+			. " WHERE DIF_setHTMDepth($param)  "
+			. "  AND  (DIF.dif.full OR DIF_FineSearch($field_ra, $field_dec, DIF.dif.full))";
+
+		    if ($id_type == 2) {
+			
+			my @vv = query("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_SCHEMA='$dbname' AND TABLE_NAME='$table' AND COLUMN_NAME='healpID_$id_opt" . "_$param'");
+			if ($#vv >= 0) {
+			    my $name_from = "healpID_$id_opt" . "_$param";
+			    my $name_to   = "healpID_$id_opttx" . "_$param";
+			    my $column_type = $vv[0];
+			    print "--> Update column names on table $dbname.$table...";
+			    exec_sql(qq{
+ 	                     \#\@ONERR_DIE|Cannot rename column on $dbname.$table|
+	                     ALTER TABLE $dbname.$table CHANGE $name_from $name_to $column_type//
+                            });
+			}
+
+			$_ = $sivsql;
+			s/HTM_Depth/HEALP_Order/;
+			s/HTM_Full/HEALP_Full/;
+			s/htmID/healpID_$id_opttx/;
+			s/setHTMDepth\(/setHEALPOrder\($id_opt, /;
+                        $sivsql = $_;
+		    }
+
+		    if ($id_type == 1) { $sql .= $sivsql; }
+
+		    $dummy = exec_sql("DROP VIEW IF EXISTS $vname" . "_$param");
+		    if ($siv) {
+			$sivsql = "CREATE VIEW $vname" . "_$param AS $sivsql";
+			$dummy = exec_sql($sivsql);
+		    }
+		}
+
+
+
+                #LN modif
+		#if (($id_type == 1)   &&   ($#v >= 1)) { $miv = 1; }
+		if (($id_type == 1) && !$optnomiv) {
+                  $miv = 1;
+		  $dummy = exec_sql("DROP VIEW IF EXISTS $vname");
+		  $dummy = exec_sql($sql);
+                } else { 
+                  $miv = 0;
+                }
+		#print "MIV $miv  -  $#v - \n";
+		#if ($miv) { $dummy = exec_sql($sql); }
+	    }
+	}
+    }
+}
+
+
+
+sub dif_htm_sqltype {
+    my $param = shift(@_);
+    my $htmtype;
+    
+  SWITCH: {
+      if ($param <  3) { $htmtype = "TINYINT   UNSIGNED";  last SWITCH; }
+      if ($param <  7) { $htmtype = "SMALLINT  UNSIGNED";  last SWITCH; }
+      if ($param < 11) { $htmtype = "MEDIUMINT UNSIGNED";  last SWITCH; }
+      if ($param < 15) { $htmtype = "INTEGER   UNSIGNED";  last SWITCH; }
+      $htmtype = "BIGINT";
+    }
+    return $htmtype;
+}
+
+
+sub dif_healp_sqltype {
+    my $param = shift(@_);
+    my $healptype;
+    
+  SWITCH: {
+      if ($param <  3) { $healptype = "TINYINT   UNSIGNED";  last SWITCH; }
+      if ($param <  7) { $healptype = "SMALLINT  UNSIGNED";  last SWITCH; }
+      if ($param < 11) { $healptype = "MEDIUMINT UNSIGNED";  last SWITCH; }
+      if ($param < 15) { $healptype = "INTEGER   UNSIGNED";  last SWITCH; }
+      $healptype = "BIGINT";
+    }
+    return $healptype;
+} 
+
+
+
+sub dif_Index {
+    dif_check();
+
+    $param = 0;
+    $htmtype = "";
+    $healptype = "";
+    my $field_pre = "";
+    my $field;
+    my @param_list;
+    my $sql;
+    my $sqltype;
+    my $lookup;
+
+    if ($id_type == 1) {
+	if ($_[0] != 0) {
+	    push @_, 'Insert database name (end with RETURN): ';
+	    push @_, 'Insert table name: ';
+	    push @_, 'Insert HTM resolution parameter ([0 : 25]): ';
+	    push @_, 'Insert name of right ascension field: ';
+	    push @_, 'Insert name of declination field: ';
+	}
+	($dbname, $table, $param, $field_ra, $field_dec) = dif_getInput(5, @_);
+
+	$field_pre = "htmID_";
+	$lookup = "HTMLookup(";
+    }
+
+    $id_opttx = dif_healpScheme();
+    if ($id_type == 2) {
+	if ($_[0] != 0) {
+	    push @_, 'Insert database name (end with RETURN): ';
+	    push @_, 'Insert table name: ';
+	    push @_, 'Insert Healpix resolution parameter ([0 : 29]): ';
+	    push @_, 'Insert name of right ascension field: ';
+	    push @_, 'Insert name of declination field: ';
+	}
+	($dbname, $table, $param, $field_ra, $field_dec) = dif_getInput(6, @_);
+
+	$field_pre = "healpID_$id_opttx" . "_";
+	$lookup = "HEALPLookup($id_opt, ";
+    }
+
+    if (! ($dbname))
+    { return 1; }
+
+    if (! ($table))
+    { return 1; }
+        
+    if (! ($field_ra))
+    { return 1; }
+
+    if (! ($field_dec))
+    { return 1; }
+
+
+    @param_list = split(',', $param);
+
+    #Range check 
+    foreach $param (@param_list) {
+	if ($id_type == 1) {
+	    if (($param < 0)   ||   ($param > 25))
+	    { return 1; }
+	}
+	if ($id_type == 2) {
+	    if (($param < 0)   ||   ($param > 29))
+	    { return 1; }
+	}
+    }
+
+# Recreate views only?
+  unless ($view_only) {
+
+    print "--> Adding index(es) to table $dbname.$table...";
+
+    #Disable keys
+    exec_sql(qq{
+	\#\@ONERR_DIE|Cannot disable keys on $dbname.$table|
+	ALTER TABLE $dbname.$table DISABLE KEYS//
+    });
+
+
+    #Add columns
+    $sql = qq{\#\@ONERR_WARN|Cannot alter table $dbname.$table|
+              ALTER TABLE $dbname.$table };
+    foreach $param (@param_list) {
+	
+	if ($id_type == 1) {
+	    $sqltype = dif_healp_sqltype($param);
+	}
+	if ($id_type == 2) {
+	    $sqltype = dif_healp_sqltype($param);
+	}
+	$field = $field_pre . "$param";
+
+	$sql .= qq{ADD COLUMN $field $sqltype NOT NULL DEFAULT 0,};
+    }
+    
+    $sql = substr($sql, 0, -1) . '//'; #strip last comma
+    exec_sql($sql);
+
+#LN - This is just to deal with DEC, but a more generic check should be implemented
+    if ($field_dec =~ /^(DEC)\b\W*/i) { substr($field_dec, 0, 3, "`Dec`"); }
+
+    #Populate fields
+    foreach $param (@param_list) {
+	$field = $field_pre . "$param";
+	exec_sql(qq{\#\@ONERR_DIE|Cannot update table $dbname.$table|
+                   UPDATE $dbname.$table SET $field = $lookup $param, $field_ra, $field_dec) WHERE $field = 0});
+    }
+    #$sql = qq{\#\@ONERR_DIE|Cannot update table $dbname.$table|
+    #          UPDATE $dbname.$table SET };
+    #foreach $param (@param_list) {
+    #	$field = $field_pre . "$param";
+    #	$sql .= qq{$field = $lookup $param, $field_ra, $field_dec),};
+    #}    
+    #$sql = substr($sql, 0, -1) . '//'; #strip last comma
+    #exec_sql($sql);
+
+
+    #Create indexes
+    $sql = qq{\#\@ONERR_WARN|Cannot create index on table $dbname.$table|
+              ALTER TABLE $dbname.$table };
+    foreach $param (@param_list) {
+      $field = $field_pre . "$param";
+
+# LN 04/08/2016: add RA column to index if requested
+
+      if ($addra_key) {
+        my @racol = query("select DIF.RAcol('$dbname','$table')");
+        if (length($racol[0]) > 0) {
+          $sql .= qq{ADD INDEX $field ($field, $racol[0]),};
+        } else {
+          $sql .= qq{ADD INDEX $field ($field),};
+        } 
+      } else {
+        $sql .= qq{ADD INDEX $field ($field),};
+      }
+    }    
+    $sql = substr($sql, 0, -1) . '//'; #strip last comma
+    exec_sql($sql);
+
+  }  # unless $view_only
+
+
+  #Update DIF.tbl
+#LN - readonly log: create and write to a temporary table for correct logging
+  if ($rolog) {
+# check for entry in DIF.tbl
+    $sql = "select param from DIF.tbl where db='$dbname' and name='$table' and param=$param and id_type=$id_type AND id_opt=$id_opt";
+    my $is_there = $dbh->do($sql);
+
+    if (!$is_there) {
+      $sql = 'create table if not exists DIF.tmp like DIF.tbl';
+      if (! $dbh->do($sql)) {
+        logWarn('Cannot create DIF.tmp table. Skipping.' . printDBError());
+      } else {
+        $dif_tmp = 1;
+        foreach $param (@param_list) {
+          $sql = "INSERT INTO DIF.tmp VALUES('$dbname', '$table', $id_type, $id_opt, $param, '$field_ra', '$field_dec')";
+          if (! $dbh->do($sql)) {
+            logWarn('Cannot insert into DIF.tmp table. Skipping.' . printDBError());
+          }
+        }
+      }
+    }
+
+  }
+#--
+  foreach $param (@param_list) {
+    exec_sql(qq{
+      \#\@ONERR_DIE|Cannot insert row in DIF.tbl|                                
+      INSERT INTO DIF.tbl(db, name, id_type, id_opt, param, Ra_field, Dec_field)
+      VALUES('$dbname', '$table', $id_type, $id_opt, $param, '$field_ra', '$field_dec')
+      ON DUPLICATE KEY UPDATE Ra_field='$field_ra', Dec_field='$field_dec'//
+      });
+  }
+
+
+  unless ($view_only) {
+    #Enable keys
+    exec_sql(qq{
+	\#\@ONERR_DIE|Cannot disable keys on $dbname.$table|
+	ALTER TABLE $dbname.$table ENABLE KEYS//
+    });
+
+  }
+
+  dif_views();
+
+  unless ($optnotrig) {
+    dif_trigger();
+  }
+
+#LN - remove the temporary table
+  if ($dif_tmp) {
+    $sql = 'drop table if exists DIF.tmp';
+    if (! $dbh->do($sql)) {
+      logWarn('Cannot drop DIF.tmp table.' . printDBError());
+    }
+  }
+#--
+  return 1;
+}
+
+
+
+# Here goes any change to apply to tables strucures or installation verification.
+# 03/08/2016: Work in progress.
+
+sub dif_update {
+  my @v = query("select CHARACTER_MAXIMUM_LENGTH from information_schema.columns where TABLE_SCHEMA='DIF' and TABLE_NAME='tbl' and COLUMN_NAME='name'");
+
+# In v. 0.5.4 the column types of DIF.tbl were changed 
+  if ($v[0] < 128) {
+    query("CREATE table DIF.tbl_new (db VARCHAR(64), name VARCHAR(128), id_type INTEGER NOT NULL, id_opt INTEGER NOT NULL DEFAULT 0, param INTEGER NOT NULL, Ra_field VARCHAR(128), Dec_field VARCHAR(128), UNIQUE KEY(db, name, id_type, id_opt, param))");
+    query("INSERT INTO DIF.tbl_new SELECT * FROM DIF.tbl");
+    query("RENAME TABLE DIF.tbl TO DIF.tbl_bck");
+    query("RENAME TABLE DIF.tbl_new TO DIF.tbl");
+  }
+
+}
+
+
+
+sub dif_funcdesc {
+    exec_file("funcdesc.sql");
+}
+
+
+
+sub dif_messier {
+    my @v = query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA='DIF' AND TABLE_NAME LIKE 'Messier_%'");
+
+    my $l;
+    my @rec;
+
+    if ($#v >= 0) {
+    	foreach $l (@v) {
+    	    my @vname = split(/\t/, $l);
+	    query("DROP VIEW DIF.$vname[0]");
+	}
+
+	query("DELETE FROM DIF.tbl WHERE db='DIF' AND name='Messier'");
+    }
+
+    exec_file("Messier.sql");
+}
+
+
+
+
+sub dif_grantuser {
+    dif_check();
+    my $u = "";
+    if ($_[0] != 0) {
+        push @_, 'Insert user name (end with RETURN): ';
+        push @_, 'Insert DB name: ';
+    }
+    ($u,$dbname) = dif_getInput(2, @_);
+
+    if (! $u || ! ($dbname))
+    { return 1; }
+
+      print "--> Granting privileges for user ". $u;
+    #query("GRANT CREATE VIEW ON ". $dbname ".* TO ". $u ."@localhost");
+      exec_sql(qq{
+	\#\@ONERR_IGNORE_INFO|Cannot grant SELECT on DIF.dif|
+	GRANT SELECT ON DIF.dif TO $u\@localhost//
+      });
+      exec_sql(qq{
+	\#\@ONERR_IGNORE_INFO|Cannot grant ALL PRIVILEGES on DIF.tbl|
+        GRANT ALL PRIVILEGES ON DIF.tbl TO $u\@localhost//
+      });
+      exec_sql(qq{
+	\#\@ONERR_IGNORE_INFO|Cannot grant ALL PRIVILEGES on $dbname.*|
+        GRANT ALL PRIVILEGES ON $dbname.* TO $u\@localhost//
+      });
+}
+
+
+
+sub dif_upgrade {
+    dif_check();
+    print "--> Updating UDF...";
+    exec_file("DIF_udf.sql");
+    dif_update();
+    dif_funcdesc();
+    dif_messier();
+
+    my @v = query("SELECT DISTINCT db, name FROM DIF.tbl");
+    my $l;
+    my @rec;
+
+    if ($#v >= 0) {
+    	foreach $l (@v) {
+    	    @rec = split(/\t/, $l);
+            $dbname = $rec[0];
+            $table = $rec[1];
+	    dif_views();
+            unless($optnotrig) {
+	      dif_trigger();
+	    }
+	}
+    }
+    return 1;
+}
+
+
+
+
+sub splitArgs {
+    my @v;
+
+    while ($#ARGV >= 0) {
+	if ($ARGV[$#ARGV] =~ /^--/)
+	{ last; }
+	push @v, shift(@ARGV);
+	#print "---- $v[$#v]\n";
+    }
+
+    if ($optinteractive) {
+	#Cut all arguments, they must be give through stdin
+	$#v = -1;
+    }
+
+    return @v;
+}
+
+
+
+
+# ---- MAIN ----
+
+if ($#ARGV == -1) {
+    dif_check();
+    exit;
+}
+
+while ($#ARGV >= 0) {
+    my $opt = shift(@ARGV);
+    my $ret = 1;
+
+# Not exactly equivalent
+    if ($opt eq "--ver") {
+	print "DIF version: $difver\n";
+	exit 0;
+    } elsif ($opt eq "-v") {
+	print $difver;
+	exit 0;
+
+    } elsif (($opt eq "--help")  ||  ($opt eq "-h")) {
+	print $DIFhead;
+	usage();
+	exit 0;
+
+    } elsif ($opt eq "--interactive") {
+	$optinteractive = 1;
+
+    } elsif ($opt eq "--log") {
+	$optlog = 1;
+
+    } elsif ($opt eq "--logfile") {
+	$optlogfile = 1;
+
+    } elsif ($opt eq "--multidx") {
+        $optnomiv = 0;
+
+    } elsif ($opt eq "--no-multidx") {  # v.0.5.4 is default. Should be removed.
+        $optnomiv = 1;
+
+    } elsif ($opt eq "--trigger") {
+        $optnotrig = 0;
+
+    } elsif ($opt eq "--no-trigger") {   # v.0.5.4 is default. Should be removed.
+        $optnotrig = 1;
+
+    } elsif ($opt eq "--views-only") {
+        $view_only = 1;
+
+    } elsif ($opt eq "--readonly") {
+	$optreadonly = 1;
+
+    } elsif ($opt eq "--cnf") {
+	$read_cnf = 1;
+
+    } elsif ($opt eq "--ra-key") {
+	$addra_key = 1;
+
+    } elsif (($opt eq "-u") || ($opt eq "--user")) {
+        $user = shift(@ARGV);
+
+    } elsif (($opt eq "-p") || ($opt eq "--pass")) {
+        $pass = shift(@ARGV);
+
+
+    } elsif ($opt eq "--install") {
+	$ret = dif_install();
+	
+    } elsif ($opt eq "--uninstall") {
+	$ret = dif_uninstall();
+	exit; #Don't want to do nothing else after DIF has been uninstalled
+
+    } elsif ($opt eq "--upgrade") {
+	$ret = dif_upgrade($optinteractive, splitArgs());
+
+    } elsif ($opt eq "--grant-user") {
+	$ret = dif_grantuser($optinteractive, splitArgs());
+
+
+    } elsif ($opt eq "--index-htm") {
+	$id_type = 1;
+	$id_opt  = 0;
+	$ret = dif_Index($optinteractive, splitArgs());
+
+    } elsif ($opt eq "--index-healpix-ring") {
+	$id_type = 2;
+	$id_opt  = 0;
+	$ret = dif_Index($optinteractive, splitArgs());
+
+    } elsif ($opt eq "--index-healpix-nested") {
+	$id_type = 2;
+	$id_opt  = 1;
+	$ret = dif_Index($optinteractive, splitArgs());
+
+    } elsif ($opt eq "--drop-index-htm") {
+	$id_type = 1;
+	$id_opt  = 0;
+	$ret = dif_dropIndex($optinteractive, splitArgs());
+
+    } elsif ($opt eq "--drop-index-healpix-ring") {
+	$id_type = 2;
+	$id_opt  = 0;
+	$ret = dif_dropIndex($optinteractive, splitArgs());
+
+    } elsif ($opt eq "--drop-index-healpix-nested") {
+	$id_type = 2;
+	$id_opt  = 1;
+	$ret = dif_dropIndex($optinteractive, splitArgs());
+
+    #} elsif ($opt eq "--views") {
+    #	$ret = views_trigger($optinteractive, splitArgs());
+    #
+    #} elsif ($opt eq "--single-index-views") {
+    #	$siv = 1;
+    #	$ret = views_trigger($optinteractive, splitArgs());
+    #
+    #} elsif ($opt eq "--drop-views") {
+    #	$miv = 0;
+    #	$siv = 0;
+    #	$trig= 0;
+    #	$ret = views_trigger($optinteractive, splitArgs());
+
+    } else {
+	logFatal("Unknown option: $opt");
+    }
+}

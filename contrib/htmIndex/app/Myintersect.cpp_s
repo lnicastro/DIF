@@ -1,0 +1,135 @@
+//#     Filename:       Myintersect.cpp (from "intersect.cpp")
+//#
+//#     Intersect a domain with the index, returning the full and partial nodes
+//#
+//#
+#include "fstream.h"
+#include "VarStr.h"
+#include <VarVecDef.h>
+#include "SpatialInterface.h"
+#include "SpatialDomain.h"
+
+/*
+    #RECTANGLE_RADEC		- same, given in ra/dec
+
+Example 3:
+
+#DOMAIN
+1
+#RECTANGLE_RADEC
+54 29
+54 30
+55 29
+55 30
+
+*/
+
+void
+usage(char *name) {
+
+  cout << "usage: " << endl
+       << name << " RAcorner1 DECcorner1 RAcorner2 DECcorner2" << endl
+       << endl;
+  exit(0);
+}
+
+int
+main(int argc, char *argv[]) {
+
+/*******************************************************
+/
+/ Initialization
+/
+ ******************************************************/
+
+  int arg = 4;			// number of required arguments
+  int depth=6,savedepth=2;	// depth and stored depth
+  size_t i,j,n=1;
+  float64 ra1, dec1, ra2, dec2, ra3, dec3, ra4, dec4;
+  int args = 1;			// start to parse argument no 1
+  argc--;
+
+  if (argc != arg) usage(argv[0]);
+
+  try
+    {
+      // construct index with given depth and savedepth
+      htmInterface htm(depth,savedepth);  // generate htm interface
+      const SpatialIndex &index = htm.index();
+
+      SpatialDomain domain;    // initialize empty domain
+
+
+ra1  = atof(argv[args++]);
+dec1 = atof(argv[args++]);
+ra3  = atof(argv[args++]);
+dec3 = atof(argv[args++]);
+ra2  = ra1;
+dec2 = dec3;
+ra4  = ra3;
+dec4 = dec1;
+
+SpatialVector v1(ra1, dec1), v2(ra2, dec2), v3(ra3, dec3), v4(ra4, dec4);
+SpatialConvex cvx(&v1,&v2,&v3,&v4);
+domain.add(cvx);
+
+
+/*******************************************************
+/
+/ Intersection
+/
+ ******************************************************/
+
+//      BitList partial,full;		// BitList results
+      ValVec<uint64> plist, flist;	// List results
+//      const ValVec<htmRange> *rlist;
+
+      j = n;
+	while(j--) {
+	  domain.intersect(&index,plist,flist);	  // intersect with list
+      }
+
+/*******************************************************
+/
+/ Print result
+/
+ ******************************************************/
+
+//      size_t f=0,p=0;
+      SpatialVector vertex1,vertex2,vertex3;	  // Fill vertices in these
+
+	// ----------- FULL NODES -------------
+	  printf("List of full nodes : \n");
+	  for(i = 0; i < flist.length(); i++){  // just loop this list
+	    PRINTID(flist(i)); 			// print ID
+	    printf(":");
+	    PRINTID_HEX(flist(i)); 			// print ID
+	    printf(":%s ", index.nameById(flist(i)));	// print Name
+	    index.nodeVertex(flist(i),// get vertices
+			     vertex1,vertex2,vertex3);
+	    printf("%f,%f ; %f,%f ; %f,%f\n",
+		   vertex1.ra(), vertex1.dec(), // print ra,
+		   vertex2.ra(), vertex2.dec(), // dec of
+		   vertex3.ra(), vertex3.dec());// vertices
+	  }
+	  printf("List of partial nodes : \n");
+	  for(i = 0; i < plist.length(); i++){  // just loop this list
+	    PRINTID(plist(i)); 			// print ID
+	    printf(":");
+	    PRINTID_HEX(plist(i)); 			// print ID
+	    printf(":%s ", index.nameById(plist(i)));	// print Name
+	    index.nodeVertex(plist(i),// get vertices
+			     vertex1,vertex2,vertex3);
+	    printf("%f,%f ; %f,%f ; %f,%f\n",
+		   vertex1.ra(), vertex1.dec(), // print ra,
+		   vertex2.ra(), vertex2.dec(), // dec of
+		   vertex3.ra(), vertex3.dec());// vertices
+	  }
+    }
+  catch (SpatialException &x)
+    {
+      printf("%s\n",x.what());
+    }
+  return 0;
+
+}

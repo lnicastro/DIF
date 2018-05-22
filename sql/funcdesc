@@ -1,0 +1,39 @@
+HTMnameById & (Id INT) & string & function & ha_dif.so & Return the HTM ID in string format given its integer value
+HTMidByName & (IdName STRING) & longlong & function & ha_dif.so & Return the HTM ID given its string name
+HTMLookup & (Depth INT, Ra_deg DOUBLE, Dec_deg DOUBLE) & longlong & function & ha_dif.so & Return the HTM ID at a given depth and sky coordinates
+HEALPLookup & (nested INT, order INT, Ra_deg DOUBLE, Dec_deg DOUBLE) & longlong & function & ha_dif.so & Return HEALPix ID at a given schema, order and coordinates
+Sphedist & (Ra1_deg DOUBLE, Dec1_deg DOUBLE, Ra2_deg DOUBLE, Dec2_deg DOUBLE) & double & function & ha_dif.so & Return the distance of 2 sky points
+HTMBaryDist & (depth INT, id INT, ra DOUBLE, dec DOUBLE) & double & function & ha_dif.so & Return the distance from the HTM trixel barycenter given depth, pixel ID and coordinates
+HEALPBaryDist & (nested INT, order INT, id INT, ra DOUBLE, dec DOUBLE) & double & function & ha_dif.so & Return the distance from the HEALPix pixel barycentre (center) given scheme, order, pixel ID and coordinates
+HTMBary & (depth INT, id INT) & string & function & ha_dif.so & Return the HTM trixel barycenter coordinates given depth and ID
+HTMBaryC & (depth INT, ra DOUBLE, dec DOUBLE) & string & function & ha_dif.so & Return the HTM trixel barycenter coordinates given depth and spherical coordinates
+HEALPBary & (nested INT, order INT, id INT) & string & function & ha_dif.so & Return the HEALPix pixel barycentre (center) coordinates given scheme order and pixel ID
+HEALPBaryC & (nested INT, order INT, ra DOUBLE, dec DOUBLE) & string & function & ha_dif.so & Return the HEALPix pixel barycentre (center) coordinates given scheme , order and spherical coordinates
+HTMNeighb & (depth INT, id INT) & string & function & ha_dif.so & Return the HTM trixel IDs of neighboring pixels of a given pixel ID
+HTMsNeighb & (depth INT, id INT, out_depth INT) & string & function & ha_dif.so & Return the HTM trixel IDs, at the same or higher depth, of neighboring pixels of a given pixel ID
+HTMNeighbC & (depth INT, Ra_deg DOUBLE, Dec_deg DOUBLE) & string & function & ha_dif.so & Return the HTM trixel IDs of the pixel and its neighboring pixels calculated from the input spherical coordinates
+HEALPNeighb & (nested INT, order INT, id INT) & string & function & ha_dif.so & Return the HEALPix IDs of neighboring pixels of a given pixel ID
+HEALPNeighbC & (nested INT, order INT, Ra_deg DOUBLE, Dec_deg DOUBLE) & string & function & ha_dif.so & Return the HEALPix IDs of the pixel and its neighboring pixels calculated from the input spherical coordinates
+HEALPBound & (nested INT, order INT, id INT [,step INT]) & string & function & ha_dif.so & Return the HEALPix pixel boundaries coordinates given scheme, order and pixel ID. If step=1 then return the 4 corners (north, west, south and east)
+HEALPBoundC & (nested INT, order INT, Ra_deg DOUBLE, Dec_deg DOUBLE [,step INT]) & string & function & ha_dif.so & Return the HEALPix pixel boundaries coordinates given scheme, order and spherical coordinates. If step=1 then return the 4 corners (north, west, south and east)
+HEALPMaxS & (order INT) & double & function & ha_dif.so & Return the HEALPix max size (in arcmin) from center to corner, given the order
+DIF_Circle & (Ra_deg DOUBLE, Dec_deg DOUBLE, Rad_arcmin DOUBLE) & longlong & function & ha_dif.so & Populate the DIF.dif table with the fully and partially covered pixels by the given circular region 
+DIF_Rect & (Ra_deg DOUBLE, Dec_deg DOUBLE, side_ra_arcmin DOUBLE [, side_dec_arcmin DOUBLE]) & longlong & function & ha_dif.so & Populate the DIF.dif table with the full and partial pixels covered by the given rectangular region, defined by center and one or two sides
+DIF_Rectv & (Ra1_deg DOUBLE, Dec1_deg DOUBLE, Ra2_deg DOUBLE, Dec2_deg DOUBLE [, x 2]) & longlong & function & ha_dif.so & Populate the DIF.dif table with the full and partial pixels covered by the given rectangular region, defined by the coordinates of the 2 opposite (or 4) corners
+DIF_NeighbC & (Ra_deg DOUBLE, Dec_deg DOUBLE) & longlong & function & ha_dif.so & Populate the DIF.dif table with the pixel ID identified by the input coodinates and its neighboring pixel IDs. For multiple depths, use the smallest one.
+DIF_sNeighb & (in_depth INT, id INT, out_depth INT) & longlong & function & ha_dif.so & Populate the DIF.dif table with the neighboring pixels of a given pixel ID whose depth is definied by the out_depth (greater or equal to in_depth) parameter
+DIF_cpuTime & () & double & function & ha_dif.so & Return the cumulative CPU time (s) of the last DIF processes
+DIF_setHTMDepth & (depth INT) & longlong & function & ha_dif.so & Internal func.: set the current HTM depth(s)
+DIF_setHEALPOrder & (nested INT, order INT) & longlong & function & ha_dif.so & Internal func.: set the current HEALpix order
+DIF_clear & () & longlong & function & ha_dif.so & Internal func.: clear internal settings
+DIF_FineSearch & (...) & longlong & function & ha_dif.so & Internal func.: perform distance selection for objects in partial pixels
+getHTMDepth & (db_name CHAR(64), tab_name CHAR(64)) & INTEGER & function & void & Return the available HTM depths for a given DB and table as read from DIF.tbl
+getHEALPOrder & (db_name CHAR(64), tab_name CHAR(64)) & INTEGER & function & void & Return the available HEALPix orders for a given DB and table as read from DIF.tbl
+getHEALPNested & (db_name CHAR(64), tab_name CHAR(64), p_order INTEGER) & INTEGER & function & void & Return 1 if the given table used the NESTED schene at the given depth, as read from DIF.tbl
+difview_htmClean & (IN doclean BOOLEAN) & void & procedure & void & Check presence of INFORMATION_SCHEMA.TABLES listed HTM views in DIF.tbl. If doclean is 1 then drop the unlisted views.
+difview_Check & () & void & procedure & void & Check existence of DIF.tbl listed entry, i.e. view, in INFORMATION_SCHEMA.TABLES
+getRa & (db_name CHAR(64), tab_name CHAR(64)) & VARCHAR(100) & function & void & Return the table field name, or its conversion, used to get RA in degrees
+getDec & (db_name CHAR(64), tab_name CHAR(64)) & VARCHAR(100) & function & void & Return the table field name, or its conversion, used to get DEC in degrees 
+RAcol & (db_name CHAR(64), tab_name CHAR(64)) & VARCHAR(64) & function & void & Return the table field name for RA
+DECcol & (db_name CHAR(64), tab_name CHAR(64)) & VARCHAR(64) & function & void & Return the table field name for DEC
+difInfo & (IN udf VARCHAR(64)) & void & procedure & void & Show info for a DIF function or procedure

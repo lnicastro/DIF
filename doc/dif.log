@@ -1,0 +1,277 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/MacPorts 2015_4) (preloaded format=latex 2015.7.22)  5 AUG 2016 14:36
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**dif.tex
+(./dif.tex
+LaTeX2e <2015/01/01>
+Babel <3.9l> and hyphenation patterns for 44 languages loaded.
+(/opt/local/share/texmf-texlive/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/opt/local/share/texmf-texlive/tex/latex/base/size10.clo
+File: size10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/opt/local/share/texmf-texlive/tex/generic/babel/babel.sty
+Package: babel 2014/09/25 3.9l The Babel package
+
+(/opt/local/share/texmf-texlive/tex/generic/babel-english/english.ldf
+Language: english 2012/08/20 v3.3p English support from the babel system
+
+(/opt/local/share/texmf-texlive/tex/generic/babel/babel.def
+File: babel.def 2014/09/25 3.9l Babel common definitions
+\babel@savecnt=\count87
+\U@D=\dimen103
+)
+\l@canadian = a dialect from \language\l@american 
+\l@australian = a dialect from \language\l@british 
+\l@newzealand = a dialect from \language\l@british 
+))
+(/opt/local/share/texmf-texlive/tex/latex/graphics/graphicx.sty
+Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/opt/local/share/texmf-texlive/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/opt/local/share/texmf-texlive/tex/latex/graphics/graphics.sty
+Package: graphics 2014/10/28 v1.0p Standard LaTeX Graphics (DPC,SPQR)
+
+(/opt/local/share/texmf-texlive/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/opt/local/share/texmf-texlive/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: dvips.def on input line 94.
+
+(/opt/local/share/texmf-texlive/tex/latex/graphics/dvips.def
+File: dvips.def 2014/10/14 v3.0j Driver-dependent file (DPC,SPQR)
+))
+\Gin@req@height=\dimen104
+\Gin@req@width=\dimen105
+)
+(/opt/local/share/texmf-texlive/tex/latex/framed/framed.sty
+Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
+\OuterFrameSep=\skip43
+\fb@frw=\dimen106
+\fb@frh=\dimen107
+\FrameRule=\dimen108
+\FrameSep=\dimen109
+)
+(/opt/local/share/texmf-texlive/tex/latex/listings/listings.sty
+\lst@mode=\count88
+\lst@gtempboxa=\box26
+\lst@token=\toks15
+\lst@length=\count89
+\lst@currlwidth=\dimen110
+\lst@column=\count90
+\lst@pos=\count91
+\lst@lostspace=\dimen111
+\lst@width=\dimen112
+\lst@newlines=\count92
+\lst@lineno=\count93
+\lst@maxwidth=\dimen113
+
+(/opt/local/share/texmf-texlive/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2014/09/06 1.5e (Carsten Heinz)
+\c@lstnumber=\count94
+\lst@skipnumbers=\count95
+\lst@framebox=\box27
+)
+(/opt/local/share/texmf-texlive/tex/latex/listings/listings.cfg
+File: listings.cfg 2014/09/06 1.5e listings configuration
+))
+Package: listings 2014/09/06 1.5e (Carsten Heinz)
+
+(/opt/local/share/texmf-texlive/tex/latex/url/url.sty
+\Urlmuskip=\muskip10
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+(/opt/local/share/texmf-texlive/tex/latex/a4wide/a4wide.sty
+Package: a4wide 1994/08/30
+
+(/opt/local/share/texmf-texlive/tex/latex/ntgclass/a4.sty
+Package: a4 2004/04/15 v1.2g A4 based page layout
+))
+(/opt/local/share/texmf-texlive/tex/latex/fancyhdr/fancyhdr.sty
+\fancy@headwidth=\skip44
+\f@ncyO@elh=\skip45
+\f@ncyO@erh=\skip46
+\f@ncyO@olh=\skip47
+\f@ncyO@orh=\skip48
+\f@ncyO@elf=\skip49
+\f@ncyO@erf=\skip50
+\f@ncyO@olf=\skip51
+\f@ncyO@orf=\skip52
+)
+(/opt/local/share/texmf-texlive/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2014/09/06 1.5e listings language file
+) (./dif.aux)
+\openout1 = `dif.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 110.
+LaTeX Font Info:    ... okay on input line 110.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 110.
+LaTeX Font Info:    ... okay on input line 110.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 110.
+LaTeX Font Info:    ... okay on input line 110.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 110.
+LaTeX Font Info:    ... okay on input line 110.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 110.
+LaTeX Font Info:    ... okay on input line 110.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 110.
+LaTeX Font Info:    ... okay on input line 110.
+\c@lstlisting=\count96
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 141.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 141.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 141.
+
+(../version) [1
+
+] [1] (./dif.toc
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 3.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 3.
+ [1])
+\tf@toc=\write3
+\openout3 = `dif.toc'.
+
+ [2]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 206.
+
+
+(/opt/local/share/texmf-texlive/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 206.
+ [1]
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <7> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 286.
+ [2]
+File: includes/hpx_cart.eps Graphic file (type eps)
+
+<includes/hpx_cart.eps>
+File: includes/hpx_draw_k0.eps Graphic file (type eps)
+ <includes/hpx_draw_k0.eps>
+File: includes/htm_draw_d0-d4.eps Graphic file (type eps)
+
+<includes/htm_draw_d0-d4.eps> [3]
+Overfull \hbox (1.73267pt too wide) in paragraph at lines 418--420
+[]\OT1/cmr/m/n/10 HEALPix, res-o-lu-tion pa-ram-e-ter: $[0 : 29]$, for ei-ther 
+or-der-ing scheme (RING or NESTED,
+ []
+
+[4] [5]
+Overfull \hbox (9.14406pt too wide) in paragraph at lines 640--643
+\OT1/cmr/m/n/10 After you have com-piled and in-stalled a new ver-sion of \OT1/
+cmr/bx/n/9 DIF \OT1/cmr/m/n/10 you do not need to is-sue a []\OT1/cmtt/m/n/10 d
+if --install
+ []
+
+[6] [7]
+Overfull \hbox (1.0011pt too wide) in paragraph at lines 1051--1053
+[]\OT1/cmr/m/n/10 create a view named \OT1/cmtt/m/n/10 Messier[]htm[]6 \OT1/cmr
+/m/n/10 which traspar-ently per-form the join be-tween the \OT1/cmtt/m/n/10 Mes
+sier
+ []
+
+File: includes/schema.eps Graphic file (type eps)
+<includes/schema.eps> [8]
+File: includes/htm6-10neighb_plot.eps Graphic file (type eps)
+ <includes/htm6-10neighb_plot.eps> [9]
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 1175.
+
+ [10] [11]
+Overfull \hbox (0.66005pt too wide) in paragraph at lines 1403--1403
+[]\OT1/cmtt/m/n/10 --no-multidx    do not create/update the multi-index view fo
+r HTM (Tab_htm). Def.[] 
+ []
+
+
+Overfull \hbox (5.91pt too wide) in paragraph at lines 1403--1403
+[]                \OT1/cmtt/m/n/10 and indices. Must preceed --index-htm or --i
+ndex-healpix-xxx comm.[] 
+ []
+
+[12] [13] [14]
+File: includes/fktimes_2.eps Graphic file (type eps)
+ <includes/fktimes_2.eps>
+File: includes/fktimes1m_2.eps Graphic file (type eps)
+ <includes/fktimes1m_2.eps> [15]
+[16] [17] [18] [19] [20] [21] [22] [23] [24] [25]
+Overfull \hbox (40.43982pt too wide) in paragraph at lines 2560--2561
+[]\OT1/cmtt/m/n/10 DIF[]RectV(Ra1 DOUBLE, Dec1 DOUBLE, Ra2 DOUBLE, Dec2 DOUBLE 
+[, Ra3 DOUBLE, Dec3 DOUBLE,
+ []
+
+[26]
+Overfull \hbox (42.54578pt too wide) in paragraph at lines 2659--2663
+\OT1/cmr/m/n/10 These are DB engine-related aux-il-iary func-tions. The three f
+unc-tions \OT1/cmtt/m/n/10 DIF[]setHTMDepth\OT1/cmr/m/n/10 , \OT1/cmtt/m/n/10 D
+IF[]setHEALPOrder
+ []
+
+[27] [28] [29]
+Overfull \hbox (16.40991pt too wide) in paragraph at lines 2801--2801
+[]\OT1/cmtt/m/n/10 +------------------------+----------------------------------
+-----------------------+[] 
+ []
+
+
+Overfull \hbox (16.40991pt too wide) in paragraph at lines 2801--2801
+[]\OT1/cmtt/m/n/10 | in_DIF_tbl_but_no_view | to_remove_run_command            
+                       |[] 
+ []
+
+
+Overfull \hbox (16.40991pt too wide) in paragraph at lines 2801--2801
+[]\OT1/cmtt/m/n/10 +------------------------+----------------------------------
+-----------------------+[] 
+ []
+
+
+Overfull \hbox (16.40991pt too wide) in paragraph at lines 2801--2801
+[]\OT1/cmtt/m/n/10 | test.ascctest          | DELETE FROM DIF.tbl where db="tes
+t" AND name="ascctest" |[] 
+ []
+
+
+Overfull \hbox (16.40991pt too wide) in paragraph at lines 2801--2801
+[]\OT1/cmtt/m/n/10 +------------------------+----------------------------------
+-----------------------+[] 
+ []
+
+[30] [31] [32] [33] [34] [35]
+Underfull \hbox (badness 10000) in paragraph at lines 3397--3402
+
+ []
+
+[36] [37] (./dif.aux) ) 
+Here is how much of TeX's memory you used:
+ 2917 strings out of 494186
+ 38610 string characters out of 6156914
+ 159904 words of memory out of 5000000
+ 6209 multiletter control sequences out of 15000+600000
+ 12549 words of font info for 45 fonts, out of 8000000 for 9000
+ 430 hyphenation exceptions out of 8191
+ 38i,12n,43p,971b,1660s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on dif.dvi (41 pages, 153216 bytes).

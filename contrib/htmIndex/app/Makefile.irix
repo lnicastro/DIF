@@ -1,0 +1,81 @@
+#	PACKAGE:	SpatialIndex
+#
+# os: irix
+# --- Macros -----------------------------------------------------------------
+
+CCXX =		CC
+LD = 		CC
+INCLUDE =	-I../include
+CCFLAGS =	-n32 -exceptions -ptused -xansi -woff 1460 ${INCLUDE} -DLINKAGE=
+ARFLAGS = 	-rlcs
+CP      =       cp
+RM      =       rm -f
+LIBRARY =	../lib/libSpatialIndex.a
+
+EXECUTABLES =	timeHTM\
+		lookup\
+		echoDomain\
+		intersect
+
+TEST_OBJS =	timeHTM.o
+
+ISECT_OBJS =	intersect.o
+
+LOOKUP_OBJS =	lookup.o
+
+ECHO_OBJS =	echoDomain.o
+
+LDLIBS =	${LIBRARY} -lm
+
+# --- Targets ----------------------------------------------------------------
+
+# Rules for building each executable.
+
+timeHTM: ${TEST_OBJS} ${LIBRARY}
+	@ echo linking $@
+	@ ${LD} -o $@ ${CCFLAGS} ${TEST_OBJS} ${LDLIBS}
+
+lookup: ${LOOKUP_OBJS} ${LIBRARY}
+	@ echo linking $@
+	@ ${LD} -o $@ ${CCFLAGS} ${LOOKUP_OBJS} ${LDLIBS}
+
+intersect: ${ISECT_OBJS} ${LIBRARY}
+	@ echo linking $@
+	@ ${LD} -o $@ ${CCFLAGS} ${ISECT_OBJS} ${LDLIBS}
+
+echoDomain: ${ECHO_OBJS} ${LIBRARY}
+	@ echo linking $@
+	@ ${LD} -o $@ ${CCFLAGS} ${ECHO_OBJS} ${LDLIBS}
+
+# Build and install the executables.
+
+apps : ${EXECUTABLES}
+	- ${CP} ${EXECUTABLES} ../bin
+
+all :	apps
+
+# Clean without removing installed products.
+
+tidy :
+	- ${RM} ${EXECUTABLES} ${TEST_OBJS} ${LOOKUP_OBJS} ${ECHO_OBJS} ${ISECT_OBJS}
+
+# Remove all files generated or installed by make.  
+
+clean :	tidy
+	- cd ../bin; ${RM} ${EXECUTABLES}
+
+# --- Suffix Rules -----------------------------------------------------------
+
+# First clear out the default suffixes, then declare our own and
+# define the rules.
+
+.SUFFIXES:
+.SUFFIXES: .o .cpp
+
+# Compiling C++ code.  The command lines are so long as to be useless.
+# Use 'sxmake -terse' to suppress the echo of the compile command.
+
+.cpp.o:
+	@ echo compiling $<
+	@ ${CCXX} -c ${CCFLAGS} $<
+
