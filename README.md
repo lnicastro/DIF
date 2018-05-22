@@ -1,7 +1,8 @@
 # DIF
 DIF is a collection of tools aimed at implementing a powerful indexing system for astronomical catalogs and other data with spherical coordinates, stored into MySQL / MariaDB databases.
-DIF is able to use both HTM and HEALPix pixelization schemas and it allows very fast query execution even on billion-row tables. 
+DIF is able to use both [HTM](http://www.skyserver.org/htm/) and [HEALPix](http://healpix.jpl.nasa.gov/) pixelization schemas and it allows very fast query execution even on billion-row tables. 
 Because it requires to create and enable a storage engine, you need to install it using the MySQL source code. See the [documentation](doc/dif.pdf).
+
 
 ## Requirements
 
@@ -24,7 +25,7 @@ sudo make install
 ## Installing DIF facilities in MySQL
 To actually enable the DIF facilities, you need to run the installation command:
 ```
-dif --instal```
+dif --instal
 ```
 
 You'll be asked the MySQL root password to complete this task.
@@ -41,7 +42,7 @@ sudo /etc/init.d/mysql.server restart
 or
 ```
 sudo /usr/local/mysql/bin/mysqladmin -u root -p shutdown
-sudo /usr/local/mysql/bin/mysqld_safe --user=mysql &amp;
+sudo /usr/local/mysql/bin/mysqld_safe --user=mysql &
 ```
 
 ## Test installation
