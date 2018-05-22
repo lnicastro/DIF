@@ -1,7 +1,7 @@
-#DIF
+# DIF
 DIF is a collection of tools aimed at implementing a powerful indexing system for astronomical catalogs and other data with spherical coordinates, stored into MySQL / MariaDB databases.
 DIF is able to use both HTM and HEALPix pixelization schemas and it allows very fast query execution even on billion-row tables. 
-Because it requires to create and enable a storage engine, you need to install it using the MySQL source code. See the documentation.
+Because it requires to create and enable a storage engine, you need to install it using the MySQL source code. See the [documentation](doc/dif.pdf).
 
 ## Requirements
 
