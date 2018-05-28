@@ -7,7 +7,7 @@ Because it requires to create and enable a storage engine, you need to install i
 ## Requirements
 
 1. MySQL / MariaDB source code compiled and installed
-2. GNU Autotools + make or gmake
+2. make or gmake
 3. Perl `DBI/DBD-mysql` modules
 
 ## Compile and install
@@ -25,7 +25,7 @@ sudo make install
 ## Installing DIF facilities in MySQL
 To actually enable the DIF facilities, you need to run the installation command:
 ```
-dif --instal
+dif --install
 ```
 
 You'll be asked the MySQL root password to complete this task.
@@ -82,9 +82,9 @@ Let's index the table with a depth 6 HTM index:
 shell> dif --index-htm Catalogs ascc25 6 "RAmas/3.6e6" "DECmas/3.6e6"
 ```
 
-Among other things, this will create the "table view" `ascc25_mini_htm_6`. This is the table that we must use in place of `ascc25_mini` when DIF specific functions are used in the WHERE clause of the query.
+Among other things, this will create the "table view" `ascc25_mini_htm_6`. This is the table that you must use in place of `ascc25_mini` when DIF specific functions are used in the WHERE clause of the query.
 
-Let's index the table also with a n order 10 HEALPix index. The first parameter of `HEALPLookup` set to 1 selects the *nested* schema.
+Let's index the table also with an order 10 HEALPix index.
 ```
 shell> dif --index-healpix-nested Catalogs ascc25_mini 10 "RAmas/3.6e6" "DECmas/3.6e6"
 ```
@@ -105,7 +105,13 @@ Enter the MySQL client terminal, e.g. `mysql -u root -p Catalogs`, then:
 -- only magnitudes V less than 11 for objects in a square with side 33 arcmin
   SELECT Bmm/1000 as B, Vmm/1000 as V
      FROM ascc25_mini_htm_6
-     WHERE dif_Rect(100,-20,33) and Vmm &lt; 11000;
+     WHERE dif_Rect(100,-20,33) and Vmm < 11000;
+
+-- only magnitudes V less than 12 for objects in a preudo-rectangle with sides
+-- 30, 15 arcmin (along RA, Dec)
+  SELECT Bmm/1000 as B, Vmm/1000 as V
+     FROM ascc25_mini_htm_6
+     WHERE dif_Rect(100,-20, 30, 15) and Vmm < 12000;
 
 -- a query using the HEALPix indexing
   SELECT ramas/3.6e6 as radeg, decmas/3.6e6 as decdeg, Vmm/1000 as Vmag, (Bmm-Vmm)/1000 as color
