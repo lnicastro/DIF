@@ -22,6 +22,10 @@ make
 sudo make install
 ```
 
+**Note:** if you compiled MySQL in a build directory rather than in the root source directory, then you have to pass this to ``configure``, e.g. if you used the subdirectory BUILD:
+```
+./configure --with-mysql-source=/path_to/mysql-5.7.22/BUILD
+```
 
 ## Installing DIF facilities in MySQL
 To actually enable the DIF facilities, you need to run the installation command:
@@ -95,7 +99,7 @@ shell> dif --index-healpix-nested Catalogs ascc25_mini 10 "RAmas/3.6e6" "DECmas/
 Enter the MySQL client terminal, e.g. `mysql -u root -p Catalogs`, then:
 
 ```
--- all the info for objects in a circle or radius 18 arcmin around RA=30, Dec=30
+-- all the info for objects in a circle of radius 18 arcmin around RA=30, Dec=30
   SELECT * FROM ascc25_mini_htm_6 WHERE dif_Circle(30,30,18);
 
 -- as above, but returning coordinates and magnitudes only in standard format
