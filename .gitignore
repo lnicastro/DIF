@@ -4,6 +4,7 @@ Build
 # Dependencies
 src/.deps
 src/.libs
+src/*.dSYM
 
 # Prerequisites
 *.d
@@ -37,3 +38,6 @@ src/.libs
 *.exe
 *.out
 *.app
+
+# More stuff
+autom4te.cache/*
