@@ -41,3 +41,8 @@ src/*.dSYM
 
 # More stuff
 autom4te.cache/*
+Makefile
+aclocal.m4
+config.log
+config.status
+libtool
