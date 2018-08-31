@@ -301,6 +301,7 @@ top_builddir = ..
 top_srcdir = ..
 EXTRA_DIST = dif.tex includes html other
 dist_doc_DATA = dif.pdf
+CLEANFILES = dif.log dif.toc dif.aux dif.dvi
 all: all-am
 
 .SUFFIXES:
@@ -429,6 +430,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)

@@ -35,3 +35,4 @@ docdir = $(pkgdatadir)/doc
 
 dist_doc_DATA = dif.pdf
 
+CLEANFILES = dif.log dif.toc dif.aux dif.dvi
