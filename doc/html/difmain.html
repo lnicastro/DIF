@@ -1,31 +1,44 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
   <title>DIF - Dynamic Index Facility</title>
-  <meta content="Giorgio Calderone" name="author">
-  <meta content="Luciano Nicastro" name="author">
+  <meta content="Giorgio Calderone" name="author" />
+  <meta content="Luciano Nicastro" name="author" />
+
+<style>
+body {
+  background-image: url(difback.png);
+  background-color: #efefef;
+  font: 90%/1.45em adobe-clean-n3, adobe-clean, "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: #2d6ca2;
+}
+
+a:hover {
+  color: #204d74;
+}
+
+</style>
 </head>
-<body style="background-image: url(difback.png);">
+
+<body>
 
 <div style="text-align: center;">
-<big>
-<span style="font-weight: bold;">DIF - Dynamic Index Facility
-</big>
+<h2>DIF - Dynamic Index Facility</h2>
 </div>
-
-<br /><br />
 
 <div style="text-align: left;">
 
 DIF is a set of tools aimed at implementing a powerful indexing system
 for astronomical catalogs and other data with spherical coordinates,
-stored into <a href="http://www.mysql.org"
-target="_blank">MySQL</a> databases. DIF is able to use both <a
-href="http://www.sdss.jhu.edu/htm/" target="_blank">HTM</a> and <a
-href="http://healpix.jpl.nasa.gov" target="_blank">HEALPix</a>
-pixelization schemas and it allows very fast query execution even on
-billion-row tables.
+stored into <a href="http://dev.mysql.com/" target="_blank">MySQL</a> / <a href="https://mariadb.com/" target="_blank">MariaDB</a> databases.
+DIF is able to use both <a href="http://www.skyserver.org/htm/" target="_blank">HTM</a> and
+<a href="http://healpix.jpl.nasa.gov" target="_blank">HEALPix</a>
+pixelization schemas and it allows very fast query execution even on billion-row tables.
 
 <br /><br />
 
@@ -36,29 +49,135 @@ documentation and downloadable software packages. The site is still
 under development, so check for updates.
 </div>
 
+
+<div style="font-size: 110%; margin-top: 12px; padding: 12px; border: 1px solid #ccc; background: #efefef;">
+
+<span style="color: #990000; ">DIF moved to <a href="https://github.com/lnicastro/DIF" target="_new"><strong>GitHub</strong></a> on 2018-21-05.</span> Please use it as new reference site.
+
 <br />
-Read how to install MySQL from source or to use
-<a href="../dif/loc-mysql-install.txt"><b>DIF with multiple MySQL servers</b></a> (TXT).
-
-<div style="text-align: left;">
-<br /><font color="#990000">12/11/2008: V. 0.3.3-alpha1. New version using the 64-bit INT HEALPix lib and with several UDF added!</font>
-<br /><font color="#990000">17/07/2009: V. 0.5.0. New version using multi-indexing capabilities. First release.</font>
-<br /><font color="#990000">15/03/2010: V. 0.5.2. New version using multi-indexing capabilities. Please see documentation.
-<br /><font color="#990000">26/10/2010: V. 0.5.2. dif script upgrade.
-<br /><font color="#990000">10/04/2012: V. 0.5.2. Full Mac OS X (+MacPorts) support.
-<br /><font color="#990000">29/08/2012: V. 0.5.2. Debian and new GCC version support.
-<br /><font color="#990000">30/01/2013: V. 0.5.2. MySQL 5.5 and MySQL Cluster 7.2 support.
- <br /> More info to be added here!</font>
-<br />
-
-<hr style="width: 100%; height: 2px;">
-<br />
-
-DIF has been written by <a
-href="mailto:nicastro at iasfbo.inaf.it">Luciano Nicastro</a>&nbsp;and <a
-href="mailto:giorgio.calderone at mib.infn.it">Giorgio Calderone</a><br />
-
+See also the new DIF-derived package <a href="https://github.com/lnicastro/SID" target="_new"><strong>SID</strong></a>. It does not require MySQL/MariaDB source code and it is usable with any Linux/MacOS installation!
 </div>
+
+<h3>Installlion</h3>
+See the <a href="../dif.pdf">PDF documentation</a> and <a href="https://github.com/lnicastro/DIF" target="_new">GitHub page</a> for more details.
+
+<br />
+Read how to install MySQL 5.1 from source or to use
+<a href="../other/loc-mysql-install.txt"><b>DIF with multiple MySQL servers</b></a> (TXT). Below a typical MySQL 5.7 + DIF installation on a Linux system:
+
+<div style="font-size: 110%; margin-top: 12px; padding: 12px; border: 1px solid #ddd; background: #fafafa;">
+<pre>
+# DIF QUICK START
+#
+
+# Ensure DBD::mysql is installed
+sudo cpan install DBD::mysql
+
+# Download packages in a temporary directory
+# (NOTE: DIF is not yet compatible with mysql >= 8.0.0)
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.23.tar.gz
+wget http://ross.iasfbo.inaf.it/dif/dif-0.5.4.tar.gz
+
+# Compile and install mysql
+tar xvzf mysql-5.7.23.tar.gz
+cd mysql-5.7.23/
+cmake . -DDOWNLOAD_BOOST=1  -DWITH_BOOST=dlboost
+make
+sudo make install
+sudo groupadd mysql
+sudo useradd -r -g mysql -s /bin/false mysql
+
+# Create the file `/etc/my.cnf` with the following content:
+[mysqld]
+secure-file-priv = ""
+
+# Initialize the server.
+# IMPORTANT: Take note of the generated random password!
+cd /usr/local/mysql
+sudo bin/mysqld --initialize --user=mysql
+sudo bin/mysql_ssl_rsa_setup
+
+# Start the server (this command must be executed as root)
+/usr/local/mysql/bin/mysqld_safe --user=mysql &
+
+# Connect as root using the random password generated above...
+mysql -u root -p
+
+# ... and change it with:
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
+
+# Now logout and re-connect with the new password
+mysql -u root -p
+
+# Compile and install DIF:
+tar xvzf dif-0.5.4.tar.gz
+cd dif-0.5.4
+./configure --with-mysql-source=/complete/path/to/the/mysql/source/directory
+make
+sudo make install
+
+# Install DIF database (the mysql root password will be asked)
+dif --install
+
+# The latter command installs an example table with all the Messier
+# objects.  To display the content of such table use:
+mysql> use DIF;
+mysql> SELECT * from Messier;
+
+# Install the HTM index on the example table DIF.Messier
+dif --index-htm DIF Messier 6 Ra Decl
+
+# Use DIF index to search in a circular region:
+SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
+
+# Ensure you are using the index prepending `DESCRIBE` to previous query:
+mysql> DESCRIBE SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
++----+-------------+---------+------------+------+---------------+---------+---------+------------+------+----------+------------------------------------+
+| id | select_type | table   | partitions | type | possible_keys | key     | key_len | ref        | rows | filtered | Extra                              |
++----+-------------+---------+------------+------+---------------+---------+---------+------------+------+----------+------------------------------------+
+|  1 | SIMPLE      | dif     | NULL       | ALL  | NULL          | NULL    | NULL    | NULL       |    0 |     0.00 | Using where                        |
+|  1 | SIMPLE      | Messier | NULL       | ref  | htmID_6       | htmID_6 | 2       | DIF.dif.id |    1 |   100.00 | Using index condition; Using where |
++----+-------------+---------+------------+------+---------------+---------+---------+------------+------+----------+------------------------------------+
+
+# Stop the mysql server with:
+/usr/local/mysql/bin/mysqladmin -u root -p shutdown
+</pre>
+</div>
+
+<h3>Change log</h3>
+<div style="top-padding: 16px; color: #4466a0; background-color: #fafafa;">
+<ul>
+<li>22/05/2018: V. 0.5.4. Ported to GitHub. Added README.md.</li>
+<li>19/10/2017: V. 0.5.4. Makefile fix for MariaDB 10.2.9.</li>
+<li>09/08/2017: V. 0.5.4. Support MariaDB 10.2.</li>
+<li>08/06/2017: V. 0.5.4. Fix returned list of partial pixels in HEALPix rectangular regions.</li>
+<li>11/09/2016: V. 0.5.4. Added support for MySQL &gt; 5.7.9.</li>
+<li>04/08/2016: V. 0.5.4. MariaDB 10.1 support. Replaced HEALPix C++ library with version 3.30. Rectangular region selections for HEALPix. Added various UDFs and SQL procedures. Extended dif script capabilities (run "dif -h").</li>
+<li>23/05/2014: V. 0.5.3. MySQL 5.6, 5.7 and MariaDB 10.0 support. Added UDFs HTMsNeighb and HEALPMaxS. Added DIF_sNeighb DB engine region search area (HTM trixel neighbors at higher depth).</li>
+<li>30/01/2013: V. 0.5.2. MySQL 5.5 and MySQL Cluster 7.2 support.</li>
+<li>29/08/2012: V. 0.5.2. Debian and new GCC version support.</li>
+<li>10/04/2012: V. 0.5.2. Full Mac OS X (+MacPorts) support.</li>
+<li>26/10/2010: V. 0.5.2. dif script upgrade.</li>
+<li>15/03/2010: V. 0.5.2. New version using multi-indexing capabilities. Please see documentation.</li>
+<li>17/07/2009: V. 0.5.0. New version using multi-indexing capabilities. First release.</li>
+<li>12/11/2008: V. 0.3.3-alpha1. New version using the 64-bit INT HEALPix lib and with several UDF added!</li>
+
+<li>10/07/2008: Giorgio Calderone <gcalderone@ifc.inaf.it>, V. 0.3.2-alpha3 - Bugfix.</li>
+
+<li>08/01/2008: Giorgio Calderone <gcalderone@ifc.inaf.it>, V. 0.3.2-alpha2 - Documentation updated.</li>
+
+<li>11/11/2007: Giorgio Calderone <gcalderone@ifc.inaf.it>, V. 0.3.2-alpha1 - First release of DIF, as a standalone package, until now it has been part of the MCS project. It support both HTM and HEALPix (either RING or NESTED) pixelization schemas.</li>
+
+</ul>
+</div>
+
+<hr style="width: 100%; height: 2px; border-width:0;color:gray;background-color:gray">
+<br />
+
+DIF written by <a href="mailto:giorgio.calderone at inaf.it">Giorgio Calderone</a> and <a href="mailto:luciano.nicastro at inaf.it">Luciano Nicastro</a>
+<br />
+<br />
+Website maintained by <i>Luciano Nicastro</i>
 
 </body>
 </html>
