@@ -40,8 +40,8 @@ src/*.dSYM
 *.app
 
 # More stuff
-autom4te.cache/*
-Makefile
+contrib/Spherematch/Save
+autom4te.cache
 aclocal.m4
 config.log
 config.status
