@@ -11,12 +11,12 @@ SHELL = /bin/sh
 CCPP ?= g++
 LD = g++
 INC = ./
-LIB = ../lib
+LIBDIR = ../lib
 CFLAGS  = -g -O3 -Wall -fPIC -I$(INC) # -DDEBUG -DCHECK_LEAKS
 CPPFLAGS = -g -O3 -Wall -fPIC -I$(INC) # -DDEBUG -DCHECK_LEAKS
 LDFLAGS =
-LIB_A = $(LIB)/libspheregroup.a
-LIB_SO = $(LIB)/libspheregroup.so
+LIB_A = $(LIBDIR)/libspheregroup.a
+LIB_SO = $(LIBDIR)/libspheregroup.so
 
 OBJECTS = \
 	spherematch2.o \
@@ -27,9 +27,12 @@ OBJECTS = \
 	friendsoffriends.o \
 	chunkfriendsoffriends.o 
 
-all : $(LIB_SO) $(LIB_A)
-def : $(LIB_A)
 
+all : def $(LIB_SO)
+def : creadirs $(LIB_A)
+
+creadirs:
+	@if [ ! -d $(LIBDIR) ]; then mkdir $(LIBDIR) ; fi
 
 $(LIB_SO): $(OBJECTS)
 	$(LD) -shared $(LDFLAGS) -o $(LIB_SO) $(OBJECTS)
@@ -37,4 +40,4 @@ $(LIB_A): $(OBJECTS)
 	ar rv $(LIB_A) $?
 
 clean :
-	- /bin/rm -f *~ core *.o $(LIB)/libspheregroup.*
+	- /bin/rm -f *~ core *.o $(LIBDIR)/libspheregroup.*
