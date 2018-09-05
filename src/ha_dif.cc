@@ -26,7 +26,7 @@
 
 #include "dif.hh"
 
-#include <mysql_version.h>
+#include "ha_dif.h"
 
 // version 5.5.x doesn't contain mysql_priv.h . We need to add the provided includes.
 #if MYSQL_VERSION_ID >= 50505
@@ -41,7 +41,6 @@
 
 #include "sql_class.h"           // MYSQL_HANDLERTON_INTERFACE_VERSION
 
-#include "ha_dif.h"
 
 //#include "probes_mysql.h"
 #include <my_global.h>
