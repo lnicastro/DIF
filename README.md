@@ -12,6 +12,22 @@ If you want to use most of the DIF capabilities but avoid to install MySQL / Mar
 3. Perl `DBI/DBD-mysql` modules
 
 ## Compile and install
+
+**Note:** To avoid autotools requirements with a message like this:
+```
+...
+DIF/config/missing: line 81: aclocal-1.16: command not found
+WARNING: 'aclocal-1.16' is missing on your system.
+...
+```
+
+give this command before running ``configure``:
+
+```
+touch configure aclocal.m4 Makefile.in
+```
+
+
 Assuming that you have downloaded and compiled + installed MySQL 5.7.22:
 ```
 tar zxvf dif-0.5.4.tar.gz
