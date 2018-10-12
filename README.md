@@ -24,7 +24,7 @@ WARNING: 'aclocal-1.16' is missing on your system.
 give this command before running ``configure``:
 
 ```
-touch configure aclocal.m4 Makefile.in
+touch configure aclocal.m4 Makefile.in src/config.h.in
 ```
 
 

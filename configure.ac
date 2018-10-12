@@ -86,7 +86,7 @@ cmake_MySQL_SOURCE_DIR=`grep MySQL_SOURCE_DIR $mypath_mysql_source/CMakeCache.tx
 
 #CMake build directory is mandatory. Here some guessed: shall be requested as configure parameter
   #CPPFLAGS="-I$mypath_mysql_source/BUILD/include -I$mypath_mysql_source/bld/include $CPPFLAGS -DMYSQL$MYSQL_VERSION -DDBUG_OFF"
-  CPPFLAGS="-I$mypath_mysql_source/libbinlogevents/export -I$mypath_mysql_source/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS -DMYSQL$MYSQL_VERSION -DDBUG_OFF"
+  CPPFLAGS="-I$mypath_mysql_source/libbinlogevents/export -I$mypath_mysql_source/libbinlogevents/include -I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS -DMYSQL$MYSQL_VERSION -DDBUG_OFF"
 else
   AC_CHECK_HEADERS([mysql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: mysql_priv.h])])
   CPPFLAGS="$CPPFLAGS -DMYSQL$MYSQL_VERSION"
