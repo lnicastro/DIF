@@ -1,3 +1,6 @@
+2018-10-12 LN, ver. 0.5.4
+	- Updated configure.ac to manage cmake build directory.
+
 2018-05-22 LN, ver. 0.5.4
 	- Ported to GitHub. Added README.md
 
