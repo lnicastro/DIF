@@ -64,8 +64,8 @@ MYSQL_VERSION=`$MYSQL_CONFIG --version | cut -d "." -f -2 | sed -e 's/\./_/g'`
 AC_SUBST(MYSQL_VERSION)
 
 #Standard version id (e.g. 50709 or 50626 or 100119)
-MYSQL_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | sed -e 's/\./ /' | xargs printf "%02d"`
-AC_SUBST(MYSQL_VERSION_ID)
+MY_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | sed -e 's/\./ /' | xargs printf "%02d"`
+AC_SUBST(MY_VERSION_ID)
 
 #Installed MySQL include dir (not used)
 #MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
@@ -75,9 +75,9 @@ CPPFLAGS="-I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_my
 
 AX_COMPARE_VERSION([$MYSQL_VERSION],[gt],[5.2])
 if test "$ax_compare_version" = "true" ; then
-  echo "Warning: MySQL version $MYSQL_VERSION (greater than 5.1). When compiling mysql check debug mode is off, e.g use 'cmake -DWITH_DEBUG=0 ...'"
+  echo "Warning: MySQL version $MYSQL_VERSION (greater than 5.1). Version ID $MY_VERSION_ID. When compiling mysql check debug mode is off, e.g use 'cmake -DWITH_DEBUG=0 ...'"
   echo "Warning: you must pass the BUILD dir. to configure, e.g. '--with-mysql-source=/path_to_mysql_source/bld'"
-  if test $MYSQL_VERSION_ID -lt "50709" ; then
+  if test $MY_VERSION_ID -lt "50709" ; then
   # if m4_cmp($MYSQL_VERSION_ID,50709) ; then
     AC_CHECK_HEADERS([sql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: sql_priv.h])])
   fi
@@ -86,10 +86,10 @@ cmake_MySQL_SOURCE_DIR=`grep MySQL_SOURCE_DIR $mypath_mysql_source/CMakeCache.tx
 
 #CMake build directory is mandatory. Here some guessed: shall be requested as configure parameter
   #CPPFLAGS="-I$mypath_mysql_source/BUILD/include -I$mypath_mysql_source/bld/include $CPPFLAGS -DMYSQL$MYSQL_VERSION -DDBUG_OFF"
-  CPPFLAGS="-I$mypath_mysql_source/libbinlogevents/export -I$mypath_mysql_source/libbinlogevents/include -I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS -DMYSQL$MYSQL_VERSION -DDBUG_OFF"
+  CPPFLAGS="-I$mypath_mysql_source/libbinlogevents/export -I$mypath_mysql_source/libbinlogevents/include -I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS -D MY_VERSION_ID=$MY_VERSION_ID -DDBUG_OFF"
 else
   AC_CHECK_HEADERS([mysql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: mysql_priv.h])])
-  CPPFLAGS="$CPPFLAGS -DMYSQL$MYSQL_VERSION"
+  CPPFLAGS="$CPPFLAGS -D MY_VERSION_ID=$MYSQL_VERSION_ID"
 fi
 
 
