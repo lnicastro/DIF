@@ -13,7 +13,7 @@ If you want to use most of the DIF capabilities but avoid to install MySQL / Mar
 
 ## Compile and install
 
-**Note:** To avoid autotools requirements with a message like this:
+**Note:** if you download the code via `git clone`, to avoid autotools requirements with a message like this:
 ```
 ...
 DIF/config/missing: line 81: aclocal-1.16: command not found
@@ -21,7 +21,7 @@ WARNING: 'aclocal-1.16' is missing on your system.
 ...
 ```
 
-give this command before running ``configure``:
+give this command before running `configure`:
 
 ```
 touch configure aclocal.m4 Makefile.in src/config.h.in
@@ -38,9 +38,9 @@ make
 sudo make install
 ```
 
-**Note:** if you compiled MySQL in a build directory rather than in the root source directory, then you have to pass this to ``configure``, e.g. if you used the subdirectory BUILD:
+**Note:** if you compiled MySQL in a build directory rather than in the root source directory, then you have to pass this to ``configure``, e.g. if you used the subdirectory `Build`:
 ```
-./configure --with-mysql-source=/path_to/mysql-5.7.22/BUILD
+./configure --with-mysql-source=/path_to/mysql-5.7.22/Build
 ```
 
 ## Installing DIF facilities in MySQL
@@ -50,6 +50,7 @@ dif --install
 ```
 
 You'll be asked the MySQL root password to complete this task.
+
 **Note:** `dif` is a Perl script used to perform various DIF-related tasks. If you use `tcsh` you might need to run `rehash` to have the command visible in an existing terminal. See the manual for a full description or run:
 ```
 dif --help
