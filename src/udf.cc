@@ -20,18 +20,22 @@
 // 
 // ----------------------------------------------------------------------$
 
+#include <math.h>
 #include <iostream>
-#include <algorithm>
+#include <regex>
+#include <string>
 
-#include <string.h>
 #include "dif.hh"
 
-#include <my_global.h>
-#include <my_sys.h>
+//#include <my_global.h>
 #include <mysql.h>
 
-#include <m_ctype.h>
-#include <m_string.h>
+#if MYSQL_VERSION_ID >= 80000
+typedef bool   my_bool;
+#endif
+typedef long long   longlong;
+typedef unsigned long long      uint64;
+
 
 #include "udf_utils.hh"
 

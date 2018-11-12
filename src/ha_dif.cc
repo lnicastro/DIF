@@ -39,7 +39,7 @@
 
 //#include <mysql/plugin.h>
 
-#include "sql_class.h"           // MYSQL_HANDLERTON_INTERFACE_VERSION
+// MySQL 8 #include "sql_class.h"           // MYSQL_HANDLERTON_INTERFACE_VERSION
 
 
 //#include "probes_mysql.h"
