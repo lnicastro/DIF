@@ -28,7 +28,11 @@
 #pragma interface			/* gcc class implementation */
 #endif
 
+#if MY_VERSION_ID < 80000
 #include <mysql_version.h>
+#else
+#include <mysql.h>
+#endif
 
 #if MYSQL_VERSION_ID < 50505
 #include <mysql_priv.h>
