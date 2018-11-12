@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------^
-# Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
-# Giorgio Calderone <gcalderone@ifc.inaf.it>, Luciano Nicastro <nicastro@iasfbo.inaf.it>
+# Copyright (C) 2005 - 2018
+# Giorgio Calderone <giorgio.calderone@inaf.it>, Luciano Nicastro <luciano.nicastro@inaf.it>
 # 
 # This file is part of DIF.
 # 
@@ -20,8 +20,8 @@
 # 
 # ----------------------------------------------------------------------$
 AC_INIT([dif],
-        [0.5.4],
-        [Giorgio Calderone <giorgio.calderone@gmail.com>, Luciano Nicastro <nicastro@iasfbo.inaf.it>],
+        [0.5.5],
+        [Giorgio Calderone <giorgio.calderone@inaf.it>, Luciano Nicastro <luciano.nicastro@inaf.it>],
         [dif])
 
 AC_CONFIG_AUX_DIR(config)
@@ -70,7 +70,7 @@ AC_SUBST(MYSQL_VERSION_ID)
 #Installed MySQL include dir (not used)
 #MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
 
-CPPFLAGS="-I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
+CPPFLAGS="-I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS -std=gnu++11"
 
 
 AX_COMPARE_VERSION([$MYSQL_VERSION],[gt],[5.2])
