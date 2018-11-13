@@ -6,7 +6,7 @@ USE DIF//
 #@ONERR_IGNORE||
 DROP TABLE IF EXISTS func//
 
-#@ONERR_DIE|Cannot create table func|
+#@ONERR_WARN|Cannot create table func|
 CREATE TABLE func (
 	name CHAR(64) DEFAULT 'unknown', 
 	params VARCHAR(128) DEFAULT 'undefined', 
@@ -19,7 +19,7 @@ CHARACTER SET ASCII COLLATE ascii_bin COMMENT='DIF functions and procedures desc
 
 
 
-#@ONERR_DIE|Cannot load data into table|
-LOAD DATA INFILE
+#@ONERR_WARN|Cannot load data into table func|
+LOAD DATA LOCAL INFILE
 '@prefix@/share/dif/sql/funcdesc'
 INTO TABLE func FIELDS TERMINATED BY ' & ' OPTIONALLY ENCLOSED BY '"'//

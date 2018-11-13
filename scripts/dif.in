@@ -1,9 +1,9 @@
 #!@PERL@ -W -l
 
 # ----------------------------------------------------------------------^
-# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-# Giorgio Calderone <giorgio.calderone@google.com>
-# Luciano Nicastro <nicastro@iasfbo.inaf.it>
+# Copyright (C) 2004 - 2018
+# Giorgio Calderone <giorgio.calderone@inaf.it>
+# Luciano Nicastro <luciano.nicastro@inaf.it>
 # 
 # This file is part of DIF.
 # 
@@ -70,7 +70,7 @@ my $dbh = 0;
 
 my $difver = '@VERSION@';
 my $DIFhead = "\nDIF - Dynamic Indexing Facilities, ver. $difver" .
-            "\nGiorgio Calderone - giorgio.calderone\@gmail.com and Luciano Nicastro - nicastro\@iasfbo.inaf.it\n";
+            "\nGiorgio Calderone - giorgio.calderone\@inaf.it and Luciano Nicastro - luciano.nicastro\@inaf.it\n";
 
 my $pre = '@prefix@/share/dif/sql';
 my $logfileName = "dif.log";

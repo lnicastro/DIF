@@ -6,7 +6,7 @@ USE DIF//
 #@ONERR_IGNORE||
 DROP TABLE IF EXISTS Messier//
 
-#@ONERR_DIE|Cannot create table Messier|
+#@ONERR_WARN|Cannot create table Messier|
 CREATE TABLE Messier (
 	M int NOT NULL, 
 	Type CHAR(2) DEFAULT '**',
@@ -20,8 +20,8 @@ CREATE TABLE Messier (
 
 
 
-#@ONERR_DIE|Cannot load data into table|
-LOAD DATA INFILE
+#@ONERR_WARN|Cannot load data into table Messier|
+LOAD DATA LOCAL INFILE
 '@prefix@/share/dif/sql/messier'
 INTO TABLE Messier//
 
