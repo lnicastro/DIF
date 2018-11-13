@@ -1193,7 +1193,7 @@ char * HEALPBound(UDF_INIT *init, UDF_ARGS *args,
 
   vector<double> b_ra, b_dec;
   unsigned long nc=0;
-  char temp[40];
+  char temp[51];
   char *ss = init->ptr;
 
   if ( getHealPBound1(nested, order, id, step, b_ra, b_dec) ) {
@@ -1278,7 +1278,7 @@ char * HEALPBoundC(UDF_INIT *init, UDF_ARGS *args,
 
   vector<double> b_ra, b_dec;
   unsigned long nc=0;
-  char temp[40];
+  char temp[51];
   char *ss = init->ptr;
 
   if ( getHealPBoundC1(nested, order, ra, de, step, b_ra, b_dec) ) {
