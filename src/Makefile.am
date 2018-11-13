@@ -23,15 +23,10 @@
 # NOTE: Both HTM and HealPIX library must be compiled with the -fPIC option
 #
 
-#MYSQL_PATH = @MYSQL_SOURCE@
-#MYSQL_INC = -I$(MYSQL_PATH)/sql -I$(MYSQL_PATH)/include -I$(MYSQL_PATH)/include/mysql
-#MYSQL_INC = `@MYSQL_CONFIG@ --include`
-
 HTM_INC = -I../contrib/htmIndex/include
 HEALP_INC = -I../contrib/Healpix/HealP3
 
-#INCLUDES =  -DMYSQL_DYNAMIC_PLUGIN  $(MYSQL_INC) $(HTM_INC) $(HEALP_INC)
-AM_CPPFLAGS =  -DMYSQL_DYNAMIC_PLUGIN $(HTM_INC) $(HEALP_INC) $(MYSQL_INC)
+AM_CPPFLAGS =  -DMYSQL_DYNAMIC_PLUGIN $(HTM_INC) $(HEALP_INC)
 
 noinst_HEADERS = dif.hh ha_dif.h udf_utils.hh my_stmt_db.h my_stmt_db2.h pix_myXmatch_def.hh
 
@@ -60,9 +55,6 @@ ha_dif_la_LIBADD = ../contrib/htmIndex/lib/libSpatialIndex.a \
                    ../contrib/Spherematch/lib/libspheregroup.a
 
 noinst_LIBRARIES = libMyUtils.a libdif_alone.a
-#libMyUtils_a_CXXFLAGS =
-#libMyUtils_a_CFLAGS =
-#libMyUtils_a_LDFLAGS = `@MYSQL_CONFIG@ --libs`
 libMyUtils_a_SOURCES = \
    my_stmt_db.c my_stmt_db2.c deg_radec.c
 
@@ -74,25 +66,17 @@ fakesky_RND_SOURCES = fakesky_RND.cc
 fakesky_HPx_SOURCES = fakesky_HPx.cc
 myXmatch_SOURCES = myXmatch.cc
 pix_myXmatch_SOURCES = pix_myXmatch.cc
-#fakesky_H6_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a
-#fakesky_RND_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a
-#fakesky_HPx_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/Healpix/HealP3/lib/libHealP3.a
-myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a
-pix_myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a
-fakesky_H6_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a
-fakesky_RND_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a
-fakesky_HPx_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/Healpix/HealP3/lib/libHealP3.a
-fakesky_H6_LDFLAGS = `@MYSQL_CONFIG@ --libs`
-fakesky_RND_LDFLAGS = `@MYSQL_CONFIG@ --libs`
-fakesky_HPx_LDFLAGS = `@MYSQL_CONFIG@ --libs`
-myXmatch_LDFLAGS = `@MYSQL_CONFIG@ --libs`
-pix_myXmatch_LDFLAGS = `@MYSQL_CONFIG@ --libs`
+myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a @MYSQL_LIBS@
+pix_myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a @MYSQL_LIBS@
+fakesky_H6_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a @MYSQL_LIBS@
+fakesky_RND_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a @MYSQL_LIBS@
+fakesky_HPx_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/Healpix/HealP3/lib/libHealP3.a @MYSQL_LIBS@
 testMySearch_SOURCES = testMySearch.cc
 testMySearch_LDADD = ./libdif_alone.a ../contrib/htmIndex/lib/libSpatialIndex.a \
                      ../contrib/Healpix/HealP3/lib/libHealP3.a \
                      ../contrib/Spherematch/lib/libspheregroup.a
 
-testMySearch_LDFLAGS = `@MYSQL_CONFIG@ --libs` -pthread
+testMySearch_LDFLAGS = -pthread
 
 
 

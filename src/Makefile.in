@@ -39,10 +39,6 @@
 # NOTE: Both HTM and HealPIX library must be compiled with the -fPIC option
 #
 
-#MYSQL_PATH = @MYSQL_SOURCE@
-#MYSQL_INC = -I$(MYSQL_PATH)/sql -I$(MYSQL_PATH)/include -I$(MYSQL_PATH)/include/mysql
-#MYSQL_INC = `@MYSQL_CONFIG@ --include`
-
 
 
 
@@ -224,37 +220,22 @@ am_fakesky_H6_OBJECTS = fakesky_H6.$(OBJEXT)
 fakesky_H6_OBJECTS = $(am_fakesky_H6_OBJECTS)
 fakesky_H6_DEPENDENCIES = ./libdif_alone.a ./libMyUtils.a \
 	../contrib/htmIndex/lib/libSpatialIndex.a
-fakesky_H6_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(fakesky_H6_LDFLAGS) $(LDFLAGS) -o $@
 am_fakesky_HPx_OBJECTS = fakesky_HPx.$(OBJEXT)
 fakesky_HPx_OBJECTS = $(am_fakesky_HPx_OBJECTS)
 fakesky_HPx_DEPENDENCIES = ./libdif_alone.a ./libMyUtils.a \
 	../contrib/Healpix/HealP3/lib/libHealP3.a
-fakesky_HPx_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(fakesky_HPx_LDFLAGS) $(LDFLAGS) -o $@
 am_fakesky_RND_OBJECTS = fakesky_RND.$(OBJEXT)
 fakesky_RND_OBJECTS = $(am_fakesky_RND_OBJECTS)
 fakesky_RND_DEPENDENCIES = ./libdif_alone.a ./libMyUtils.a \
 	../contrib/htmIndex/lib/libSpatialIndex.a
-fakesky_RND_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(fakesky_RND_LDFLAGS) $(LDFLAGS) -o $@
 am_myXmatch_OBJECTS = myXmatch.$(OBJEXT)
 myXmatch_OBJECTS = $(am_myXmatch_OBJECTS)
 myXmatch_DEPENDENCIES = ./libMyUtils.a \
 	../contrib/Spherematch/lib/libspheregroup.a
-myXmatch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(myXmatch_LDFLAGS) $(LDFLAGS) -o $@
 am_pix_myXmatch_OBJECTS = pix_myXmatch.$(OBJEXT)
 pix_myXmatch_OBJECTS = $(am_pix_myXmatch_OBJECTS)
 pix_myXmatch_DEPENDENCIES = ./libMyUtils.a \
 	../contrib/Spherematch/lib/libspheregroup.a
-pix_myXmatch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(pix_myXmatch_LDFLAGS) $(LDFLAGS) -o $@
 am_testMySearch_OBJECTS = testMySearch.$(OBJEXT)
 testMySearch_OBJECTS = $(am_testMySearch_OBJECTS)
 testMySearch_DEPENDENCIES = ./libdif_alone.a \
@@ -454,9 +435,10 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MYSQL = @MYSQL@
 MYSQL_CONFIG = @MYSQL_CONFIG@
+MYSQL_LIBS = @MYSQL_LIBS@
 MYSQL_SOURCE = @MYSQL_SOURCE@
 MYSQL_VERSION = @MYSQL_VERSION@
-MYSQL_VERSION_ID = @MYSQL_VERSION_ID@
+MY_VERSION_ID = @MY_VERSION_ID@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -533,9 +515,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 HTM_INC = -I../contrib/htmIndex/include
 HEALP_INC = -I../contrib/Healpix/HealP3
-
-#INCLUDES =  -DMYSQL_DYNAMIC_PLUGIN  $(MYSQL_INC) $(HTM_INC) $(HEALP_INC)
-AM_CPPFLAGS = -DMYSQL_DYNAMIC_PLUGIN $(HTM_INC) $(HEALP_INC) $(MYSQL_INC)
+AM_CPPFLAGS = -DMYSQL_DYNAMIC_PLUGIN $(HTM_INC) $(HEALP_INC)
 noinst_HEADERS = dif.hh ha_dif.h udf_utils.hh my_stmt_db.h my_stmt_db2.h pix_myXmatch_def.hh
 lib_LTLIBRARIES = ha_dif.la
 ha_dif_la_CXXFLAGS = $(INCLUDES) -fno-rtti
@@ -561,9 +541,6 @@ ha_dif_la_LIBADD = ../contrib/htmIndex/lib/libSpatialIndex.a \
                    ../contrib/Spherematch/lib/libspheregroup.a
 
 noinst_LIBRARIES = libMyUtils.a libdif_alone.a
-#libMyUtils_a_CXXFLAGS =
-#libMyUtils_a_CFLAGS =
-#libMyUtils_a_LDFLAGS = `@MYSQL_CONFIG@ --libs`
 libMyUtils_a_SOURCES = \
    my_stmt_db.c my_stmt_db2.c deg_radec.c
 
@@ -573,25 +550,17 @@ fakesky_RND_SOURCES = fakesky_RND.cc
 fakesky_HPx_SOURCES = fakesky_HPx.cc
 myXmatch_SOURCES = myXmatch.cc
 pix_myXmatch_SOURCES = pix_myXmatch.cc
-#fakesky_H6_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a
-#fakesky_RND_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a
-#fakesky_HPx_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/Healpix/HealP3/lib/libHealP3.a
-myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a
-pix_myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a
-fakesky_H6_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a
-fakesky_RND_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a
-fakesky_HPx_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/Healpix/HealP3/lib/libHealP3.a
-fakesky_H6_LDFLAGS = `@MYSQL_CONFIG@ --libs`
-fakesky_RND_LDFLAGS = `@MYSQL_CONFIG@ --libs`
-fakesky_HPx_LDFLAGS = `@MYSQL_CONFIG@ --libs`
-myXmatch_LDFLAGS = `@MYSQL_CONFIG@ --libs`
-pix_myXmatch_LDFLAGS = `@MYSQL_CONFIG@ --libs`
+myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a @MYSQL_LIBS@
+pix_myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a @MYSQL_LIBS@
+fakesky_H6_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a @MYSQL_LIBS@
+fakesky_RND_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a @MYSQL_LIBS@
+fakesky_HPx_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/Healpix/HealP3/lib/libHealP3.a @MYSQL_LIBS@
 testMySearch_SOURCES = testMySearch.cc
 testMySearch_LDADD = ./libdif_alone.a ../contrib/htmIndex/lib/libSpatialIndex.a \
                      ../contrib/Healpix/HealP3/lib/libHealP3.a \
                      ../contrib/Spherematch/lib/libspheregroup.a
 
-testMySearch_LDFLAGS = `@MYSQL_CONFIG@ --libs` -pthread
+testMySearch_LDFLAGS = -pthread
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -744,23 +713,23 @@ ha_dif.la: $(ha_dif_la_OBJECTS) $(ha_dif_la_DEPENDENCIES) $(EXTRA_ha_dif_la_DEPE
 
 fakesky_H6$(EXEEXT): $(fakesky_H6_OBJECTS) $(fakesky_H6_DEPENDENCIES) $(EXTRA_fakesky_H6_DEPENDENCIES) 
 	@rm -f fakesky_H6$(EXEEXT)
-	$(AM_V_CXXLD)$(fakesky_H6_LINK) $(fakesky_H6_OBJECTS) $(fakesky_H6_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(CXXLINK) $(fakesky_H6_OBJECTS) $(fakesky_H6_LDADD) $(LIBS)
 
 fakesky_HPx$(EXEEXT): $(fakesky_HPx_OBJECTS) $(fakesky_HPx_DEPENDENCIES) $(EXTRA_fakesky_HPx_DEPENDENCIES) 
 	@rm -f fakesky_HPx$(EXEEXT)
-	$(AM_V_CXXLD)$(fakesky_HPx_LINK) $(fakesky_HPx_OBJECTS) $(fakesky_HPx_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(CXXLINK) $(fakesky_HPx_OBJECTS) $(fakesky_HPx_LDADD) $(LIBS)
 
 fakesky_RND$(EXEEXT): $(fakesky_RND_OBJECTS) $(fakesky_RND_DEPENDENCIES) $(EXTRA_fakesky_RND_DEPENDENCIES) 
 	@rm -f fakesky_RND$(EXEEXT)
-	$(AM_V_CXXLD)$(fakesky_RND_LINK) $(fakesky_RND_OBJECTS) $(fakesky_RND_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(CXXLINK) $(fakesky_RND_OBJECTS) $(fakesky_RND_LDADD) $(LIBS)
 
 myXmatch$(EXEEXT): $(myXmatch_OBJECTS) $(myXmatch_DEPENDENCIES) $(EXTRA_myXmatch_DEPENDENCIES) 
 	@rm -f myXmatch$(EXEEXT)
-	$(AM_V_CXXLD)$(myXmatch_LINK) $(myXmatch_OBJECTS) $(myXmatch_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(CXXLINK) $(myXmatch_OBJECTS) $(myXmatch_LDADD) $(LIBS)
 
 pix_myXmatch$(EXEEXT): $(pix_myXmatch_OBJECTS) $(pix_myXmatch_DEPENDENCIES) $(EXTRA_pix_myXmatch_DEPENDENCIES) 
 	@rm -f pix_myXmatch$(EXEEXT)
-	$(AM_V_CXXLD)$(pix_myXmatch_LINK) $(pix_myXmatch_OBJECTS) $(pix_myXmatch_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(CXXLINK) $(pix_myXmatch_OBJECTS) $(pix_myXmatch_LDADD) $(LIBS)
 
 testMySearch$(EXEEXT): $(testMySearch_OBJECTS) $(testMySearch_DEPENDENCIES) $(EXTRA_testMySearch_DEPENDENCIES) 
 	@rm -f testMySearch$(EXEEXT)

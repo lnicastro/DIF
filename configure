@@ -636,6 +636,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+MYSQL_LIBS
 MY_VERSION_ID
 MYSQL_VERSION
 MYSQL_CONFIG
@@ -16018,6 +16019,10 @@ MY_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | s
 #Installed MySQL include dir (not used)
 #MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
 
+#Installed MySQL library flags (see src/Makefile.am)
+MYSQL_LIBS=`$MYSQL_CONFIG --libs`
+
+
 CPPFLAGS="-I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS -std=gnu++11"
 
 
@@ -16100,7 +16105,6 @@ done
 
   CPPFLAGS="$CPPFLAGS -D MY_VERSION_ID=$MYSQL_VERSION_ID"
 fi
-
 
 DIF_VERSION="$PACKAGE_VERSION"
 

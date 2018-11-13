@@ -70,6 +70,10 @@ AC_SUBST(MY_VERSION_ID)
 #Installed MySQL include dir (not used)
 #MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
 
+#Installed MySQL library flags (see src/Makefile.am)
+MYSQL_LIBS=`$MYSQL_CONFIG --libs`
+AC_SUBST(MYSQL_LIBS)
+
 CPPFLAGS="-I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS -std=gnu++11"
 
 
@@ -91,7 +95,6 @@ else
   AC_CHECK_HEADERS([mysql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: mysql_priv.h])])
   CPPFLAGS="$CPPFLAGS -D MY_VERSION_ID=$MYSQL_VERSION_ID"
 fi
-
 
 DIF_VERSION="$PACKAGE_VERSION"
 
