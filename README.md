@@ -101,7 +101,7 @@ mysql> describe ascc25_mini;
 
 Let's index the table with a depth 6 HTM index:
 ```
-shell> dif --index-htm Catalogs ascc25 6 "RAmas/3.6e6" "DECmas/3.6e6"
+shell> dif --index-htm Catalogs ascc25_mini 6 "RAmas/3.6e6" "DECmas/3.6e6"
 ```
 
 Among other things, this will create the "table view" `ascc25_mini_htm_6`. This is the table that you must use in place of `ascc25_mini` when DIF specific functions are used in the WHERE clause of the query.
