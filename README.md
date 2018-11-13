@@ -137,6 +137,6 @@ Enter the MySQL client terminal, e.g. `mysql -u root -p Catalogs`, then:
 
 -- a query using the HEALPix indexing
   SELECT ramas/3.6e6 as radeg, decmas/3.6e6 as decdeg, Vmm/1000 as Vmag, (Bmm-Vmm)/1000 as color
-     FROM ascc25_mini_healp_10
+     FROM ascc25_mini_healp_nest_10
      WHERE dif_Circle(30,-20,30);
 ```
