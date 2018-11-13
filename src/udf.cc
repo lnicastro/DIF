@@ -21,6 +21,7 @@
 // ----------------------------------------------------------------------$
 
 #include <math.h>
+#include <cstring>
 #include <iostream>
 #include <regex>
 #include <string>
