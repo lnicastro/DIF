@@ -3,7 +3,7 @@
 
   Note: "myXmatch" custom
 
-  LN @ IASF-INAF, Sep. 2010                         Last changed: 20/01/2011
+  LN @ INAF-OAS, Sep. 2010                         Last changed: 14/11/2018
 */
 
 #ifndef MY_STMT_DB_H
@@ -20,6 +20,10 @@
 #endif
 
 #include <mysql.h>  /* header of the database client API library */
+
+#if MYSQL_VERSION_ID >= 80000
+typedef bool   my_bool;
+#endif
 
 #define MYSQL_SOCK NULL
 
