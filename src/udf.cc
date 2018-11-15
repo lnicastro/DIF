@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------------^
-// Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
-// Giorgio Calderone <gcalderone@ifc.inaf.it>
+// Copyright (C) 2004 - 2018
+// Giorgio Calderone <giorgio.calderone@inaf.it>
+// Luciano Nicastro <luciano.nicastro@inaf.it>
 // 
 // This file is part of DIF.
 // 
@@ -1361,10 +1362,23 @@ my_bool DIF_setHTMDepth_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   CHECK_ARG_NUM(1);
   CHECK_ARG_TYPE(0, INT_RESULT);
 
+  init->maybe_null = 0;
+  init->max_length = 4;
+  init->const_item = 1;
+
   if (! difreg.getp()) difreg.constructor();
   //difreg->clear_region();
   difreg->setSchema(DIF_HTM);
-  difreg->setAvailParam( IARGS(0) );
+
+// 14/11/2018: changed for MySQL 8
+// NOTE: args->args can be undefined alias (AS) are being used. Use "attributes".
+//int depth = IARGS(0);
+//int depth = *((long long*) args->args[0]);
+int depth = atoi(args->attributes[0]);
+
+  difreg->setAvailParam( depth );
+
+//sprintf(message, "\n args[0]=%s n=%lu depth=%d\n", (char *)args->attributes[0], args->lengths[0], depth );
 
   return 0;
 }
@@ -1372,7 +1386,10 @@ my_bool DIF_setHTMDepth_init(UDF_INIT* init, UDF_ARGS *args, char *message)
 
 longlong DIF_setHTMDepth(UDF_INIT *init, UDF_ARGS *args,
                          char *is_null, char* error)
-{ return *(args->args[0]); }
+{
+ //return *(args->args[0]);
+ return 1;
+ }
 
 void DIF_setHTMDepth_deinit(UDF_INIT *init)
 {
@@ -1390,11 +1407,21 @@ my_bool DIF_setHEALPOrder_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   CHECK_ARG_TYPE(0, INT_RESULT);
   CHECK_ARG_TYPE(1, INT_RESULT);
 
+  init->maybe_null = 0;
+  init->max_length = 4;
+  init->const_item = 1;
+
   if (! difreg.getp()) difreg.constructor();
   //difreg->clear_region();
   // 5/7/2016 exchange: difreg->setSchema(IARGS(0)   ?   DIF_HEALP_RING   :   DIF_HEALP_NEST);
-  difreg->setSchema(IARGS(0)   ?   DIF_HEALP_NEST   :   DIF_HEALP_RING);
-  difreg->setAvailParam( IARGS(1) );
+// 14/11/2018: changed for MySQL 8
+  //difreg->setSchema(IARGS(0)   ?   DIF_HEALP_NEST   :   DIF_HEALP_RING);
+  //difreg->setAvailParam( IARGS(1) );
+
+  int nested = atoi(args->attributes[0]);
+  int order = atoi(args->attributes[1]);
+  difreg->setSchema(nested   ?   DIF_HEALP_NEST   :   DIF_HEALP_RING);
+  difreg->setAvailParam( order );
 
   return 0;
 }
