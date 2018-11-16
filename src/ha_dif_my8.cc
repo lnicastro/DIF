@@ -25,12 +25,11 @@
 #pragma implementation				// gcc: Class implementation
 #endif
 
-#include "dif.hh"
-
-#include "ha_dif.h"
-
 #include <mysql/plugin.h>
 #include <mysql/psi/mysql_file.h>
+
+#include "dif.hh"
+#include "ha_dif.h"
 
 #include "my_dbug.h"
 #include "mysql/plugin.h"
