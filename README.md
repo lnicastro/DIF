@@ -3,15 +3,19 @@ DIF is a collection of tools aimed at implementing a powerful indexing system fo
 DIF is able to use both [HTM](http://www.skyserver.org/htm/) and [HEALPix](http://healpix.jpl.nasa.gov/) pixelization schemas and it allows very fast query execution even on billion-row tables. 
 Because it requires to create and enable a storage engine, you need to install it using the MySQL source code. See this [web page](http://ross.iasfbo.inaf.it/dif/) or the [documentation](doc/dif.pdf) and the [reference paper](http://www.hindawi.com/journals/aa/2010/524534.html).
 
-If you want to use most of the DIF capabilities but avoid to install MySQL / MariaDB from the source code, please use [SID](https://github.com/lnicastro/SID) instead.
+If you want to use most of the DIF capabilities but avoid to compile MySQL / MariaDB source code, please use [SID](https://github.com/lnicastro/SID) instead.
+
+This is the **Version 0.5.5** development tree.
 
 ## Requirements
 
-1. MySQL / MariaDB source code compiled and installed
+1. MySQL / MariaDB source code compiled (same version as the system version OR installed)
 2. make or gmake
 3. Perl `DBI/DBD-mysql` modules
 
 ## Compile and install
+
+**Note:** as of version 0.5.5 you do not need to install the source compiled version.
 
 **Note:** if you download the code via `git clone`, to avoid autotools requirements with a message like this:
 ```
@@ -57,17 +61,33 @@ dif --help
 ```
 
 Assuming the command executes successfully, you now need to restart the MySQL server to make the new DIF storage engine working.
-Depending on how you started the server, you could need to use one of these commands:
+Depending on your OS and/or how you started the server, you could need to use one of these commands:
 ```
-sudo /etc/init.d/mysql.server restart
+sudo service mysql restart
 ```
 or
 ```
+sudo /etc/init.d/mysql.server restart
+```
+or locate your MySQL `bin` dir and use `mysqladmin` and `mysqld_safe`, e.g.:
+```
+which mysqladmin
+...
 sudo /usr/local/mysql/bin/mysqladmin -u root -p shutdown
 sudo /usr/local/mysql/bin/mysqld_safe --user=mysql &
 ```
 
 ## Test installation
+First of all be sure you have the Perl `DBI/DBD-mysql` modules installed. You can install them using `cpan` or the OS specific command, e.g. on Mac OS using MacPorts: 
+```
+sudo port install p5-dbd-mysql
+```
+or on Debian/Ubuntu:
+```
+sudo apt install libdbd-mysql-perl
+```
+and so on.
+
 Download the reduced version of the [ASCC 2.5](http://ross2.iasfbo.inaf.it/dif/data/ascc25_mini.sql.gz) star catalogue in a working directory, say `dif_data`. Can also download the file manually:
 ```
 shell> mkdir ~/dif_data

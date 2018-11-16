@@ -1,3 +1,13 @@
+2018-11-16 LN, ver. 0.5.5
+	- Various changes in order to allow:
+	  1. installation using only the compiled version of MySQL (same version as the system installed version)
+	  2. compatibility with MySQL 8
+	- Updated: configure.ac configure src/Makefile.am, src/ha_dif.h, src/ha_dif.cc, src/udf.cc,
+	  src/src/my_stmt_db.h, src/src/my_stmt_db2.h,
+	  sql/Makefile.am, sql/funcdesc.sql.in, sql/Messier.sql.in
+	- Added: src/ha_dif_my8.cc, sql/func_insert.sql, sql/messier_insert.sql
+	- Code cleaning.
+
 2018-10-12 LN, ver. 0.5.4
 	- Updated configure.ac to manage cmake build directory.
 
