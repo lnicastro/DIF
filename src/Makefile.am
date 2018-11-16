@@ -20,7 +20,7 @@
 # ----------------------------------------------------------------------$
 
 #
-# NOTE: Both HTM and HealPIX library must be compiled with the -fPIC option
+# NOTE: Both HTM and HEALPix libraries must be compiled with the -fPIC option
 #
 
 HTM_INC = -I../contrib/htmIndex/include
@@ -87,12 +87,18 @@ testMySearch_LDFLAGS = -pthread
 
 install-data-hook:
 # LN 09/06/2011: manage shared lib extension
+# LN 16/11/2018: place the libraries in the plugin dir to avoid apparmor issues
+#
 # Since version 5.1.24 the option --plugindir was added
 #	if test -z $$pd; then pd="`@MYSQL_CONFIG@ --libs | @PERL@ ../selectflags.pl | @PERL@ -pe 'chomp; s/-L//g; s/ +//g;'`/plugin"; fi;
-	@if test -e /etc/my.cnf; then pd="`cat /etc/my.cnf | grep '^plugin_dir' | @AWK@ -F '=' '{print $$2}'`"; \
-	else echo WARNING: no /etc/my.cnf file found. && pd=""; fi; \
-	if test -z $$pd; then pd="`@MYSQL_CONFIG@ --plugindir`"; fi; \
+# Do not check in my.cnf anymore
+#	@if test -e /etc/my.cnf; then pd="`cat /etc/my.cnf | grep '^plugin_dir' | @AWK@ -F '=' '{print $$2}'`"; \
+#else echo WARNING: no /etc/my.cnf file found. && pd=""; fi; \
+#if test -z $$pd; then pd="`@MYSQL_CONFIG@ --plugindir`"; fi; \
+#	echo "MySQL plugin dir: $$pd"; \
+#	if ! test $$pd = ${libdir}; \
+#	then echo "Creating a symbolic link in $$pd to ${libdir}/ha_dif.so"; \
+#	ln -sf ${libdir}/ha_dif.so $$pd; fi
+	@pd="`@MYSQL_CONFIG@ --plugindir`"; \
 	echo "MySQL plugin dir: $$pd"; \
-	if ! test $$pd = ${libdir}; \
-	then echo "Creating a symbolic link in $$pd to ${libdir}/ha_dif.so"; \
-	ln -sf ${libdir}/ha_dif.so $$pd; fi
+	cp -a ${libdir}/ha_dif.* $$pd
