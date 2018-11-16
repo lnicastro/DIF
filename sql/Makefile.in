@@ -223,9 +223,10 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MYSQL = @MYSQL@
 MYSQL_CONFIG = @MYSQL_CONFIG@
+MYSQL_LIBS = @MYSQL_LIBS@
 MYSQL_SOURCE = @MYSQL_SOURCE@
 MYSQL_VERSION = @MYSQL_VERSION@
-MYSQL_VERSION_ID = @MYSQL_VERSION_ID@
+MY_VERSION_ID = @MY_VERSION_ID@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -309,6 +310,8 @@ dist_sql_DATA = \
               DIF_View.sql         \
               Messier.sql          \
               funcdesc.sql         \
+              messier_insert.sql   \
+              func_insert.sql      \
               messier              \
               funcdesc
 

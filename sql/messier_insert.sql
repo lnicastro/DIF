@@ -1,26 +1,3 @@
-#@ONERR_DIE|Database DIF does not exists|
-USE DIF//
-
-
-
-#@ONERR_IGNORE||
-DROP TABLE IF EXISTS Messier//
-
-#@ONERR_WARN|Cannot create table Messier|
-CREATE TABLE Messier (
-	M int NOT NULL, 
-	Type CHAR(2) DEFAULT '**',
-	Const CHAR(3) DEFAULT '***', 
-	Mag FLOAT, 
-	Ra  FLOAT, 
-	Decl FLOAT, 
-	Dist CHAR(20), 
-	App_size CHAR(20) DEFAULT 'unknown'
-)
-ENGINE=MyISAM COMMENT='DIF test catalogue @prefix@/share/dif/sql/messier'//
-
-
-#@ONERR_WARN|Cannot load data into table Messier|
 INSERT INTO `Messier` VALUES
 (1,'BN','Tau',8.2,83.625,22.0167,'6.3 kly','6\'x4\''),
 (2,'GC','Aqu',6.3,323.375,-0.816667,'36.2 kly','12.9\''),
@@ -131,4 +108,4 @@ INSERT INTO `Messier` VALUES
 (107,'GC','Oph',7.8,248.126,-12.9383,'19.6 kl','11.0\''),
 (108,'GX','UMj',10.7,167.876,55.6717,'45 Mly','8.7\'x2.2\''),
 (109,'GX','UMj',10.8,179.4,53.375,'55 Mly','7.6\'x4.6\''),
-(110,'GX','And',9.4,10.1,41.6867,'2.2 Mly','21.9\'x10.9\'')//
+(110,'GX','And',9.4,10.1,41.6867,'2.2 Mly','21.9\'x10.9\'');

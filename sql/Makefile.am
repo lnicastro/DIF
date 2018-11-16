@@ -30,5 +30,7 @@ dist_sql_DATA = \
               DIF_View.sql         \
               Messier.sql          \
               funcdesc.sql         \
+              messier_insert.sql   \
+              func_insert.sql      \
               messier              \
               funcdesc

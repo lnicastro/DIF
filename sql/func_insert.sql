@@ -1,25 +1,3 @@
-#@ONERR_DIE|Database DIF does not exists|
-USE DIF//
-
-
-
-#@ONERR_IGNORE||
-DROP TABLE IF EXISTS func//
-
-#@ONERR_WARN|Cannot create table func|
-CREATE TABLE func (
-	name CHAR(64) DEFAULT 'unknown', 
-	params VARCHAR(128) DEFAULT 'undefined', 
-	ret  CHAR(16) DEFAULT 'string',
-        type enum('function','procedure','aggregate'),
-	plugin_lib CHAR(64) DEFAULT '', 
-	description VARCHAR(256) DEFAULT ''
-)
-ENGINE=MyISAM CHARACTER SET ASCII COLLATE ascii_bin COMMENT='DIF functions and procedures description'//
-
-
-
-#@ONERR_WARN|Cannot load data into table func|
 INSERT INTO `func` VALUES ('HTMnameById','(Id INT)','string','function','ha_dif.so','Return the HTM ID in string format given its integer value');
 ('HTMidByName','(IdName STRING)','longlong','function','ha_dif.so','Return the HTM ID given its string name');
 ('HTMLookup','(Depth INT, Ra_deg DOUBLE, Dec_deg DOUBLE)','longlong','function','ha_dif.so','Return the HTM ID at a given depth and sky coordinates');
@@ -58,4 +36,4 @@ INSERT INTO `func` VALUES ('HTMnameById','(Id INT)','string','function','ha_dif.
 ('getDec','(db_name CHAR(64), tab_name CHAR(64))','VARCHAR(100)','function','void','Return the table field name, or its conversion, used to get DEC in degrees ');
 ('RAcol','(db_name CHAR(64), tab_name CHAR(64))','VARCHAR(64)','function','void','Return the table field name for RA');
 ('DECcol','(db_name CHAR(64), tab_name CHAR(64))','VARCHAR(64)','function','void','Return the table field name for DEC');
-('difInfo','(IN udf VARCHAR(64))','void','procedure','void','Show info for a DIF function or procedure')//
+('difInfo','(IN udf VARCHAR(64))','void','procedure','void','Show info for a DIF function or procedure');
