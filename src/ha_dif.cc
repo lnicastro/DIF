@@ -205,7 +205,7 @@ int ha_dif::create(const char *name, TABLE *table_arg,
   DBUG_RETURN(0);
 }
 
-
+/*
 const char *ha_dif::index_type(uint key_number)
 {
   DBUG_ENTER("ha_dif::index_type");
@@ -216,7 +216,7 @@ const char *ha_dif::index_type(uint key_number)
               (table_share->key_info[key_number].algorithm ==
                HA_KEY_ALG_RTREE) ? "RTREE" : "BTREE");
 }
-
+*/
 
 int ha_dif::write_row(uchar * buf)
 {
@@ -234,6 +234,13 @@ int ha_dif::rnd_init(bool scan)
   difreg->go();
   difreg->subStop();
 
+  DBUG_RETURN(0);
+}
+
+//Added
+
+int ha_dif::rnd_end() {
+  DBUG_ENTER("ha_dif::rnd_end");
   DBUG_RETURN(0);
 }
 
@@ -312,13 +319,13 @@ int ha_dif::external_lock(THD *thd, int lock_type)
   DBUG_RETURN(0);
 }
 
-
+/*
 uint ha_dif::lock_count(void) const
 {
   DBUG_ENTER("ha_dif::lock_count");
   DBUG_RETURN(0);
 }
-
+*/
 
 THR_LOCK_DATA **ha_dif::store_lock(THD *thd,
                                          THR_LOCK_DATA **to,
@@ -328,7 +335,7 @@ THR_LOCK_DATA **ha_dif::store_lock(THD *thd,
   DBUG_RETURN(to);
 }
 
-
+/*
 int ha_dif::index_read(uchar * buf, const uchar * key,
                              uint key_len, enum ha_rkey_function find_flag)
 {
@@ -350,7 +357,7 @@ int ha_dif::index_read_last(uchar * buf, const uchar * key, uint key_len)
   DBUG_ENTER("ha_dif::index_read_last");
   DBUG_RETURN(HA_ERR_END_OF_FILE);
 }
-
+*/
 
 int ha_dif::index_next(uchar * buf)
 {

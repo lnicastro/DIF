@@ -637,6 +637,8 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
 MYSQL_LIBS
+MYSQL8_FALSE
+MYSQL8_TRUE
 MY_VERSION_ID
 MYSQL_VERSION
 MYSQL_CONFIG
@@ -16309,6 +16311,19 @@ MYSQL_VERSION=`$MYSQL_CONFIG --version | cut -d "." -f -2 | sed -e 's/\./_/g'`
 MY_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | sed -e 's/\./ /' | xargs printf "%02d"`
 
 
+
+#Used to decide ha_dif source file
+#AM_CONDITIONAL([MYSQL8], [test $MY_VERSION_ID -gt "80000"])
+ if  [ $MY_VERSION_ID -gt "80000" ] && [ $MY_VERSION_ID -lt "100000" ] ; then
+  MYSQL8_TRUE=
+  MYSQL8_FALSE='#'
+else
+  MYSQL8_TRUE='#'
+  MYSQL8_FALSE=
+fi
+
+
+
 #Installed MySQL include dir (not used)
 #MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
 
@@ -16540,6 +16555,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MYSQL8_TRUE}" && test -z "${MYSQL8_FALSE}"; then
+  as_fn_error $? "conditional \"MYSQL8\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

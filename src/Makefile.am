@@ -34,7 +34,7 @@ lib_LTLIBRARIES = ha_dif.la
 ha_dif_la_CXXFLAGS = $(INCLUDES) -fno-rtti
 ha_dif_la_LDFLAGS = -module
 ha_dif_la_SOURCES = \
-   udf.cc ha_dif.cc \
+   udf.cc \
    difflist_i.cpp skysep_h.cpp \
    getHTMid.cpp getHTMidByName.cpp getHTMnameById.cpp \
    DIFhtmCircleRegion.cpp DIFhtmRectRegion.cpp \
@@ -49,6 +49,11 @@ ha_dif_la_SOURCES = \
    DIFgetHTMsNeighb.cpp \
    getHealPMaxS.cpp
 
+if MYSQL8
+ha_dif_la_SOURCES += ha_dif_my8.cc
+else
+ha_dif_la_SOURCES += ha_dif.cc
+endif
 
 ha_dif_la_LIBADD = ../contrib/htmIndex/lib/libSpatialIndex.a \
                    ../contrib/Healpix/HealP3/lib/libHealP3.a \

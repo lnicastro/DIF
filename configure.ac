@@ -69,6 +69,12 @@ AC_SUBST(MYSQL_VERSION)
 MY_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | sed -e 's/\./ /' | xargs printf "%02d"`
 AC_SUBST(MY_VERSION_ID)
 
+
+#Used to decide ha_dif source file
+#AM_CONDITIONAL([MYSQL8], [test $MY_VERSION_ID -gt "80000"])
+AM_CONDITIONAL([MYSQL8], [ [[ $MY_VERSION_ID -gt "80000" ]] && [[ $MY_VERSION_ID -lt "100000" ]] ])
+
+
 #Installed MySQL include dir (not used)
 #MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
 

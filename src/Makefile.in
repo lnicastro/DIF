@@ -116,6 +116,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@MYSQL8_TRUE@am__append_1 = ha_dif_my8.cc
+@MYSQL8_FALSE@am__append_2 = ha_dif.cc
 bin_PROGRAMS = testMySearch$(EXEEXT) fakesky_H6$(EXEEXT) \
 	fakesky_RND$(EXEEXT) fakesky_HPx$(EXEEXT) myXmatch$(EXEEXT) \
 	pix_myXmatch$(EXEEXT)
@@ -174,8 +176,20 @@ am_libMyUtils_a_OBJECTS = my_stmt_db.$(OBJEXT) my_stmt_db2.$(OBJEXT) \
 libMyUtils_a_OBJECTS = $(am_libMyUtils_a_OBJECTS)
 libdif_alone_a_AR = $(AR) $(ARFLAGS)
 libdif_alone_a_LIBADD =
-am__objects_1 = udf.$(OBJEXT) ha_dif.$(OBJEXT) difflist_i.$(OBJEXT) \
-	skysep_h.$(OBJEXT) getHTMid.$(OBJEXT) getHTMidByName.$(OBJEXT) \
+am__libdif_alone_a_SOURCES_DIST = udf.cc difflist_i.cpp skysep_h.cpp \
+	getHTMid.cpp getHTMidByName.cpp getHTMnameById.cpp \
+	DIFhtmCircleRegion.cpp DIFhtmRectRegion.cpp getHTMNeighb.cpp \
+	getHTMNeighbC.cpp getHTMBary.cpp getHTMBaryC.cpp \
+	getHTMBaryDist.cpp DIFgetHTMNeighbC.cpp getHealPBound.cpp \
+	getHealPBoundC.cpp getHealPid.cpp getHealPNeighb.cpp \
+	getHTMsNeighb.cpp getHealPNeighbC.cpp getHealPBary.cpp \
+	getHealPBaryC.cpp getHealPBaryDist.cpp DIFmyHealPCone.cpp \
+	DIFmyHealPRect.cpp DIFgetHealPNeighbC.cpp DIFgetHTMsNeighb.cpp \
+	getHealPMaxS.cpp ha_dif_my8.cc ha_dif.cc
+@MYSQL8_TRUE@am__objects_1 = ha_dif_my8.$(OBJEXT)
+@MYSQL8_FALSE@am__objects_2 = ha_dif.$(OBJEXT)
+am__objects_3 = udf.$(OBJEXT) difflist_i.$(OBJEXT) skysep_h.$(OBJEXT) \
+	getHTMid.$(OBJEXT) getHTMidByName.$(OBJEXT) \
 	getHTMnameById.$(OBJEXT) DIFhtmCircleRegion.$(OBJEXT) \
 	DIFhtmRectRegion.$(OBJEXT) getHTMNeighb.$(OBJEXT) \
 	getHTMNeighbC.$(OBJEXT) getHTMBary.$(OBJEXT) \
@@ -187,27 +201,39 @@ am__objects_1 = udf.$(OBJEXT) ha_dif.$(OBJEXT) difflist_i.$(OBJEXT) \
 	getHealPBaryC.$(OBJEXT) getHealPBaryDist.$(OBJEXT) \
 	DIFmyHealPCone.$(OBJEXT) DIFmyHealPRect.$(OBJEXT) \
 	DIFgetHealPNeighbC.$(OBJEXT) DIFgetHTMsNeighb.$(OBJEXT) \
-	getHealPMaxS.$(OBJEXT)
-am_libdif_alone_a_OBJECTS = $(am__objects_1)
+	getHealPMaxS.$(OBJEXT) $(am__objects_1) $(am__objects_2)
+am_libdif_alone_a_OBJECTS = $(am__objects_3)
 libdif_alone_a_OBJECTS = $(am_libdif_alone_a_OBJECTS)
 ha_dif_la_DEPENDENCIES = ../contrib/htmIndex/lib/libSpatialIndex.a \
 	../contrib/Healpix/HealP3/lib/libHealP3.a \
 	../contrib/Spherematch/lib/libspheregroup.a
-am_ha_dif_la_OBJECTS = ha_dif_la-udf.lo ha_dif_la-ha_dif.lo \
-	ha_dif_la-difflist_i.lo ha_dif_la-skysep_h.lo \
-	ha_dif_la-getHTMid.lo ha_dif_la-getHTMidByName.lo \
-	ha_dif_la-getHTMnameById.lo ha_dif_la-DIFhtmCircleRegion.lo \
-	ha_dif_la-DIFhtmRectRegion.lo ha_dif_la-getHTMNeighb.lo \
-	ha_dif_la-getHTMNeighbC.lo ha_dif_la-getHTMBary.lo \
-	ha_dif_la-getHTMBaryC.lo ha_dif_la-getHTMBaryDist.lo \
-	ha_dif_la-DIFgetHTMNeighbC.lo ha_dif_la-getHealPBound.lo \
-	ha_dif_la-getHealPBoundC.lo ha_dif_la-getHealPid.lo \
-	ha_dif_la-getHealPNeighb.lo ha_dif_la-getHTMsNeighb.lo \
-	ha_dif_la-getHealPNeighbC.lo ha_dif_la-getHealPBary.lo \
-	ha_dif_la-getHealPBaryC.lo ha_dif_la-getHealPBaryDist.lo \
-	ha_dif_la-DIFmyHealPCone.lo ha_dif_la-DIFmyHealPRect.lo \
-	ha_dif_la-DIFgetHealPNeighbC.lo ha_dif_la-DIFgetHTMsNeighb.lo \
-	ha_dif_la-getHealPMaxS.lo
+am__ha_dif_la_SOURCES_DIST = udf.cc difflist_i.cpp skysep_h.cpp \
+	getHTMid.cpp getHTMidByName.cpp getHTMnameById.cpp \
+	DIFhtmCircleRegion.cpp DIFhtmRectRegion.cpp getHTMNeighb.cpp \
+	getHTMNeighbC.cpp getHTMBary.cpp getHTMBaryC.cpp \
+	getHTMBaryDist.cpp DIFgetHTMNeighbC.cpp getHealPBound.cpp \
+	getHealPBoundC.cpp getHealPid.cpp getHealPNeighb.cpp \
+	getHTMsNeighb.cpp getHealPNeighbC.cpp getHealPBary.cpp \
+	getHealPBaryC.cpp getHealPBaryDist.cpp DIFmyHealPCone.cpp \
+	DIFmyHealPRect.cpp DIFgetHealPNeighbC.cpp DIFgetHTMsNeighb.cpp \
+	getHealPMaxS.cpp ha_dif_my8.cc ha_dif.cc
+@MYSQL8_TRUE@am__objects_4 = ha_dif_la-ha_dif_my8.lo
+@MYSQL8_FALSE@am__objects_5 = ha_dif_la-ha_dif.lo
+am_ha_dif_la_OBJECTS = ha_dif_la-udf.lo ha_dif_la-difflist_i.lo \
+	ha_dif_la-skysep_h.lo ha_dif_la-getHTMid.lo \
+	ha_dif_la-getHTMidByName.lo ha_dif_la-getHTMnameById.lo \
+	ha_dif_la-DIFhtmCircleRegion.lo ha_dif_la-DIFhtmRectRegion.lo \
+	ha_dif_la-getHTMNeighb.lo ha_dif_la-getHTMNeighbC.lo \
+	ha_dif_la-getHTMBary.lo ha_dif_la-getHTMBaryC.lo \
+	ha_dif_la-getHTMBaryDist.lo ha_dif_la-DIFgetHTMNeighbC.lo \
+	ha_dif_la-getHealPBound.lo ha_dif_la-getHealPBoundC.lo \
+	ha_dif_la-getHealPid.lo ha_dif_la-getHealPNeighb.lo \
+	ha_dif_la-getHTMsNeighb.lo ha_dif_la-getHealPNeighbC.lo \
+	ha_dif_la-getHealPBary.lo ha_dif_la-getHealPBaryC.lo \
+	ha_dif_la-getHealPBaryDist.lo ha_dif_la-DIFmyHealPCone.lo \
+	ha_dif_la-DIFmyHealPRect.lo ha_dif_la-DIFgetHealPNeighbC.lo \
+	ha_dif_la-DIFgetHTMsNeighb.lo ha_dif_la-getHealPMaxS.lo \
+	$(am__objects_4) $(am__objects_5)
 ha_dif_la_OBJECTS = $(am_ha_dif_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -305,11 +331,13 @@ am__depfiles_remade = ./$(DEPDIR)/DIFgetHTMNeighbC.Po \
 	./$(DEPDIR)/ha_dif_la-getHealPNeighbC.Plo \
 	./$(DEPDIR)/ha_dif_la-getHealPid.Plo \
 	./$(DEPDIR)/ha_dif_la-ha_dif.Plo \
+	./$(DEPDIR)/ha_dif_la-ha_dif_my8.Plo \
 	./$(DEPDIR)/ha_dif_la-skysep_h.Plo \
-	./$(DEPDIR)/ha_dif_la-udf.Plo ./$(DEPDIR)/myXmatch.Po \
-	./$(DEPDIR)/my_stmt_db.Po ./$(DEPDIR)/my_stmt_db2.Po \
-	./$(DEPDIR)/pix_myXmatch.Po ./$(DEPDIR)/skysep_h.Po \
-	./$(DEPDIR)/testMySearch.Po ./$(DEPDIR)/udf.Po
+	./$(DEPDIR)/ha_dif_la-udf.Plo ./$(DEPDIR)/ha_dif_my8.Po \
+	./$(DEPDIR)/myXmatch.Po ./$(DEPDIR)/my_stmt_db.Po \
+	./$(DEPDIR)/my_stmt_db2.Po ./$(DEPDIR)/pix_myXmatch.Po \
+	./$(DEPDIR)/skysep_h.Po ./$(DEPDIR)/testMySearch.Po \
+	./$(DEPDIR)/udf.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -352,8 +380,9 @@ SOURCES = $(libMyUtils_a_SOURCES) $(libdif_alone_a_SOURCES) \
 	$(fakesky_HPx_SOURCES) $(fakesky_RND_SOURCES) \
 	$(myXmatch_SOURCES) $(pix_myXmatch_SOURCES) \
 	$(testMySearch_SOURCES)
-DIST_SOURCES = $(libMyUtils_a_SOURCES) $(libdif_alone_a_SOURCES) \
-	$(ha_dif_la_SOURCES) $(fakesky_H6_SOURCES) \
+DIST_SOURCES = $(libMyUtils_a_SOURCES) \
+	$(am__libdif_alone_a_SOURCES_DIST) \
+	$(am__ha_dif_la_SOURCES_DIST) $(fakesky_H6_SOURCES) \
 	$(fakesky_HPx_SOURCES) $(fakesky_RND_SOURCES) \
 	$(myXmatch_SOURCES) $(pix_myXmatch_SOURCES) \
 	$(testMySearch_SOURCES)
@@ -520,22 +549,16 @@ noinst_HEADERS = dif.hh ha_dif.h udf_utils.hh my_stmt_db.h my_stmt_db2.h pix_myX
 lib_LTLIBRARIES = ha_dif.la
 ha_dif_la_CXXFLAGS = $(INCLUDES) -fno-rtti
 ha_dif_la_LDFLAGS = -module
-ha_dif_la_SOURCES = \
-   udf.cc ha_dif.cc \
-   difflist_i.cpp skysep_h.cpp \
-   getHTMid.cpp getHTMidByName.cpp getHTMnameById.cpp \
-   DIFhtmCircleRegion.cpp DIFhtmRectRegion.cpp \
-   getHTMNeighb.cpp getHTMNeighbC.cpp getHTMBary.cpp getHTMBaryC.cpp \
-   getHTMBaryDist.cpp DIFgetHTMNeighbC.cpp \
-   getHealPBound.cpp getHealPBoundC.cpp getHealPid.cpp \
-   getHealPNeighb.cpp getHTMsNeighb.cpp getHealPNeighbC.cpp \
-   getHealPBary.cpp getHealPBaryC.cpp \
-   getHealPBaryDist.cpp \
-   DIFmyHealPCone.cpp DIFmyHealPRect.cpp \
-   DIFgetHealPNeighbC.cpp \
-   DIFgetHTMsNeighb.cpp \
-   getHealPMaxS.cpp
-
+ha_dif_la_SOURCES = udf.cc difflist_i.cpp skysep_h.cpp getHTMid.cpp \
+	getHTMidByName.cpp getHTMnameById.cpp DIFhtmCircleRegion.cpp \
+	DIFhtmRectRegion.cpp getHTMNeighb.cpp getHTMNeighbC.cpp \
+	getHTMBary.cpp getHTMBaryC.cpp getHTMBaryDist.cpp \
+	DIFgetHTMNeighbC.cpp getHealPBound.cpp getHealPBoundC.cpp \
+	getHealPid.cpp getHealPNeighb.cpp getHTMsNeighb.cpp \
+	getHealPNeighbC.cpp getHealPBary.cpp getHealPBaryC.cpp \
+	getHealPBaryDist.cpp DIFmyHealPCone.cpp DIFmyHealPRect.cpp \
+	DIFgetHealPNeighbC.cpp DIFgetHTMsNeighb.cpp getHealPMaxS.cpp \
+	$(am__append_1) $(am__append_2)
 ha_dif_la_LIBADD = ../contrib/htmIndex/lib/libSpatialIndex.a \
                    ../contrib/Healpix/HealP3/lib/libHealP3.a \
                    ../contrib/Spherematch/lib/libspheregroup.a
@@ -799,8 +822,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ha_dif_la-getHealPNeighbC.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ha_dif_la-getHealPid.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ha_dif_la-ha_dif.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ha_dif_la-ha_dif_my8.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ha_dif_la-skysep_h.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ha_dif_la-udf.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ha_dif_my8.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myXmatch.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/my_stmt_db.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/my_stmt_db2.Po@am__quote@ # am--include-marker
@@ -863,13 +888,6 @@ ha_dif_la-udf.lo: udf.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='udf.cc' object='ha_dif_la-udf.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -c -o ha_dif_la-udf.lo `test -f 'udf.cc' || echo '$(srcdir)/'`udf.cc
-
-ha_dif_la-ha_dif.lo: ha_dif.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -MT ha_dif_la-ha_dif.lo -MD -MP -MF $(DEPDIR)/ha_dif_la-ha_dif.Tpo -c -o ha_dif_la-ha_dif.lo `test -f 'ha_dif.cc' || echo '$(srcdir)/'`ha_dif.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ha_dif_la-ha_dif.Tpo $(DEPDIR)/ha_dif_la-ha_dif.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ha_dif.cc' object='ha_dif_la-ha_dif.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -c -o ha_dif_la-ha_dif.lo `test -f 'ha_dif.cc' || echo '$(srcdir)/'`ha_dif.cc
 
 ha_dif_la-difflist_i.lo: difflist_i.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -MT ha_dif_la-difflist_i.lo -MD -MP -MF $(DEPDIR)/ha_dif_la-difflist_i.Tpo -c -o ha_dif_la-difflist_i.lo `test -f 'difflist_i.cpp' || echo '$(srcdir)/'`difflist_i.cpp
@@ -1059,6 +1077,20 @@ ha_dif_la-getHealPMaxS.lo: getHealPMaxS.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='getHealPMaxS.cpp' object='ha_dif_la-getHealPMaxS.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -c -o ha_dif_la-getHealPMaxS.lo `test -f 'getHealPMaxS.cpp' || echo '$(srcdir)/'`getHealPMaxS.cpp
+
+ha_dif_la-ha_dif_my8.lo: ha_dif_my8.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -MT ha_dif_la-ha_dif_my8.lo -MD -MP -MF $(DEPDIR)/ha_dif_la-ha_dif_my8.Tpo -c -o ha_dif_la-ha_dif_my8.lo `test -f 'ha_dif_my8.cc' || echo '$(srcdir)/'`ha_dif_my8.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ha_dif_la-ha_dif_my8.Tpo $(DEPDIR)/ha_dif_la-ha_dif_my8.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ha_dif_my8.cc' object='ha_dif_la-ha_dif_my8.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -c -o ha_dif_la-ha_dif_my8.lo `test -f 'ha_dif_my8.cc' || echo '$(srcdir)/'`ha_dif_my8.cc
+
+ha_dif_la-ha_dif.lo: ha_dif.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -MT ha_dif_la-ha_dif.lo -MD -MP -MF $(DEPDIR)/ha_dif_la-ha_dif.Tpo -c -o ha_dif_la-ha_dif.lo `test -f 'ha_dif.cc' || echo '$(srcdir)/'`ha_dif.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/ha_dif_la-ha_dif.Tpo $(DEPDIR)/ha_dif_la-ha_dif.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ha_dif.cc' object='ha_dif_la-ha_dif.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ha_dif_la_CXXFLAGS) $(CXXFLAGS) -c -o ha_dif_la-ha_dif.lo `test -f 'ha_dif.cc' || echo '$(srcdir)/'`ha_dif.cc
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1276,8 +1308,10 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ha_dif_la-getHealPNeighbC.Plo
 	-rm -f ./$(DEPDIR)/ha_dif_la-getHealPid.Plo
 	-rm -f ./$(DEPDIR)/ha_dif_la-ha_dif.Plo
+	-rm -f ./$(DEPDIR)/ha_dif_la-ha_dif_my8.Plo
 	-rm -f ./$(DEPDIR)/ha_dif_la-skysep_h.Plo
 	-rm -f ./$(DEPDIR)/ha_dif_la-udf.Plo
+	-rm -f ./$(DEPDIR)/ha_dif_my8.Po
 	-rm -f ./$(DEPDIR)/myXmatch.Po
 	-rm -f ./$(DEPDIR)/my_stmt_db.Po
 	-rm -f ./$(DEPDIR)/my_stmt_db2.Po
@@ -1389,8 +1423,10 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ha_dif_la-getHealPNeighbC.Plo
 	-rm -f ./$(DEPDIR)/ha_dif_la-getHealPid.Plo
 	-rm -f ./$(DEPDIR)/ha_dif_la-ha_dif.Plo
+	-rm -f ./$(DEPDIR)/ha_dif_la-ha_dif_my8.Plo
 	-rm -f ./$(DEPDIR)/ha_dif_la-skysep_h.Plo
 	-rm -f ./$(DEPDIR)/ha_dif_la-udf.Plo
+	-rm -f ./$(DEPDIR)/ha_dif_my8.Po
 	-rm -f ./$(DEPDIR)/myXmatch.Po
 	-rm -f ./$(DEPDIR)/my_stmt_db.Po
 	-rm -f ./$(DEPDIR)/my_stmt_db2.Po
