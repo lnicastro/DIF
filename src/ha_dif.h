@@ -103,7 +103,7 @@ public:
 
   /*
     The name of the index type that will be used for display
-    don't implement this method unless you really have indexes
+    Not implement because we do not have indexes
   */
 
 // Commented

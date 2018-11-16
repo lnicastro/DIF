@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------------^
-// Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
-// Giorgio Calderone <gcalderone@ifc.inaf.it>
+// Copyright (C) 2004 - 2018
+// Giorgio Calderone <giorgio.calderone@inaf.it>
+// Luciano Nicastro <luciano.nicastro@inaf.it>
 // 
 // This file is part of DIF.
 // 

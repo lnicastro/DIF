@@ -140,7 +140,7 @@ ha_dif::ha_dif(handlerton *hton, TABLE_SHARE *table_arg)
 }
 
 
-// Commented?
+// Commented: no extensions
 /*
 static const char *ha_dif_exts[] = { NullS };
 const char **ha_dif::bas_ext() const
