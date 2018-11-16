@@ -32,19 +32,19 @@ touch configure aclocal.m4 Makefile.in src/config.h.in
 ```
 
 
-Assuming that you have downloaded and compiled + installed MySQL 5.7.22:
+Assuming that you have downloaded and compiled + installed MySQL 5.7.24:
 ```
-tar zxvf dif-0.5.4.tar.gz
+tar zxvf dif-0.5.5.tar.gz
 
-cd dif-0.5.4
-./configure --with-mysql-source=/path_to/mysql-5.7.22
+cd dif-0.5.5
+./configure --with-mysql-source=/path_to/mysql-5.7.24
 make
 sudo make install
 ```
 
 **Note:** if you compiled MySQL in a build directory rather than in the root source directory, then you have to pass this to ``configure``, e.g. if you used the subdirectory `Build`:
 ```
-./configure --with-mysql-source=/path_to/mysql-5.7.22/Build
+./configure --with-mysql-source=/path_to/mysql-5.7.24/Build
 ```
 
 ## Installing DIF facilities in MySQL
