@@ -14,9 +14,9 @@ This is the **Version 0.5.5** development tree.
 3. Perl `DBI/DBD-MySQL` modules
 
 ## Compile and install
-It depends on how you installed MySQL on your machine.
+Compiling DIF depends on how you installed MySQL on your machine.
 
-**Note:** as of version 0.5.5 you do not need to compile and install the MySQL source version.
+**Note:** as of DIF version 0.5.5, you do not need to compile and install the MySQL source version.
 
 **Note:** if you download DIF via `git clone`, to avoid autotools requirements with a message like this:
 ```
@@ -32,18 +32,19 @@ give this command before running `configure` (see below):
 touch configure aclocal.m4 Makefile.in src/config.h.in
 ```
 
-## Case 1: MySQL installed via prebuild package
+## Case 1: MySQL installed via prebuilt package
 This is the typical installation on any system, that is when
 you have installed MySQL using a precompiled package (e.g. a `.dmg` file on Mac OS
 or issuing `sudo apt install mysql-server libmysqlclient-dev` on Debian/Ubuntu).
-In this case you only need to be sure that you have all the necessary include file and `mysql_config`. Check your installed version:
+In this case you only need to be sure that you have all the necessary include files and `mysql_config`. Check your installed version:
 ```
-shell> mysql_config --version
+mysql_config --version
 5.7.24
 ```
 DIF should work on MySQL 5.1, 5.5, 5.6, 5.7 (and the corresponding MariaDB varsions) and 8.0.
 
-Now we need to prepare some additional include file via `cmake`.
+Now we need to prepare some additional MySQL include files via `cmake`.
+
 The easiest way is to download the source code. Assuming the installed version is 5.7.24 (in a temporary directory):
 ```
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.24.tar.gz
