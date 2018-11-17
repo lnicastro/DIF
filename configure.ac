@@ -25,6 +25,7 @@ AC_INIT([dif],
         [dif])
 
 AC_CONFIG_AUX_DIR(config)
+# AM_CONFIG_HEADER(src/config.h)
 AC_CONFIG_HEADERS(src/config.h)
 AM_INIT_AUTOMAKE([dist-bzip2])
 m4_include([ax_compare_version.m4])
@@ -64,12 +65,13 @@ if [[ -z "$MYSQL_CONFIG" ]]; then AC_MSG_ERROR([Could not find program: mysql_co
 MYSQL_VERSION=`$MYSQL_CONFIG --version | cut -d "." -f -2 | sed -e 's/\./_/g'`
 AC_SUBST(MYSQL_VERSION)
 
-#Standard MySQL version id (e.g. 50709 or 50626 or 100119)
+#Standard version id (e.g. 50709 or 50626 or 100119)
 MY_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | sed -e 's/\./ /' | xargs printf "%02d"`
 AC_SUBST(MY_VERSION_ID)
 
 
-#Used to decide ha_dif source file: MariaDB is TODO
+#Used to decide ha_dif source file
+#AM_CONDITIONAL([MYSQL8], [test $MY_VERSION_ID -gt "80000"])
 AM_CONDITIONAL([MYSQL8], [ [[ $MY_VERSION_ID -gt "80000" ]] && [[ $MY_VERSION_ID -lt "100000" ]] ])
 
 
@@ -80,7 +82,8 @@ MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
 MYSQL_LIBS=`$MYSQL_CONFIG --libs`
 AC_SUBST(MYSQL_LIBS)
 
-CPPFLAGS="$MYSQL_INCLUDE -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
+#CPPFLAGS="$MYSQL_INCLUDE -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
+CPPFLAGS="$MYSQL_INCLUDE $CPPFLAGS"
 CXXFLAGS="-std=gnu++11"
 
 
@@ -95,9 +98,12 @@ if test "$ax_compare_version" = "true" ; then
 
 cmake_MySQL_SOURCE_DIR=`grep MySQL_SOURCE_DIR $mypath_mysql_source/CMakeCache.txt | cut -d "=" -f 2`
 
-#CMake build directory is mandatory. Here some guessed: shall be requested as configure parameter
-  #CPPFLAGS="-I$mypath_mysql_source/BUILD/include -I$mypath_mysql_source/bld/include $CPPFLAGS -DMYSQL$MYSQL_VERSION -DDBUG_OFF"
-  CPPFLAGS="-I$mypath_mysql_source/libbinlogevents/export -I$mypath_mysql_source/libbinlogevents/include -I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS -D MY_VERSION_ID=$MY_VERSION_ID -DDBUG_OFF"
+#CMake build directory is mandatory. Check if it coincides with source dir. 
+  if test "x$mypath_mysql_source" != "x$cmake_MySQL_SOURCE_DIR" ; then
+    CPPFLAGS="$CPPFLAGS -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source -I$mypath_mysql_source/libbinlogevents/export -I$mypath_mysql_source/libbinlogevents/include"
+  fi
+
+  CPPFLAGS="-I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS -D MY_VERSION_ID=$MY_VERSION_ID -DDBUG_OFF"
 else
   AC_CHECK_HEADERS([mysql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: mysql_priv.h])])
   CPPFLAGS="$CPPFLAGS -D MY_VERSION_ID=$MYSQL_VERSION_ID"
