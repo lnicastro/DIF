@@ -4403,7 +4403,7 @@ $as_echo "none needed" >&6; } ;; #(
 $as_echo "$ac_cv_prog_cc_stdc" >&6; } ;;
 esac
 
-AX_CXX_COMPILE_STDCXX11
+#AX_CXX_COMPILE_STDCXX11
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -16333,7 +16333,7 @@ MYSQL_LIBS=`$MYSQL_CONFIG --libs`
 
 #CPPFLAGS="$MYSQL_INCLUDE -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
 CPPFLAGS="$MYSQL_INCLUDE $CPPFLAGS"
-CXXFLAGS="-std=gnu++11"
+CXXFLAGS="-std=c++11"
 
 
 

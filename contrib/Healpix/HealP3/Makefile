@@ -1,13 +1,13 @@
 # Makefile for custom HEALPix facilities to be used in DIF.
 # 
-# LN@IASF-INAF, Aug. 2007                        Last change: 16/05/2016
+# LN @ INAF-OAS, Aug. 2007                     Last change: 17/11/2018
 #--
 
 MAKE ?= make
 CCXX ?= g++
 LD = g++
 PREFIX = .
-CPPFLAGS = -Wall -O3 -fPIC
+CPPFLAGS = -Wall -O3 -fPIC -std=c++11
 BINDIR = $(PREFIX)/bin
 LIBDIR = $(PREFIX)/lib
 DOCDIR = $(SRCROOT)/doc

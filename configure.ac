@@ -46,7 +46,7 @@ AC_SUBST(MYSQL_SOURCE)
 
 
 AC_PROG_CC_STDC
-AX_CXX_COMPILE_STDCXX11
+#AX_CXX_COMPILE_STDCXX11
 AC_LANG_PUSH(C++)
 AC_PROG_CXX
 AC_PROG_LIBTOOL
@@ -84,7 +84,7 @@ AC_SUBST(MYSQL_LIBS)
 
 #CPPFLAGS="$MYSQL_INCLUDE -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
 CPPFLAGS="$MYSQL_INCLUDE $CPPFLAGS"
-CXXFLAGS="-std=gnu++11"
+CXXFLAGS="-std=c++11"
 
 
 AX_COMPARE_VERSION([$MYSQL_VERSION],[gt],[5.2])
