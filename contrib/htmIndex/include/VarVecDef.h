@@ -37,6 +37,8 @@
 //# Peter Kunszt, Apr. 1999    Add remove() method to ValVec
 //# Peter Kunszt, Jul. 2000    Add new class VarStr
 
+// Modified: L. Nicastro @ INAF-OAS, 19/03/2009   Last change: 17/11/2018
+
 #include <VarVec.h>
 #include <cstdlib>
 #include <new>
@@ -217,7 +219,7 @@ size_t	ValVec<T>::insert( size_t count, size_t offset )
       }
    }
    else if ( count )
-      if ( offset )
+      if ( offset ) {
 	 try {
 	    // destroy obliterated portion of unoccupied region
 	    for ( i = 0; i < count; ++i ) vector_[length_+i].~T();
@@ -236,8 +238,9 @@ size_t	ValVec<T>::insert( size_t count, size_t offset )
 	    length_ = capacity_ = 0;
 	    throw;
 	 }
-      else if ( pFill_ )
+      } else if ( pFill_ ) {
 	 for ( i = 0; i < count; ++i ) vector_[length_+i] = *pFill_;
+      }
 
    return length_ = newLength;
 }

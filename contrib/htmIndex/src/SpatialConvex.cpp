@@ -32,7 +32,7 @@
 //#
 //#define DIAGNOSE
 
-// Modified: L. Nicastro @ IASF-INAF, 19/03/2009
+// Modified: L. Nicastro @ INAF-OAS, 19/03/2009   Last change: 17/11/2018
 
 #include <vector>
 #include <algorithm>
@@ -216,6 +216,10 @@ SpatialConvex::add(SpatialConstraint & c)
     break;
   case zERO:
     sign_ = c.sign_;
+    break;
+  case mIXED:
+    break;
+  default:
     break;
   }
 }
@@ -553,6 +557,10 @@ SpatialConvex::simplify() {
       break;
     case zERO:
       sign_ = constraints_[i].sign_;
+      break;
+    case mIXED:
+      break;
+    default:
       break;
     }
   }
@@ -1257,7 +1265,7 @@ SpatialConvex::testTriangle(const SpatialVector & v0,
       // Is there another positive constraint that does NOT intersect with
       // the edges?
       size_t cIndex;
-      if ( cIndex = testOtherPosNone(v0,v1,v2) ) {
+      if ( (cIndex = testOtherPosNone(v0,v1,v2)) ) {
 	// Does that constraint lie inside or outside of the triangle?
 	if ( testConstraintInside(v0,v1,v2, cIndex) )
 	  return pARTIAL;
@@ -1267,7 +1275,7 @@ SpatialConvex::testTriangle(const SpatialVector & v0,
 	else return rEJECT;
 
       } else {
-	if(sign_ == pOS || sign_ == zERO) return pARTIAL;
+	if ( sign_ == pOS || sign_ == zERO ) return pARTIAL;
 	else return dONTKNOW;
       }	
     } else {

@@ -36,7 +36,8 @@
 //#     June 18, 1998 : pzk -- added compress/decompress methods
 //#     June 29, 1998 : pzk -- added copy constructor/assignment to iterator
 
-//  LN add
+//  LN add:  Last change: 17/11/2018
+#include <iostream>
 using namespace std;
 
 #ifdef SXDB
