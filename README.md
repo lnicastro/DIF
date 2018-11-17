@@ -9,13 +9,13 @@ This is the **Version 0.5.5** development tree.
 
 ## Requirements
 
-1. MySQL / MariaDB source code compiled (same version as the system version OR installed)
+1. MySQL / MariaDB source code configure cia `cmake` (same version as the system version OR installed)
 2. make or gmake
-3. Perl `DBI/DBD-mysql` modules
+3. Perl `DBI/DBD-MySQL` modules
 
 ## Compile and install
 
-**Note:** as of version 0.5.5 you do not need to install the source compiled version.
+**Note:** as of version 0.5.5 you do not need to compile and install the source compiled version.
 
 **Note:** if you download the code via `git clone`, to avoid autotools requirements with a message like this:
 ```
@@ -31,8 +31,40 @@ give this command before running `configure`:
 touch configure aclocal.m4 Makefile.in src/config.h.in
 ```
 
+## MySQL installed via prebuild package
+This is the typical installation on any system, that is when
+you have installed MySQL using a precompiled package (e.g. a `.dmg` file on Mac OS
+or issuing `sudo apt install mysql-server libmysqlclient-dev` on Debian/Ubuntu).
+In this case you only need to be sure that you have all the necessary include file and `mysql_config`. Check your installed version:
+```
+shell> mysql_config --version
+5.7.24
+```
+DIF should work on MySQL 5.1, 5.5, 5.6, 5.7 (and the corresponding MariaDB varsions) and 8.0.
 
-Assuming that you have downloaded and compiled + installed MySQL 5.7.24:
+Now we need to prepare some additional include file via `cmake`.
+The easiest way is to download the source code. Assuming the installed version is 5.7.24 (in a temporary directory):
+```
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.24.tar.gz
+tar zxvf mysql-boost-5.7.24.tar.gz
+cd mysql-5.7.24
+cmake . -DWITH_BOOST=boost
+```
+
+## MySQL installed via source code
+Assuming that you have downloaded, compiled and installed MySQL 5.7.24:
+
+If downloaded via git:
+```
+git clone https://github.com/lnicastro/DIF.git
+cd DIF
+touch configure aclocal.m4 Makefile.in src/config.h.in
+./configure --with-mysql-source=/path_to/mysql-5.7.24
+make
+sudo make install
+```
+
+If you downloaded a tar archive (similarly for other comoressed formats):
 ```
 tar zxvf dif-0.5.5.tar.gz
 
@@ -48,17 +80,39 @@ sudo make install
 ```
 
 ## Installing DIF facilities in MySQL
-To actually enable the DIF facilities, you need to run the installation command:
+`dif` is a Perl script used to perform various DIF-related tasks.
+It uses the Perl `DBI/DBD-MySQL` modules to communicate with the MySQL server.
+First of all be sure you have these modules installed. You can install them using `cpan DBD::mysql` or the OS specific command.
+
+On Mac OS using MacPorts: 
+```
+sudo port install p5-dbd-mysql
+```
+On Debian, Ubuntu and variants:
+```
+sudo apt-get install libdbd-mysql-perl
+```
+On Red Hat, Fedora, centOS, and variants:
+```
+sudo yum install "perl(DBD::mysql)"
+```
+On openSUSE
+```
+sudo zypper install perl-DBD-mysql
+```
+
+Once the Perl modules are installed, to actually enable the DIF facilities, you need to run the installation command:
 ```
 dif --install
 ```
 
 You'll be asked the MySQL root password to complete this task.
-
-**Note:** `dif` is a Perl script used to perform various DIF-related tasks. If you use `tcsh` you might need to run `rehash` to have the command visible in an existing terminal. See the manual for a full description or run:
+See the manual for a full description or run:
 ```
 dif --help
 ```
+
+**Note:** If you use `tcsh` you might need to run `rehash` to have the command visible in an existing terminal.
 
 Assuming the command executes successfully, you now need to restart the MySQL server to make the new DIF storage engine working.
 Depending on your OS and/or how you started the server, you could need to use one of these commands:
@@ -78,15 +132,6 @@ sudo /usr/local/mysql/bin/mysqld_safe --user=mysql &
 ```
 
 ## Test installation
-First of all be sure you have the Perl `DBI/DBD-mysql` modules installed. You can install them using `cpan` or the OS specific command, e.g. on Mac OS using MacPorts: 
-```
-sudo port install p5-dbd-mysql
-```
-or on Debian/Ubuntu:
-```
-sudo apt install libdbd-mysql-perl
-```
-and so on.
 
 Download the reduced version of the [ASCC 2.5](http://ross2.iasfbo.inaf.it/dif/data/ascc25_mini.sql.gz) star catalogue in a working directory, say `dif_data`. Can also download the file manually:
 ```
