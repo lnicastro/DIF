@@ -14,10 +14,11 @@ This is the **Version 0.5.5** development tree.
 3. Perl `DBI/DBD-MySQL` modules
 
 ## Compile and install
+It depends on how you installed MySQL on your machine.
 
-**Note:** as of version 0.5.5 you do not need to compile and install the source compiled version.
+**Note:** as of version 0.5.5 you do not need to compile and install the MySQL source version.
 
-**Note:** if you download the code via `git clone`, to avoid autotools requirements with a message like this:
+**Note:** if you download DIF via `git clone`, to avoid autotools requirements with a message like this:
 ```
 ...
 DIF/config/missing: line 81: aclocal-1.16: command not found
@@ -25,13 +26,13 @@ WARNING: 'aclocal-1.16' is missing on your system.
 ...
 ```
 
-give this command before running `configure`:
+give this command before running `configure` (see below):
 
 ```
 touch configure aclocal.m4 Makefile.in src/config.h.in
 ```
 
-## MySQL installed via prebuild package
+## Case 1: MySQL installed via prebuild package
 This is the typical installation on any system, that is when
 you have installed MySQL using a precompiled package (e.g. a `.dmg` file on Mac OS
 or issuing `sudo apt install mysql-server libmysqlclient-dev` on Debian/Ubuntu).
@@ -51,7 +52,7 @@ cd mysql-5.7.24
 cmake . -DWITH_BOOST=boost
 ```
 
-## MySQL installed via source code
+## Case 2: MySQL installed via source code
 Assuming that you have downloaded, compiled and installed MySQL 5.7.24:
 
 If downloaded via git:
