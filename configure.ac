@@ -25,7 +25,6 @@ AC_INIT([dif],
         [dif])
 
 AC_CONFIG_AUX_DIR(config)
-# AM_CONFIG_HEADER(src/config.h)
 AC_CONFIG_HEADERS(src/config.h)
 AM_INIT_AUTOMAKE([dist-bzip2])
 m4_include([ax_compare_version.m4])
@@ -65,24 +64,23 @@ if [[ -z "$MYSQL_CONFIG" ]]; then AC_MSG_ERROR([Could not find program: mysql_co
 MYSQL_VERSION=`$MYSQL_CONFIG --version | cut -d "." -f -2 | sed -e 's/\./_/g'`
 AC_SUBST(MYSQL_VERSION)
 
-#Standard version id (e.g. 50709 or 50626 or 100119)
+#Standard MySQL version id (e.g. 50709 or 50626 or 100119)
 MY_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | sed -e 's/\./ /' | xargs printf "%02d"`
 AC_SUBST(MY_VERSION_ID)
 
 
-#Used to decide ha_dif source file
-#AM_CONDITIONAL([MYSQL8], [test $MY_VERSION_ID -gt "80000"])
+#Used to decide ha_dif source file: MariaDB is TODO
 AM_CONDITIONAL([MYSQL8], [ [[ $MY_VERSION_ID -gt "80000" ]] && [[ $MY_VERSION_ID -lt "100000" ]] ])
 
 
-#Installed MySQL include dir (not used)
-#MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
+#Installed MySQL include dir
+MYSQL_INCLUDE=`$MYSQL_CONFIG --include`
 
 #Installed MySQL library flags (see src/Makefile.am)
 MYSQL_LIBS=`$MYSQL_CONFIG --libs`
 AC_SUBST(MYSQL_LIBS)
 
-CPPFLAGS="-I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
+CPPFLAGS="$MYSQL_INCLUDE -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
 CXXFLAGS="-std=gnu++11"
 
 
