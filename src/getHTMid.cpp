@@ -20,9 +20,10 @@
   Return 0 on success.
 
 
-  LN@IASF-INAF, Jan 2003                        Last change: 27/10/2015
+  LN @ INAF-OAS, Jan 2003                        Last change: 17/11/2018
 */
 
+#include <iostream>
 using namespace std;
 
 #include "SpatialInterface.h"

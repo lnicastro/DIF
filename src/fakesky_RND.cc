@@ -1,15 +1,15 @@
 /*
   Fake sky with fully random generated points.
 
-  LN @ IASF-INAF March 2009                         Last changed: 15/10/2015
+  LN @ INAF-OAS March 2009                         Last changed: 17/11/2018
 */
 
+#include <iostream>
 using namespace std;
 
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
-#include <iostream>
 #include <string.h>
 
 #include <vector>
