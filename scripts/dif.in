@@ -26,16 +26,23 @@
 use strict;
 use DBI();
 
-#http://search.cpan.org/~capttofu/DBD-mysql/
+#https://metacpan.org/pod/distribution/DBD-mysql/lib/DBD/mysql/INSTALL.pod
+#
+#cpan:
+#cpan DBD::mysql
 #
 #rpm:
 #perl-DBI
 #perl-DBD-MySQL
 # 
-#cpan
-#install DBD::mysql
-#force install DBD::mysql
+#openSUSE:
+#zypper install perl-DBD-mysql
 #
+#Red Hat, Fedora, centOS:
+#yum install "perl(DBD::mysql)"
+#
+#Debian, Ubuntu:
+#apt-get install libdbd-mysql-perl
 
 
 # ---- Global variables
