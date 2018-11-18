@@ -37,7 +37,8 @@ sudo make install
 `/path_to/mysql_source_directory` is the full path to the MySQL source dir.
 Let's consider the two possible MySQL installations.
 
-## Case 1: MySQL installed via prebuilt package
+**Case 1: MySQL installed via prebuilt package**
+
 This is the typical installation on any system, that is when
 you have installed MySQL using a precompiled package (e.g. a `.dmg` file on Mac OS
 or issuing `sudo apt install mysql-server libmysqlclient-dev` on Debian/Ubuntu).
@@ -59,7 +60,8 @@ cmake . -DWITH_BOOST=boost
 ```
 Annotate the directory name and then you are ready to install DIF.
 
-## Case 2: MySQL installed via source code
+**Case 2: MySQL installed via source code**
+
 Assuming that you have downloaded, compiled and **installed** MySQL 5.7.24, then you only need
 to know the directory name and be sure that you have not cleaned the required include files in the source directory. Eventually rerun the `cmake` command.
 
