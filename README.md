@@ -26,11 +26,16 @@ WARNING: 'aclocal-1.16' is missing on your system.
 ...
 ```
 
-give this command before running `configure` (see below):
+give a `touch` command before running `configure`. So, from the code main directory:
 
 ```
 touch configure aclocal.m4 Makefile.in src/config.h.in
+./configure --with-mysql-source=/path_to/mysql_source_directory
+make
+sudo make install
 ```
+`/path_to/mysql_source_directory` is the full path to the MySQL source dir.
+Let's consider the two possible MySQL installations.
 
 ## Case 1: MySQL installed via prebuilt package
 This is the typical installation on any system, that is when
@@ -52,11 +57,15 @@ tar zxvf mysql-boost-5.7.24.tar.gz
 cd mysql-5.7.24
 cmake . -DWITH_BOOST=boost
 ```
+Then you are ready to install DIF.
 
 ## Case 2: MySQL installed via source code
-Assuming that you have downloaded, compiled and installed MySQL 5.7.24:
+Assuming that you have downloaded, compiled and **installed** MySQL 5.7.24, then you only need
+to be sure you have not cleaned the required include files in the source directory. Eventually rerun the `cmake` command.
 
-If downloaded via git:
+**Compile and install**
+
+If you downloaded DIF via `git`:
 ```
 git clone https://github.com/lnicastro/DIF.git
 cd DIF
@@ -66,7 +75,7 @@ make
 sudo make install
 ```
 
-If you downloaded a tar archive (similarly for other comoressed formats):
+If you downloaded instead a tar archive (similarly for other compressed formats):
 ```
 tar zxvf dif-0.5.5.tar.gz
 
@@ -76,7 +85,7 @@ make
 sudo make install
 ```
 
-**Note:** if you compiled MySQL in a build directory rather than in the root source directory, then you have to pass this to ``configure``, e.g. if you used the subdirectory `Build`:
+**Note:** if you compiled MySQL in a build directory rather than in its root source directory, then you have to pass this to ``configure``, e.g. if you used the subdirectory `Build`:
 ```
 ./configure --with-mysql-source=/path_to/mysql-5.7.24/Build
 ```
