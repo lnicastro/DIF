@@ -46,7 +46,7 @@ In this case you only need to be sure that you have all the necessary include fi
 mysql_config --version
 5.7.24
 ```
-DIF should work on MySQL 5.1, 5.5, 5.6, 5.7 (and the corresponding MariaDB varsions) and 8.0.
+DIF should work on MySQL 5.1, 5.5, 5.6, 5.7 (and the corresponding MariaDB versions) and 8.0.
 
 Now we need to prepare some additional MySQL include files via `cmake`.
 
@@ -57,15 +57,15 @@ tar zxvf mysql-boost-5.7.24.tar.gz
 cd mysql-5.7.24
 cmake . -DWITH_BOOST=boost
 ```
-Then you are ready to install DIF.
+Annotate the directory name and then you are ready to install DIF.
 
 ## Case 2: MySQL installed via source code
 Assuming that you have downloaded, compiled and **installed** MySQL 5.7.24, then you only need
-to be sure you have not cleaned the required include files in the source directory. Eventually rerun the `cmake` command.
+to know the directory name and be sure that you have not cleaned the required include files in the source directory. Eventually rerun the `cmake` command.
 
 **Compile and install**
 
-If you downloaded DIF via `git`:
+- If you downloaded DIF via `git`:
 ```
 git clone https://github.com/lnicastro/DIF.git
 cd DIF
@@ -75,7 +75,7 @@ make
 sudo make install
 ```
 
-If you downloaded instead a tar archive (similarly for other compressed formats):
+- If you downloaded instead a tar archive (similarly for other compressed formats):
 ```
 tar zxvf dif-0.5.5.tar.gz
 
