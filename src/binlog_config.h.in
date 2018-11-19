@@ -1,5 +1,5 @@
-# A dummy version required by DIF to compile without the need to run cmake in the MySQL source dir.
-#
+/* A dummy version required by DIF to compile without the need to run cmake in the MySQL source dir. */
+
 #ifndef BAPI_CONFIG_INCLUDED
 #define BAPI_CONFIG_INCLUDED
 /* Headers we may use */
