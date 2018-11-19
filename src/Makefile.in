@@ -130,7 +130,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(noinst_HEADERS) \
 	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = config.h
+CONFIG_HEADER = config.h binlog_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)"
@@ -393,7 +393,7 @@ am__can_run_installinfo = \
   esac
 HEADERS = $(noinst_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
-	$(LISP)config.h.in
+	$(LISP)config.h.in binlog_config.h.in
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
 # *not* preserved.
@@ -412,8 +412,8 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/config/depcomp ChangeLog
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/binlog_config.h.in \
+	$(srcdir)/config.h.in $(top_srcdir)/config/depcomp ChangeLog
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -584,7 +584,7 @@ testMySearch_LDADD = ./libdif_alone.a ../contrib/htmIndex/lib/libSpatialIndex.a 
                      ../contrib/Spherematch/lib/libspheregroup.a
 
 testMySearch_LDFLAGS = -pthread
-all: config.h
+all: config.h binlog_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
@@ -631,8 +631,16 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 	rm -f stamp-h1
 	touch $@
 
+binlog_config.h: stamp-h2
+	@test -f $@ || rm -f stamp-h2
+	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h2
+
+stamp-h2: $(srcdir)/binlog_config.h.in $(top_builddir)/config.status
+	@rm -f stamp-h2
+	cd $(top_builddir) && $(SHELL) ./config.status src/binlog_config.h
+
 distclean-hdr:
-	-rm -f config.h stamp-h1
+	-rm -f config.h stamp-h1 binlog_config.h stamp-h2
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -1207,7 +1215,7 @@ distdir-am: $(DISTFILES)
 check-am: all-am
 check: check-am
 all-am: Makefile $(PROGRAMS) $(LIBRARIES) $(LTLIBRARIES) $(HEADERS) \
-		config.h
+		config.h binlog_config.h
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs:

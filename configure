@@ -2391,6 +2391,8 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 # AM_CONFIG_HEADER(src/config.h)
 ac_config_headers="$ac_config_headers src/config.h"
 
+ac_config_headers="$ac_config_headers src/binlog_config.h"
+
 am__api_version='1.16'
 
 # Find a good install program.  We prefer a C program (faster),
@@ -3064,9 +3066,9 @@ if test "${with_mysql_source+set}" = set; then :
 fi
 
 
-if test -z $mypath_mysql_source; then
-  as_fn_error $? "The path to MySQL source or build directory tree is needed to compile DIF." "$LINENO" 5
-fi
+#if test -z $mypath_mysql_source; then
+#  AC_MSG_ERROR([The path to MySQL source or build directory tree is needed to compile DIF.])
+#fi
 
 MYSQL_SOURCE=$mypath_mysql_source
 
@@ -16311,7 +16313,6 @@ MYSQL_VERSION=`$MYSQL_CONFIG --version | cut -d "." -f -2 | sed -e 's/\./_/g'`
 MY_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | sed -e 's/\./ /' | xargs printf "%02d"`
 
 
-
 #Used to decide ha_dif source file
 #AM_CONDITIONAL([MYSQL8], [test $MY_VERSION_ID -gt "80000"])
  if  [ $MY_VERSION_ID -gt "80000" ] && [ $MY_VERSION_ID -lt "100000" ] ; then
@@ -16332,7 +16333,7 @@ MYSQL_LIBS=`$MYSQL_CONFIG --libs`
 
 
 #CPPFLAGS="$MYSQL_INCLUDE -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
-CPPFLAGS="$MYSQL_INCLUDE $CPPFLAGS"
+CPPFLAGS="-D MY_VERSION_ID=$MY_VERSION_ID $MYSQL_INCLUDE $CPPFLAGS"
 CXXFLAGS="-std=c++11"
 
 
@@ -16372,8 +16373,7 @@ x$ax_compare_version_B" | sed 's/^ *//' | sort | sed "s/x${ax_compare_version_A}
       fi
 
 if test "$ax_compare_version" = "true" ; then
-  echo "Warning: MySQL version $MYSQL_VERSION (greater than 5.1). Version ID $MY_VERSION_ID. When compiling mysql check debug mode is off, e.g use 'cmake -DWITH_DEBUG=0 ...'"
-  echo "Warning: you must pass the BUILD dir. to configure, e.g. '--with-mysql-source=/path_to_mysql_source/bld'"
+
   if test $MY_VERSION_ID -lt "50709" ; then
   # if m4_cmp($MYSQL_VERSION_ID,50709) ; then
 
@@ -16393,6 +16393,12 @@ done
 
   fi
 
+  CPPFLAGS="-DDBUG_OFF $CPPFLAGS"
+
+if test "x$mypath_mysql_source" != "x" ; then
+  echo "Warning: MySQL version $MYSQL_VERSION (greater than 5.1). Version ID $MY_VERSION_ID. When compiling mysql check debug mode is off, e.g use 'cmake -DWITH_DEBUG=0 ...'"
+  echo "Warning: you must pass the BUILD dir. to configure, e.g. '--with-mysql-source=/path_to_mysql_source/bld'"
+
   if [ -e "$mypath_mysql_source/CMakeCache.txt" ]; then
     cmake_MySQL_SOURCE_DIR=`grep MySQL_SOURCE_DIR $mypath_mysql_source/CMakeCache.txt | cut -d "=" -f 2`
   else
@@ -16405,8 +16411,13 @@ done
     CPPFLAGS="$CPPFLAGS -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source -I$mypath_mysql_source/libbinlogevents/export -I$mypath_mysql_source/libbinlogevents/include"
   fi
 
-  CPPFLAGS="-I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS -D MY_VERSION_ID=$MY_VERSION_ID -DDBUG_OFF"
+
+  CPPFLAGS="-I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS"
+
+fi
+
 else
+
   for ac_header in mysql_priv.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "mysql_priv.h" "ac_cv_header_mysql_priv_h" "$ac_includes_default"
@@ -16421,7 +16432,7 @@ fi
 
 done
 
-  CPPFLAGS="$CPPFLAGS -D MY_VERSION_ID=$MYSQL_VERSION_ID"
+
 fi
 
 DIF_VERSION="$PACKAGE_VERSION"
@@ -17544,6 +17555,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "src/config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
+    "src/binlog_config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/binlog_config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;

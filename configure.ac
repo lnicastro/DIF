@@ -26,7 +26,8 @@ AC_INIT([dif],
 
 AC_CONFIG_AUX_DIR(config)
 # AM_CONFIG_HEADER(src/config.h)
-AC_CONFIG_HEADERS(src/config.h)
+AC_CONFIG_HEADERS([src/config.h])
+AC_CONFIG_HEADERS([src/binlog_config.h])
 AM_INIT_AUTOMAKE([dist-bzip2])
 m4_include([ax_compare_version.m4])
 
@@ -37,9 +38,9 @@ AC_ARG_WITH(mysql_source,
     [PATH is the path to the MYSQL source directory (used to compile DB engines)])],
     [mypath_mysql_source="$withval"; ])
 
-if test -z $mypath_mysql_source; then
-  AC_MSG_ERROR([The path to MySQL source or build directory tree is needed to compile DIF.])
-fi
+#if test -z $mypath_mysql_source; then
+#  AC_MSG_ERROR([The path to MySQL source or build directory tree is needed to compile DIF.])
+#fi
 
 MYSQL_SOURCE=$mypath_mysql_source
 AC_SUBST(MYSQL_SOURCE)
@@ -69,7 +70,6 @@ AC_SUBST(MYSQL_VERSION)
 MY_VERSION_ID=`$MYSQL_CONFIG --version | sed -e 's/\./0/' | cut -d "." -f -2 | sed -e 's/\./ /' | xargs printf "%02d"`
 AC_SUBST(MY_VERSION_ID)
 
-
 #Used to decide ha_dif source file
 #AM_CONDITIONAL([MYSQL8], [test $MY_VERSION_ID -gt "80000"])
 AM_CONDITIONAL([MYSQL8], [ [[ $MY_VERSION_ID -gt "80000" ]] && [[ $MY_VERSION_ID -lt "100000" ]] ])
@@ -83,18 +83,23 @@ MYSQL_LIBS=`$MYSQL_CONFIG --libs`
 AC_SUBST(MYSQL_LIBS)
 
 #CPPFLAGS="$MYSQL_INCLUDE -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source $CPPFLAGS"
-CPPFLAGS="$MYSQL_INCLUDE $CPPFLAGS"
+CPPFLAGS="-D MY_VERSION_ID=$MY_VERSION_ID $MYSQL_INCLUDE $CPPFLAGS"
 CXXFLAGS="-std=c++11"
 
 
 AX_COMPARE_VERSION([$MYSQL_VERSION],[gt],[5.2])
 if test "$ax_compare_version" = "true" ; then
-  echo "Warning: MySQL version $MYSQL_VERSION (greater than 5.1). Version ID $MY_VERSION_ID. When compiling mysql check debug mode is off, e.g use 'cmake -DWITH_DEBUG=0 ...'"
-  echo "Warning: you must pass the BUILD dir. to configure, e.g. '--with-mysql-source=/path_to_mysql_source/bld'"
+
   if test $MY_VERSION_ID -lt "50709" ; then
   # if m4_cmp($MYSQL_VERSION_ID,50709) ; then
     AC_CHECK_HEADERS([sql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: sql_priv.h])])
   fi
+
+  CPPFLAGS="-DDBUG_OFF $CPPFLAGS"
+
+if test "x$mypath_mysql_source" != "x" ; then
+  echo "Warning: MySQL version $MYSQL_VERSION (greater than 5.1). Version ID $MY_VERSION_ID. When compiling mysql check debug mode is off, e.g use 'cmake -DWITH_DEBUG=0 ...'"
+  echo "Warning: you must pass the BUILD dir. to configure, e.g. '--with-mysql-source=/path_to_mysql_source/bld'"
 
   if [[ -e "$mypath_mysql_source/CMakeCache.txt" ]]; then
     cmake_MySQL_SOURCE_DIR=`grep MySQL_SOURCE_DIR $mypath_mysql_source/CMakeCache.txt | cut -d "=" -f 2`
@@ -108,10 +113,15 @@ if test "$ax_compare_version" = "true" ; then
     CPPFLAGS="$CPPFLAGS -I$mypath_mysql_source/sql -I$mypath_mysql_source/include -I$mypath_mysql_source/include/mysql -I$mypath_mysql_source -I$mypath_mysql_source/libbinlogevents/export -I$mypath_mysql_source/libbinlogevents/include"
   fi
 
-  CPPFLAGS="-I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS -D MY_VERSION_ID=$MY_VERSION_ID -DDBUG_OFF"
+
+  CPPFLAGS="-I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS"
+
+fi
+
 else
+
   AC_CHECK_HEADERS([mysql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: mysql_priv.h])])
-  CPPFLAGS="$CPPFLAGS -D MY_VERSION_ID=$MYSQL_VERSION_ID"
+
 fi
 
 DIF_VERSION="$PACKAGE_VERSION"
