@@ -96,7 +96,12 @@ if test "$ax_compare_version" = "true" ; then
     AC_CHECK_HEADERS([sql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: sql_priv.h])])
   fi
 
-cmake_MySQL_SOURCE_DIR=`grep MySQL_SOURCE_DIR $mypath_mysql_source/CMakeCache.txt | cut -d "=" -f 2`
+  if [[ -e "$mypath_mysql_source/CMakeCache.txt" ]]; then
+    cmake_MySQL_SOURCE_DIR=`grep MySQL_SOURCE_DIR $mypath_mysql_source/CMakeCache.txt | cut -d "=" -f 2`
+  else
+    cmake_MySQL_SOURCE_DIR="$mypath_mysql_source"
+    echo "Warning: $mypath_mysql_source/CMakeCache.txt not found. Will use $mypath_mysql_source only"
+  fi
 
 #CMake build directory is mandatory. Check if it coincides with source dir. 
   if test "x$mypath_mysql_source" != "x$cmake_MySQL_SOURCE_DIR" ; then
