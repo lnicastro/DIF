@@ -26,18 +26,18 @@
 #endif
 
 #include <mysql/plugin.h>
-#include <mysql/psi/mysql_file.h>
+//#include <mysql/psi/mysql_file.h>
 
 #include "dif.hh"
 #include "ha_dif.h"
 
 #include "my_dbug.h"
-#include "mysql/plugin.h"
 #include "my_psi_config.h"
 #include "mysql/psi/mysql_memory.h"
+
 #include "sql/field.h"
 #include "sql/table.h"
-#include "sql/sql_plugin.h"
+//#include "sql/sql_plugin.h"
 
 extern ThreadSpecificData<DIF_Region> difreg;
 
