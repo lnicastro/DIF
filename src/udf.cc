@@ -32,7 +32,7 @@
 //#include <my_global.h>
 #include <mysql.h>
 
-#if MYSQL_VERSION_ID >= 80000
+#if MY_VERSION_ID >= 80000
 typedef bool   my_bool;
 #endif
 typedef long long   longlong;

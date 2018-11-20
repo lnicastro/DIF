@@ -30,10 +30,10 @@
 #include "ha_dif.h"
 
 // version 5.5.x doesn't contain mysql_priv.h . We need to add the provided includes.
-#if MYSQL_VERSION_ID >= 50505
+#if MY_VERSION_ID >= 50505
 
 // These two are not present in 5.7.9
-#if MYSQL_VERSION_ID < 50709 && ! defined(MARIADB_BASE_VERSION)
+#if MY_VERSION_ID < 50709 && ! defined(MARIADB_BASE_VERSION)
 #include <my_pthread.h>
 #include <sql_priv.h>
 #endif
@@ -49,7 +49,7 @@
 
 //#include <sql/sql_table.h>
 
-#if MYSQL_VERSION_ID >= 50600
+#if MY_VERSION_ID >= 50600
 /* Interface to mysqld, to check system tables supported by SE */
 static const char* dif_system_database();
 static bool dif_is_supported_system_table(const char *db,
@@ -102,7 +102,7 @@ err:
   DBUG_RETURN(tmp_share);
 }
 
-#if MYSQL_VERSION_ID >= 50709
+#if MY_VERSION_ID >= 50709
 #include <sql/log.h>
 #if ! defined(MARIADB_BASE_VERSION)
 #include <sql/auth/auth_common.h>

@@ -40,10 +40,13 @@
 
 #else
 
-
+// Note: MYSQL_VERSION_ID needed by sql/handler.h sql/key.h
 #include <mysql_version.h>
 
-#if MYSQL_VERSION_ID < 50505
+// Would be redefined in mysql/plugin.h
+//#define MYSQL_VERSION_ID  MY_VERSION_ID
+
+#if MY_VERSION_ID < 50505
 #include <mysql_priv.h>
 
 #else
@@ -56,7 +59,7 @@
 
 #endif
 
-#if MYSQL_VERSION_ID >= 50600
+#if MY_VERSION_ID >= 50600
 
 class Dif_share : public Handler_share {
 public:
@@ -80,7 +83,7 @@ class ha_dif: public handler
 {
   THR_LOCK_DATA lock;      /* MySQL lock */
 
-#if MYSQL_VERSION_ID >= 50600
+#if MY_VERSION_ID >= 50600
   Dif_share *share;    ///< Shared lock info
   Dif_share *get_share(); ///< Get the share
 
