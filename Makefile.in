@@ -119,7 +119,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/src/config.h
+CONFIG_HEADER = $(top_builddir)/src/config.h \
+	$(top_builddir)/src/binlog_config.h
 CONFIG_CLEAN_FILES = version
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
@@ -277,9 +278,10 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MYSQL = @MYSQL@
 MYSQL_CONFIG = @MYSQL_CONFIG@
+MYSQL_LIBS = @MYSQL_LIBS@
 MYSQL_SOURCE = @MYSQL_SOURCE@
 MYSQL_VERSION = @MYSQL_VERSION@
-MYSQL_VERSION_ID = @MYSQL_VERSION_ID@
+MY_VERSION_ID = @MY_VERSION_ID@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -355,7 +357,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = configure reconf selectflags.pl selectlibs.pl
-SUBDIRS = contrib src sql scripts doc
+SUBDIRS = contrib src sql scripts # doc #==> user optional make
 all: all-recursive
 
 .SUFFIXES:

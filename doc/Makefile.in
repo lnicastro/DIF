@@ -118,7 +118,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(dist_doc_DATA) \
 	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/src/config.h
+CONFIG_HEADER = $(top_builddir)/src/config.h \
+	$(top_builddir)/src/binlog_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
@@ -221,9 +222,10 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MYSQL = @MYSQL@
 MYSQL_CONFIG = @MYSQL_CONFIG@
+MYSQL_LIBS = @MYSQL_LIBS@
 MYSQL_SOURCE = @MYSQL_SOURCE@
 MYSQL_VERSION = @MYSQL_VERSION@
-MYSQL_VERSION_ID = @MYSQL_VERSION_ID@
+MY_VERSION_ID = @MY_VERSION_ID@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -525,7 +527,6 @@ uninstall-am: uninstall-dist_docDATA
 
 dif.pdf: dif.tex
 	make -C includes pdf
-	latex dif.tex
 	latex dif.tex
 	dvips dif.dvi
 	ps2pdf dif.ps

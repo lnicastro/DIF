@@ -20,7 +20,7 @@
 # ----------------------------------------------------------------------$
 
 EXTRA_DIST = configure reconf selectflags.pl selectlibs.pl
-SUBDIRS = contrib src sql scripts doc
+SUBDIRS = contrib src sql scripts # doc #==> user optional make
 
 
 prepdist:

@@ -24,7 +24,6 @@ EXTRA_DIST = dif.tex includes html other
 dif.pdf: dif.tex
 	make -C includes pdf
 	latex dif.tex
-	latex dif.tex
 	dvips dif.dvi
 	ps2pdf dif.ps
 	rm -f dif.ps
