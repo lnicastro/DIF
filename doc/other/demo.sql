@@ -391,7 +391,7 @@ WHERE DIF_Rect(@Ra, @Decl, @Rad*10);
 -- DIF makes sense for very large catalogues. See the DIF manual and other
 -- reference material on ross.iasfbo.inaf.it/MCS/.
 --
--- Can have a look to "demo_manual_dif.sql" (in the doc/other subdir of the
--- DIF dsitribution) for a manual implementation of DIF functionalities.
+-- Can have a look to "demo_manual_dif.sql" (in this directory)
+-- for a manual implementation of DIF functionalities.
 -- If you are not interested in the development of DB related tools you
 -- should only use the automatic implementation of DIF using the "dif" script. 
