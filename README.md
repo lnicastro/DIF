@@ -30,6 +30,7 @@ give a `touch` command before running `configure`. So, from the code main direct
 
 ```
 touch configure aclocal.m4 Makefile.in src/config.h.in
+
 ./configure --with-mysql-source=/path_to/mysql_source_directory
 make
 sudo make install
@@ -42,21 +43,31 @@ Let's consider the two possible MySQL installations.
 This is the typical installation on any system, that is when
 you have installed MySQL using a precompiled package (e.g. a `.dmg` file on Mac OS
 or issuing `sudo apt install mysql-server libmysqlclient-dev` on Debian/Ubuntu).
-In this case you only need to be sure that you have all the necessary include files and `mysql_config`. Check your installed version:
+In this case you only need to be sure that you have:
+
+1.  all the necessary include files (typically provided by packages with extension `-dev` or `-devel`), e.g. in `/usr/include/mysql`,
+2. `mysql_config`.
+
+Check your installed version:
 ```
 mysql_config --version
 5.7.24
 ```
-DIF should work on MySQL 5.1, 5.5, 5.6, 5.7 (and the corresponding MariaDB versions) and 8.0.
+DIF v. 0.5.5 should work on MySQL 5.1, 5.5, 5.6, 5.7 and 8.0. Implementation for the corresponding MariaDB versions is TODO.
 
 Now we need to prepare some additional MySQL include files via `cmake`.
+
+**Note:** if you have MySQL 5.7 installed, you can also try installing DIF without running `cmake`.
 
 The easiest way is to download the source code. Assuming the installed version is 5.7.24 (in a temporary directory):
 ```
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.24.tar.gz
 tar zxvf mysql-boost-5.7.24.tar.gz
 cd mysql-5.7.24
+
 cmake . -DWITH_BOOST=boost
+
+pwd
 ```
 Annotate the directory name and then you are ready to install DIF.
 
@@ -67,7 +78,7 @@ to know the directory name and be sure that you have not cleaned the required in
 
 **Compile and install**
 
-- If you downloaded DIF via `git`:
+- If you download DIF via `git`:
 ```
 git clone https://github.com/lnicastro/DIF.git
 cd DIF
@@ -77,7 +88,7 @@ make
 sudo make install
 ```
 
-- If you downloaded instead a tar archive (similarly for other compressed formats):
+- If you instead downloaded a tar archive instead (similarly for other compressed formats):
 ```
 tar zxvf dif-0.5.5.tar.gz
 
@@ -87,13 +98,14 @@ make
 sudo make install
 ```
 
-**Note:** if you compiled MySQL in a build directory rather than in its root source directory, then you have to pass this to ``configure``, e.g. if you used the subdirectory `Build`:
+**Note:** if you run `cmake` / compiled MySQL in a build directory rather than in its root source directory,
+then you have to pass this to `configure`; e.g. if you used the subdirectory `Build`:
 ```
 ./configure --with-mysql-source=/path_to/mysql-5.7.24/Build
 ```
 
 ## Installing DIF facilities in MySQL
-`dif` is a Perl script used to perform various DIF-related tasks.
+`dif` is a DIF provided Perl script used to perform various DIF-related tasks.
 It uses the Perl `DBI/DBD-MySQL` modules to communicate with the MySQL server.
 First of all be sure you have these modules installed. You can install them using `cpan DBD::mysql` or the OS specific command.
 
@@ -134,7 +146,11 @@ sudo service mysql restart
 ```
 or
 ```
-sudo /etc/init.d/mysql.server restart
+sudo systemctl restart mysql
+```
+or
+```
+sudo /etc/init.d/mysql restart
 ```
 or locate your MySQL `bin` dir and use `mysqladmin` and `mysqld_safe`, e.g.:
 ```
