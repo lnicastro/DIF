@@ -91,7 +91,6 @@ sudo make install
 - If you instead downloaded a tar archive instead (similarly for other compressed formats):
 ```
 tar zxvf dif-0.5.5.tar.gz
-
 cd dif-0.5.5
 ./configure --with-mysql-source=/path_to/mysql-5.7.24
 make
@@ -223,7 +222,7 @@ Enter the MySQL client terminal, e.g. `mysql -u root -p Catalogs`, then:
      FROM ascc25_mini_htm_6
      WHERE dif_Rect(100,-20,33) and Vmm < 11000;
 
--- only magnitudes V less than 12 for objects in a preudo-rectangle with sides
+-- only magnitudes V less than 12 for objects in a pseudo-rectangle with sides
 -- 30, 15 arcmin (along RA, Dec)
   SELECT Bmm/1000 as B, Vmm/1000 as V
      FROM ascc25_mini_htm_6
