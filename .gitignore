@@ -44,6 +44,7 @@ scripts/Makefile
 sql/Makefile
 sql/Messier.sql
 sql/funcdesc.sql
+src/Makefile
 contrib/Spherematch/Save
 autom4te.cache
 aclocal.m4
