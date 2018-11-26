@@ -1,6 +1,3 @@
-# The cmake buildig dir
-Build
-
 # Dependencies
 src/.deps
 src/.libs
@@ -40,6 +37,13 @@ src/*.dSYM
 *.app
 
 # More stuff
+./Makefile
+contrib/Makefile
+doc/Makefile
+scripts/Makefile
+sql/Makefile
+sql/Messier.sql
+sql/funcdesc.sql
 contrib/Spherematch/Save
 autom4te.cache
 aclocal.m4
