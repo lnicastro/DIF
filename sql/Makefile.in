@@ -119,7 +119,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(dist_sql_DATA) \
 	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/src/config.h
+CONFIG_HEADER = $(top_builddir)/src/config.h \
+	$(top_builddir)/src/binlog_config.h
 CONFIG_CLEAN_FILES = Messier.sql funcdesc.sql
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)

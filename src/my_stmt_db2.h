@@ -3,7 +3,7 @@
 
   Note: "pix_myXmatch" custom
 
-  LN @ INAF-OAS, Sep. 2010                         Last changed: 14/11/2018
+  LN @ INAF-OAS, Sep. 2010                         Last changed: 29/11/2018
 */
 
 #ifndef MY_STMT_DB_H
@@ -21,7 +21,7 @@
 
 #include <mysql.h>  /* header of the database client API library */
 
-#if MYSQL_VERSION_ID >= 80000
+#if MYSQL_VERSION_ID >= 80000  &&  MYSQL_VERSION_ID < 100000
 typedef bool   my_bool;
 #endif
 

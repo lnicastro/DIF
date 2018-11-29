@@ -1,5 +1,5 @@
 #! /bin/sh
-# Generated automatically by config.status (dif) 0.5.4
+# Generated automatically by config.status (dif) 0.5.5
 # Libtool was configured on host Luciano-Nicastros-MacBook-2.local:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
@@ -282,7 +282,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/opt/local/lib/gcc6/gcc/x86_64-apple-darwin16/6.4.0 /opt/local/lib/gcc6  /usr/local/lib"
+sys_lib_search_path_spec="/opt/local/lib/gcc6/gcc/x86_64-apple-darwin16/6.5.0 /opt/local/lib/gcc6  /usr/local/lib"
 
 # Detected run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"

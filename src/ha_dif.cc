@@ -50,6 +50,13 @@
 //#include <sql/sql_table.h>
 
 #if MY_VERSION_ID >= 50600
+
+static handler *dif_create_handler(handlerton *hton,
+                                       TABLE_SHARE *table,
+                                       MEM_ROOT *mem_root);
+
+handlerton *dif_hton;
+
 /* Interface to mysqld, to check system tables supported by SE */
 static const char* dif_system_database();
 static bool dif_is_supported_system_table(const char *db,

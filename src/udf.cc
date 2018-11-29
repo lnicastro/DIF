@@ -32,7 +32,7 @@
 //#include <my_global.h>
 #include <mysql.h>
 
-#if MY_VERSION_ID >= 80000
+#if MY_VERSION_ID >= 80000 &&  MY_VERSION_ID < 100000
 typedef bool   my_bool;
 #endif
 typedef long long   longlong;
@@ -1373,8 +1373,11 @@ my_bool DIF_setHTMDepth_init(UDF_INIT* init, UDF_ARGS *args, char *message)
 // 14/11/2018: changed for MySQL 8
 // NOTE: args->args can be undefined alias (AS) are being used. Use "attributes".
 //int depth = IARGS(0);
-//int depth = *((long long*) args->args[0]);
+#if MY_VERSION_ID >= 80000 &&  MY_VERSION_ID < 100000
 int depth = atoi(args->attributes[0]);
+#else
+int depth = *((long long*) args->args[0]);
+#endif
 
   difreg->setAvailParam( depth );
 
@@ -1418,8 +1421,13 @@ my_bool DIF_setHEALPOrder_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   //difreg->setSchema(IARGS(0)   ?   DIF_HEALP_NEST   :   DIF_HEALP_RING);
   //difreg->setAvailParam( IARGS(1) );
 
+#if MY_VERSION_ID >= 80000 &&  MY_VERSION_ID < 100000
   int nested = atoi(args->attributes[0]);
   int order = atoi(args->attributes[1]);
+#else
+  int nested = IARGS(0);
+  int order = IARGS(1);
+#endif
   difreg->setSchema(nested   ?   DIF_HEALP_NEST   :   DIF_HEALP_RING);
   difreg->setAvailParam( order );
 
