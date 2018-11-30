@@ -29,7 +29,7 @@ This is the **Version 0.5.5** development tree.
 ## Compile and install
 Compiling DIF depends on how you installed MySQL/MariaDB on your machine.
 
-**Note:** if you download DIF via `git clone`, to avoid autotools requirements
+**Note:** if you download DIF from GitHub, to avoid autotools requirements
   with a message like this:
 ```
 ...
@@ -112,6 +112,16 @@ Eventually rerun the `cmake` command.
 ```
 git clone https://github.com/lnicastro/DIF.git
 cd DIF
+touch configure aclocal.m4 Makefile.in src/config.h.in
+./configure --with-mysql-source=/path_to/mysql-5.7.24
+make
+sudo make install
+```
+
+- If you downloaded the ZIP archive from GitHub:
+```
+unzip DIF-master.zip
+cd DIF-master
 touch configure aclocal.m4 Makefile.in src/config.h.in
 ./configure --with-mysql-source=/path_to/mysql-5.7.24
 make
