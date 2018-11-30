@@ -1,9 +1,17 @@
+2018-11-29 LN, ver. 0.5.5
+	- Various changes in order to allow installation with MariaDB 10.3 compiled
+	  version.
+	- Updated: configure.ac, src/ha_dif.h, src/ha_dif.cc, src/udf.cc,
+	  src/ha_dif_my8.cc, src/my_stmt_db.h, src/my_stmt_db2.h
+	- Added: src/ha_dif_maria.h
+
 2018-11-16 LN, ver. 0.5.5
 	- Various changes in order to allow:
-	  1. installation using only the compiled version of MySQL (same version as the system installed version)
+	  1. installation using only the compiled version of MySQL (same version as
+	     the system installed version)
 	  2. compatibility with MySQL 8
-	- Updated: configure.ac configure src/Makefile.am, src/ha_dif.h, src/ha_dif.cc, src/udf.cc,
-	  src/src/my_stmt_db.h, src/src/my_stmt_db2.h,
+	- Updated: configure.ac configure src/Makefile.am, src/ha_dif.h, src/ha_dif.cc,
+	  src/udf.cc, src/my_stmt_db.h, src/my_stmt_db2.h,
 	  sql/Makefile.am, sql/funcdesc.sql.in, sql/Messier.sql.in
 	- Added: src/ha_dif_my8.cc, sql/func_insert.sql, sql/messier_insert.sql
 	- Code cleaning.
@@ -37,7 +45,8 @@
 2016-07-11 LN, ver. 0.5.4
 	- Added rectangular region selections for HEALPix indexed tables.
 	- Added HEALPBound and HEALPBoundC UDFs.
-	- Added difview_htmClean, difview_healpClean, difview_Check and difInfo SQL procedures.
+	- Added difview_htmClean, difview_healpClean, difview_Check and difInfo SQL
+	  procedures.
 	- Added DIF.func table.
 	- Added --multidx, --trigger, --cnf, --user, --pass options and --grant-user
 	  command to dif script. See dif -h.

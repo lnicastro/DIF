@@ -21,7 +21,7 @@ This is the **Version 0.5.5** development tree.
 
 ## Requirements
 
-1. MySQL / MariaDB source code configure via `cmake` (same version as the
+1. MySQL / MariaDB source code configured via `cmake` (same version as the
    system version OR installed)
 2. make or gmake
 3. Perl `DBI/DBD-MySQL` modules
@@ -71,8 +71,8 @@ for MariaDB is at the moment limited to version 10.3.
 
 Now we need to prepare some additional MySQL include files via `cmake`.
 
-**Note:** if you have MySQL 5.7 installed, you can also try installing DIF
-  without running `cmake`.
+> **Note:** if you have **MySQL 5.7** installed, you should be able to install DIF
+>   without running `cmake`.
 
 The easiest way is to download the source code. Assuming the installed version
 is 5.7.24 (in a temporary directory):
@@ -97,7 +97,6 @@ cd mariadb-10.3.11
 cmake . -DDEBUG_ON=0 -DWITH_DEBUG=0 -DPLUGIN_EXAMPLE=YES -DPLUGIN_TOKUDB=NO -DPLUGIN_TOKUDB=NO
    -DPLUGIN_ROCKSDB=NO -DPLUGIN_MROONGA=NO -DPLUGIN_FEDERATED=NO -DPLUGIN_CASSANDRA=NO
    -DPLUGIN_SPHINX=NO -DPLUGIN_CONNECT=NO -DPLUGIN_SPIDER=NO
-
 ```
 
 **Case 2: MySQL/MariaDB installed via source code**
@@ -196,6 +195,35 @@ sudo /usr/local/mysql/bin/mysqld_safe --user=mysql &
 ```
 
 ## Test installation
+Enter MySQL from a terminal and check the plugin DIF and its functions are
+available:
+```
+shell> mysql -u root -p
+Enter password:
+...
+mysql> show plugins;
+...
++----------------------------+----------+--------------------+-----------+---------+
+| Name                       | Status   | Type               | Library   | License |
++----------------------------+----------+--------------------+-----------+---------+
+...
+| DIF                        | ACTIVE   | STORAGE ENGINE     | ha_dif.so | GPL     |
++----------------------------+----------+--------------------+-----------+---------+
+
+mysql> select * from mysql.func;
++-------------------+-----+---------------+----------+
+| name              | ret | dl            | type     |
++-------------------+-----+---------------+----------+
+| HTMLookup         |   2 | ha_dif.so     | function |
+| HTMidByName       |   2 | ha_dif.so     | function |
+| HTMnameById       |   0 | ha_dif.so     | function |
+...
+| DIF_setHTMDepth   |   2 | ha_dif.so     | function |
+...
++-------------------+-----+---------------+----------+
+```
+
+**Test with an astro-cat**
 
 Download the reduced version of the
 [ASCC 2.5](http://ross2.iasfbo.inaf.it/dif/data/ascc25_mini.sql.gz) star
@@ -228,7 +256,6 @@ mysql> describe ascc25_mini;
 | FLAGvar   | smallint(6)      | NO   |     | 0       |       |
 +-----------+------------------+------+-----+---------+-------+
 7 rows in set (0.00 sec)
-
 ```
 
 Let's index the table with a depth 6 HTM index:
