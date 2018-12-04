@@ -142,6 +142,11 @@ fi
   if test $MY_VERSION_ID -lt "50709" ; then
   # if m4_cmp($MYSQL_VERSION_ID,50709) ; then
     AC_CHECK_HEADERS([sql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: sql_priv.h])])
+
+# MySQL 5.6
+    if test $MY_VERSION_ID -ge "50600" ; then
+      CPPFLAGS="-DDISABLE_DTRACE $CPPFLAGS"
+    fi
   fi
 
 else

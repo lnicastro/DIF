@@ -71,7 +71,7 @@ for MariaDB is at the moment limited to version 10.3.
 
 Now we need to prepare some additional MySQL include files via `cmake`.
 
-> **Note:** if you have **MySQL 5.7** installed, you should be able to install DIF
+> **Note:** if you have **MySQL 5.6 or 5.7** installed, you should be able to install DIF
 >   without running `cmake`.
 
 The easiest way is to download the source code. Assuming the installed version

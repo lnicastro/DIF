@@ -16479,6 +16479,11 @@ fi
 
 done
 
+
+# MySQL 5.6
+    if test $MY_VERSION_ID -ge "50600" ; then
+      CPPFLAGS="-DDISABLE_DTRACE $CPPFLAGS"
+    fi
   fi
 
 else
