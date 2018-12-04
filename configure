@@ -16427,25 +16427,6 @@ x$ax_compare_version_B" | sed 's/^ *//' | sort | sed "s/x${ax_compare_version_A}
 
 if test "$ax_compare_version" = "true" ; then
 
-  if test $MY_VERSION_ID -lt "50709" ; then
-  # if m4_cmp($MYSQL_VERSION_ID,50709) ; then
-
-for ac_header in sql_priv.h
-do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "sql_priv.h" "ac_cv_header_sql_priv_h" "$ac_includes_default"
-if test "x$ac_cv_header_sql_priv_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SQL_PRIV_H 1
-_ACEOF
-
-else
-  as_fn_error $? "Could not find required include file: sql_priv.h" "$LINENO" 5
-fi
-
-done
-
-  fi
-
   CPPFLAGS="-DDBUG_OFF $CPPFLAGS"
 
 if test "x$mypath_mysql_source" != "x" ; then
@@ -16480,6 +16461,25 @@ if test "x$mypath_mysql_source" != "x" ; then
   fi
 
 fi
+
+  if test $MY_VERSION_ID -lt "50709" ; then
+  # if m4_cmp($MYSQL_VERSION_ID,50709) ; then
+
+for ac_header in sql_priv.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "sql_priv.h" "ac_cv_header_sql_priv_h" "$ac_includes_default"
+if test "x$ac_cv_header_sql_priv_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SQL_PRIV_H 1
+_ACEOF
+
+else
+  as_fn_error $? "Could not find required include file: sql_priv.h" "$LINENO" 5
+fi
+
+done
+
+  fi
 
 else
 

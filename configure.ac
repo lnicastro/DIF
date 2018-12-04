@@ -104,11 +104,6 @@ AC_SUBST(MYSQL_LIBS)
 AX_COMPARE_VERSION([$MYSQL_VERSION],[gt],[5.2])
 if test "$ax_compare_version" = "true" ; then
 
-  if test $MY_VERSION_ID -lt "50709" ; then
-  # if m4_cmp($MYSQL_VERSION_ID,50709) ; then
-    AC_CHECK_HEADERS([sql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: sql_priv.h])])
-  fi
-
   CPPFLAGS="-DDBUG_OFF $CPPFLAGS"
 
 if test "x$mypath_mysql_source" != "x" ; then
@@ -143,6 +138,11 @@ if test "x$mypath_mysql_source" != "x" ; then
   fi
 
 fi
+
+  if test $MY_VERSION_ID -lt "50709" ; then
+  # if m4_cmp($MYSQL_VERSION_ID,50709) ; then
+    AC_CHECK_HEADERS([sql_priv.h], [], [AC_MSG_ERROR([Could not find required include file: sql_priv.h])])
+  fi
 
 else
 
