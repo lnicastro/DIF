@@ -217,7 +217,7 @@ sub readUser {
       open ($in, "< $my_cnf") || die("cannot open file $my_cnf");
 # Read first found
       LINE: while(<$in>) {
-        next LINE if /^\[/;
+        next LINE if /^\[/ || /^$/;
         ($key, $val) = split('=', $_);
         $key =~ tr/ //ds;
         $val =~ tr/ \n//ds;
@@ -244,7 +244,7 @@ sub readPassword {
       open ($in, "< $my_cnf") || die("cannot open file $my_cnf");
 # Assume "user" tag before "password"
       LINE: while(<$in>) {
-        next LINE if /^\[/;
+        next LINE if /^\[/ || /^$/;
         ($key, $val) = split('=', $_);
         $key =~ tr/ //ds;
         $val =~ tr/ \n//ds;
