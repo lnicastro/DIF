@@ -21,10 +21,12 @@ This is the **Version 0.5.5** development tree.
 
 ## Requirements
 
-1. MySQL / MariaDB source code configured via `cmake` (same version as the
+1. MySQL or MariaDB configured and working
+2. mysql_config / mariadb_config
+3. MySQL / MariaDB source code configured via `cmake` (same version as the
    system version OR installed)
-2. make or gmake
-3. Perl `DBI/DBD-MySQL` modules
+4. make or gmake
+5. Perl `DBI/DBD-MySQL` modules
 
 ## Compile and install
 Compiling DIF depends on how you installed MySQL/MariaDB on your machine.
@@ -59,7 +61,7 @@ Debian/Ubuntu). In this case you only need to be sure that you have:
 
 1. all the necessary include files (typically provided by packages with
   extension `-dev` or `-devel`), e.g. in `/usr/include/mysql`,
-2. `mysql_config`.
+2. `mysql_config` or `mariadb_config`.
 
 Check your installed version:
 ```
@@ -80,6 +82,8 @@ is 5.7.24 (in a temporary directory):
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.24.tar.gz
 tar zxvf mysql-boost-5.7.24.tar.gz
 cd mysql-5.7.24
+
+  ... eventually:
 
 cmake . -DWITH_BOOST=boost
 
