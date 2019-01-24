@@ -59,7 +59,7 @@
     pix_myXmatch -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 6 14 -qAI
 
 
-  LN @ INAF-OAS, June 2013                         Last changed: 08/03/2018
+  LN @ INAF-OAS, June 2013                         Last changed: 24/01/2019
 */
 
 using namespace std;
@@ -1011,8 +1011,10 @@ cout<<"Query: "<< qry_str<<endl;
 // NOTE: HEALPix pixelization X-match not yet implemented
   if (use_hpx) {
     if (! input_col_names) {
-      t.id_coln1 += t.orde1;
-      t.id_coln2 += t.orde2;
+      t.id_coln1 = "healpID_nest_"+ t.orde1;
+      t.id_coln2 = "healpID_nest_"+ t.orde2;
+      //t.id_coln1 += t.orde1;
+      //t.id_coln2 += t.orde2;
     }
     idw1 = dif_hpxid_maxw(t.orde1);
 
@@ -1047,7 +1049,7 @@ if (verbose)
        <<"  Ra_field: '"<< catinfo[i].Ra_field <<"'  Dec_field: '"<< catinfo[i].Dec_field <<"'\n";
   }
 
-  if (nd != 2)
+  if (nd != 2 && !full_scan)
     cout << PROGNAME <<": Warning: the 2 requested depths/orders where not found in DIF.tbl for "<< db.my_db1 <<dt<< db.cat1 << endl;
 
   string qry_ini, difqry_ini1,
