@@ -3,7 +3,7 @@ DIF is a collection of tools aimed at implementing a powerful indexing system
 for astronomical catalogs and other data with spherical coordinates, stored
 into MySQL / MariaDB databases.
 DIF is able to use both [HTM](http://www.skyserver.org/htm/) and
-[HEALPix](http://healpix.jpl.nasa.gov/) pixelization schemas and it allows very
+[HEALPix](https://healpix.sourceforge.io/) pixelization schemas and it allows very
 fast query execution even on billion-row tables. 
 
 **Note:** as of DIF version 0.5.5, you do not need to compile and install the
@@ -11,7 +11,7 @@ fast query execution even on billion-row tables.
   a `cmake` configuration. See below.
 
 See also [web page](http://ross.iasfbo.inaf.it/dif/) or the
-[documentation](doc/dif.pdf) (to be updated) and the
+[documentation](doc/) and the
 [reference paper](http://www.hindawi.com/journals/aa/2010/524534.html).
 
 If you want to use almost all of the DIF capabilities but avoid to use MySQL /
@@ -42,7 +42,7 @@ WARNING: 'aclocal-1.16' is missing on your system.
 
 give a `touch` command before running `configure`. So, from the code main directory:
 
-```
+```shell
 touch configure aclocal.m4 Makefile.in src/config.h.in
 
 ./configure --with-mysql-source=/path_to/mysql_source_directory
@@ -78,7 +78,7 @@ Now we need to prepare some additional MySQL include files via `cmake`.
 
 The easiest way is to download the source code. Assuming the installed version
 is 5.7.24 (in a temporary directory):
-```
+```shell
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.24.tar.gz
 tar zxvf mysql-boost-5.7.24.tar.gz
 cd mysql-5.7.24
@@ -93,7 +93,7 @@ Annotate the directory name and then you are ready to install DIF.
 
 Similarly for **MariaDB 10.3**. Here we use a configuration command that avoids
 unnecessary plugins (a similar approach could have been used for MySQL too):
-```
+```shell
 wget https://downloads.mariadb.org/interstitial/mariadb-10.3.11/source/mariadb-10.3.11.tar.gz
 tar zxvf mariadb-10.3.11.tar.gz
 cd mariadb-10.3.11
@@ -211,7 +211,7 @@ sudo /usr/local/mysql/bin/mysqld_safe --user=mysql &
 ## Test installation
 Enter MySQL from a terminal and check the plugin DIF and its functions are
 available:
-```
+```sql
 shell> mysql -u root -p
 Enter password:
 ...
@@ -250,7 +250,7 @@ shell> wget http://ross2.iasfbo.inaf.it/dif/data/ascc25_mini.sql.gz
 ```
 
 Uncompress and load the data into a database of your choice, e.g. `Catalogs`;
-```
+```sql
 shell> cd ~/dif_data
 shell> gunzip ascc25_mini.sql.gz
 
@@ -290,7 +290,7 @@ shell> dif --index-healpix-nested Catalogs ascc25_mini 10 "RAmas/3.6e6" "DECmas/
 
 Enter the MySQL client terminal, e.g. `mysql -u root -p Catalogs`, then:
 
-```
+```sql
 -- all the info for objects in a circle of radius 18 arcmin around RA=30, Dec=30
   SELECT * FROM ascc25_mini_htm_6 WHERE dif_Circle(30,30,18);
 
