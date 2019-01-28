@@ -33,6 +33,15 @@ a:hover {
 
 <div style="text-align: left;">
 
+<div style="font-size: 1.2em; margin: 2em; padding: 12px; border: 1px solid #a00; background: #efefef;">
+
+<span style="color: #990000; ">DIF moved to <a href="https://github.com/lnicastro/DIF" target="_new"><strong>GitHub</strong></a> on 2018-21-05.</span> Please use it as new reference site.
+
+<br />
+See also the new DIF-derived package <a href="https://github.com/lnicastro/SID" target="_new"><strong>SID</strong></a>. It does not require MySQL/MariaDB source code and it is usable with any Linux/MacOS installation!
+</div>
+
+
 DIF is a set of tools aimed at implementing a powerful indexing system
 for astronomical catalogs and other data with spherical coordinates,
 stored into <a href="http://dev.mysql.com/" target="_blank">MySQL</a> / <a href="https://mariadb.com/" target="_blank">MariaDB</a> databases.
@@ -49,21 +58,72 @@ documentation and downloadable software packages. The site is still
 under development, so check for updates.
 </div>
 
-
-<div style="font-size: 110%; margin-top: 12px; padding: 12px; border: 1px solid #ccc; background: #efefef;">
-
-<span style="color: #990000; ">DIF moved to <a href="https://github.com/lnicastro/DIF" target="_new"><strong>GitHub</strong></a> on 2018-21-05.</span> Please use it as new reference site.
-
-<br />
-See also the new DIF-derived package <a href="https://github.com/lnicastro/SID" target="_new"><strong>SID</strong></a>. It does not require MySQL/MariaDB source code and it is usable with any Linux/MacOS installation!
-</div>
-
 <h3>Installation</h3>
 See the <a href="http://ross.iasfbo.inaf.it/dif/dif.pdf">PDF documentation</a> and <a href="https://github.com/lnicastro/DIF" target="_new">GitHub page</a> for more details.
 
 <br />
 Read how to install MySQL 5.1 from source or to use
-<a href="../dif/loc-mysql-install.txt"><b>DIF with multiple MySQL servers</b></a> (TXT). Below a typical MySQL 5.7 + DIF installation on a Linux system:
+<a href="../dif/loc-mysql-install.txt"><b>DIF with multiple MySQL servers</b></a> (TXT).
+<br />
+Below a typical installation of DIF version 0.5.5 on a Linux / Mac system with a MySQL 5.7 binary installation:
+
+<div style="font-size: 110%; margin-top: 12px; padding: 12px; border: 1px solid #ddd; background: #fafafa;">
+<pre>
+# DIF QUICK START
+#
+
+# Ensure DBD::mysql is installed
+sudo cpan install DBD::mysql
+
+# or the OS specific command, e.g. on Mac OS using MacPorts:
+sudo port install p5-dbd-mysql
+
+# or on Debian/Ubuntu:
+sudo apt-get install libdbd-mysql-perl
+
+
+# Download packages in a temporary directory
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.24.tar.gz
+wget http://ross.iasfbo.inaf.it/dif/dif-0.5.5.tar.gz
+
+# Unpack mysql
+tar xvzf mysql-5.7.24.tar.gz
+
+# the directory mysql-5.7.24 will be created
+
+# Compile and install DIF:
+tar xvzf dif-0.5.5.tar.gz
+cd dif-0.5.5
+./configure --with-mysql-source=/complete/path/to/mysql-5.7.24
+make
+sudo make install
+
+# Install DIF database (the mysql root password will be asked)
+dif --install
+
+# The latter command installs an example table with all the Messier
+# objects.  To display the content of such table use:
+mysql> use DIF;
+mysql> SELECT * from Messier;
+
+# Install the HTM index on the example table DIF.Messier
+dif --index-htm DIF Messier 6 Ra Decl
+
+# Use DIF index to search in a circular region:
+SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
+
+# Ensure you are using the index prepending `DESCRIBE` to previous query:
+mysql> DESCRIBE SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
++----+-------------+---------+------------+------+---------------+---------+---------+------------+------+----------+------------------------------------+
+| id | select_type | table   | partitions | type | possible_keys | key     | key_len | ref        | rows | filtered | Extra                              |
++----+-------------+---------+------------+------+---------------+---------+---------+------------+------+----------+------------------------------------+
+|  1 | SIMPLE      | dif     | NULL       | ALL  | NULL          | NULL    | NULL    | NULL       |    0 |     0.00 | Using where                        |
+|  1 | SIMPLE      | Messier | NULL       | ref  | htmID_6       | htmID_6 | 2       | DIF.dif.id |    1 |   100.00 | Using index condition; Using where |
++----+-------------+---------+------------+------+---------------+---------+---------+------------+------+----------+------------------------------------+
+</pre>
+
+<br />
+Below a typical installation on a Linux / Mac system with a locally compiled MySQL 5.7 source distribution:
 
 <div style="font-size: 110%; margin-top: 12px; padding: 12px; border: 1px solid #ddd; background: #fafafa;">
 <pre>
@@ -74,14 +134,13 @@ Read how to install MySQL 5.1 from source or to use
 sudo cpan install DBD::mysql
 
 # Download packages in a temporary directory
-# (NOTE: DIF is not yet compatible with mysql >= 8.0.0)
-wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.23.tar.gz
-wget http://ross.iasfbo.inaf.it/dif/dif-0.5.4.tar.gz
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.24.tar.gz
+wget http://ross.iasfbo.inaf.it/dif/dif-0.5.5.tar.gz
 
 # Compile and install mysql
-tar xvzf mysql-5.7.23.tar.gz
-cd mysql-5.7.23/
-cmake . -DDOWNLOAD_BOOST=1  -DWITH_BOOST=dlboost
+tar xvzf mysql-5.7.24.tar.gz
+cd mysql-5.7.24/
+cmake . -DWITH_BOOST=boost
 make
 sudo make install
 sudo groupadd mysql
@@ -112,7 +171,7 @@ mysql -u root -p
 # Compile and install DIF:
 tar xvzf dif-0.5.4.tar.gz
 cd dif-0.5.4
-./configure --with-mysql-source=/complete/path/to/the/mysql/source/directory
+./configure --with-mysql-source=/complete/path/to/mysql-5.7.24
 make
 sudo make install
 
@@ -147,6 +206,7 @@ mysql> DESCRIBE SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
 <h3>Change log</h3>
 <div style="top-padding: 16px; color: #4466a0; background-color: #fafafa;">
 <ul>
+<li>16/11/2018: V. 0.5.5. No need to use a source code installed version of MySQL/MariaDB.</li>
 <li>22/05/2018: V. 0.5.4. Ported to GitHub. Added README.md.</li>
 <li>19/10/2017: V. 0.5.4. Makefile fix for MariaDB 10.2.9.</li>
 <li>09/08/2017: V. 0.5.4. Support MariaDB 10.2.</li>
