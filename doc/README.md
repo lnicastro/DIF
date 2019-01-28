@@ -101,7 +101,7 @@ Some of the changes/additions listed were already introduced in later 0.5.4 vers
 
 - Added support for MySQL > 5.7.9 and MariaDB > 10.1
 
-- Changed DIF.tbl column definitions.
+- Changed `DIF.tbl` column definitions.
 
 - Added RAcol and DECcol SQL procedures.
 
@@ -114,39 +114,39 @@ To Be Continued
 
 ### What’s new in version 0.5.4
 
--   Replaced HEALPix C++ library with version 3.30.
+- Replaced HEALPix C++ library with version 3.30.
 
--   Added rectangular region selections for HEALPix indexed tables.
+- Added rectangular region selections for HEALPix indexed tables.
 
--   Added `HEALPBound` and `HEALPBoundC` UDFs.
+- Added `HEALPBound` and `HEALPBoundC` UDFs.
 
--   Added `difview_htmClean`, `difview_healpClean`, `difview_Check` and
-    `difInfo` SQL procedures.
+- Added `difview_htmClean`, `difview_healpClean`, `difview_Check` and
+  `difInfo` SQL procedures.
 
--   Added `DIF.func` table.
+- Added `DIF.func` table.
 
--   The `dif` script uses new default settings and has more options and
-    commands. In particular, as root, it is possible to grant minimal
-    privileges to users in order to be able to manage specific DBs. See
-    `dif -h`.
+- The `dif` script uses new default settings and has more options and
+  commands. In particular, as root, it is possible to grant minimal
+  privileges to users in order to be able to manage specific DBs. See
+  `dif -h`.
 
--   Code cleaning.
+- Code cleaning.
 
--   Documentation updated.
+- Documentation updated.
 
 ### What’s new in version 0.5.3
 
--   Works also for MySQL 5.6 and 5.7 (and MySQL Cluster 7.2 and MariaDB
-    10.0, 10.1).
+- Works also for MySQL 5.6 and 5.7 (and MySQL Cluster 7.2 and MariaDB
+  10.0, 10.1).
 
--   Use memset instead of bzero.
+- Use memset instead of bzero.
 
--   Added UDF `HTMsNeighb` and DIF function `DIF_sNeighb` to get higher
-    depth trixels around a given trixel.
+- Added UDF `HTMsNeighb` and DIF function `DIF_sNeighb` to get higher
+  depth trixels around a given trixel.
 
--   `dif` script update with additional options (see `dif -h`).
+- `dif` script update with additional options (see `dif -h`).
 
--   Documentation updated.
+- Documentation updated.
 
 ### A simple example
 
@@ -167,6 +167,7 @@ Now you can query the DB server requesting, for example, all the objects
 in the catalogue within 100 arcmin from the point with Ra = 82&deg;,
 Dec = 22&deg;:
 
+```sql
     mysql> SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
     +---+------+-------+------+--------+---------+---------+---------+-----------+--------+
     | M | Type | Const | Mag  | Ra     | Decl    | Dist    | htmID_6 | HTM_Depth |HTM_Full|
@@ -174,6 +175,7 @@ Dec = 22&deg;:
     | 1 | BN   | Tau   |  8.2 | 83.625 | 22.0167 | 6.3 kly |   62340 |         6 |       0|
     +---+------+-------+------+--------+---------+---------+---------+-----------+--------+
     1 row in set (0.00 sec)
+```
 
 ## The HEALPix and HTM pixelization schemas
 
@@ -305,8 +307,10 @@ tables. Note also that in this case the **DIF** created index on
 automatically being the pixelization ID the first element of the new
 aggregate index. An example is:
 
+```sql
     mysql> DROP INDEX htmID_8 ON MyDB.MyTable;
     mysql> CREATE INDEX htmID_8 ON MyDB.MyTable (htmID_8, RA);
+```
 
 The table below shows the number of pixels and memory requirements associated to different
 levels of resolution parameter for HTM (*depth*) and HEALPix (*order*).
@@ -349,7 +353,7 @@ levels of resolution parameter for HTM (*depth*) and HEALPix (*order*).
 
 The **DIF** software library is distributed in a `tar.gz` package (e.g. from
 <http://ross.iasfbo.inaf.it/dif/>) but can also be downloaded from the
-[Git repository](#https://github.com/lnicastro/DIF). To unpack the package
+[GitHub repository](https://github.com/lnicastro/DIF). To unpack the package
 simply issue the command:
 
       tar xvzf dif-x.y.z.tar.gz
@@ -359,7 +363,7 @@ the major revision, the second number is the version, and third number
 is the subversion). A directory named `dif-x.y.z` will be created
 containing all the source code as well as the documentation and the
 scripts needed to install **DIF**.
-To download and manage the package via the Git repository you need `git`:
+To download and manage the package via the GitHub repository you need `git`:
 
       git clone https://github.com/lnicastro/DIF.git
       cd DIF
@@ -463,7 +467,7 @@ another, partially manual way to upgrade:
           dif --uninstall
           dif --install
 
-    Eventually please see also section [troubles](#troubleshoothing). In particular
+    Eventually please see also section [troubles](#troubleshooting). In particular
     after the `uninstall` consider restarting the MySQL server.
 
 3.  in MySQL restore the `DIF.tbl` table (and eventually more).
@@ -473,7 +477,9 @@ another, partially manual way to upgrade:
 
     Can view the content of the table, just in case:
 
+```sql
           select * from DIF.tbl;
+```
 
 If, for any reason, a **DIF** view was lost or is inconsistent with
 the content of `DIF.tbl`, you can recrate it with the option
@@ -492,7 +498,8 @@ each entry has two fields in which the coordinates of a
 latitude/longitude system are stored. The **DIF** approach is to
 split the sphere into a finite number of zones (or “pixels”) and
 associate an ID to each of these pixels. The association is based on one
-of the pixelization schemas described in § [pixel schema](#the-healpix-and-htm-pixelization-schemas). Thus a
+of the pixelization schemas described in
+§ [pixel schemas](#the-healpix-and-htm-pixelization-schemas). Thus a
 pixel ID can be associated to each entry in the table. **DIF** will
 add a field to the table to store such IDs and creates an index on it,
 relaying on the built-in MySQL indexing system. Then
@@ -512,6 +519,7 @@ many more entries can be downloaded from
 <http://ross.iasfbo.inaf.it/MCS/>. The `Messier` table has the following
 structure:
 
+```sql
     mysql> describe Messier;
     +----------+----------------------+------+-----+---------+-------+
     | Field    | Type                 | Null | Key | Default | Extra |
@@ -525,6 +533,7 @@ structure:
     | Dist     | char(20)             | YES  |     | NULL    |       |
     | App_size | char(20)             | YES  |     | unknown |       |
     +----------+----------------------+------+-----+---------+-------+
+```
 
 The equatorial coordinates in degrees of each object is stored in the
 [Ra] and [Decl] fields. Any other coordinate system can be used as
@@ -554,8 +563,11 @@ command line. The `dif` script will:
 Now the user can access the indexed table through the
 `Messier_htm_6` view. The search criteria are specified in the
 `SELECT` query using the `DIF\_Circle` (or another region-defining)
-function[^4], as in the example shown below.
+function as in the example shown below. <br />
+*Note:* from V. 0.5.2 the prefix `HTM/HEALP` has been removed from these
+functions as the pixelization scheme is derived directly from the *view* used.
 
+```sql
     mysql> SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
     +---+------+-------+------+--------+---------+---------+---------+-----------+--------+
     | M | Type | Const | Mag  | Ra     | Decl    | Dist    | htmID_6 | HTM_Depth |HTM_Full|
@@ -563,6 +575,7 @@ function[^4], as in the example shown below.
     | 1 | BN   | Tau   |  8.2 | 83.625 | 22.0167 | 6.3 kly |   62340 |         6 |       0|
     +---+------+-------+------+--------+---------+---------+---------+-----------+--------+
     1 row in set (0.00 sec)
+```
 
 Although the table used in the example has only 110 records, the notable
 aspect here is that with **DIF** the same query can be executed even
@@ -629,18 +642,22 @@ criteria between successive queries until a new search criteria is
 specified. Thus, assuming these indices exist, the following queries
 will return exactly the same set of records:
 
+```sql
       SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
       SELECT * FROM Messier_htm_8;
       SELECT * FROM Messier_htm;
       SELECT * FROM Messier_healp_nest_10;
+```
 
 Indeed the only difference may be in the queries execution times since
 different indexes could provide different performance. Furthermore,
 search criteria may be specified before accessing the view, as in the
 following example:
 
+```sql
       SELECT DIF_Circle(82, 22, 100);
       SELECT * FROM Messier_htm_6;
+```
 
 **Note:** future versions of **DIF** will eventually allow combining
 (through logical AND and OR) different regions. However this will
@@ -661,6 +678,7 @@ via the UDF function `HTMsNeighb` or via `sNeighb` in a DIF query (see below).
 The `DIF.tbl` table is used to store the basic information about the
 tables being handled by **DIF**. Its structure is:
 
+```sql
     mysql> describe DIF.tbl;
     +-----------+--------------+------+-----+---------+-------+
     | Field     | Type         | Null | Key | Default | Extra |
@@ -673,6 +691,7 @@ tables being handled by **DIF**. Its structure is:
     | Ra_field  | varchar(128) | YES  |     | NULL    |       |
     | Dec_field | varchar(128) | YES  |     | NULL    |       |
     +-----------+--------------+------+-----+---------+-------+
+```
 
 **Note:** the string (`varchar`) fields were extended in v. 0.5.4.
 
@@ -680,6 +699,7 @@ The `DIF.func` table is used to store information about
 **DIF** functions and procedures. It is used by the `difInfo` SQL
 procedure. Its structure is:
 
+```sql
     mysql> describe DIF.func;
     +-------------+------------------------------------------+------+-----+-----------+
     | Field       | Type                                     | Null | Key | Default   |
@@ -691,6 +711,7 @@ procedure. Its structure is:
     | plugin_lib  | char(64)                                 | YES  |     |           |
     | description | varchar(256)                             | YES  |     |           |
     +-------------+------------------------------------------+------+-----+-----------+
+```
 
 **Note:** this table was added in v. 0.5.4.
 
@@ -707,6 +728,7 @@ on disk but its content is dynamically generated using the
 MySQL connection, that is a user cannot see the content of the `dif`
 table of another user. The structure of the `dif` table is:
 
+```sql
      mysql> describe DIF.dif;
      +-------+------------+------+-----+---------+-------+
      | Field | Type       | Null | Key | Default | Extra |
@@ -715,6 +737,7 @@ table of another user. The structure of the `dif` table is:
      | id    | bigint(20) | YES  |     | NULL    |       | 
      | full  | tinyint(1) | YES  |     | NULL    |       | 
      +-------+------------+------+-----+---------+-------+
+```
 
 The first field, `param`, gives the depth (HTM) or order (HEALPix) of
 the pixelization, the second contains the pixel ID and the third is a
@@ -977,7 +1000,7 @@ the `PARTITION BY` option. The `InnoDB` storage engine does not have this
 restriction.
 
 Last but not least, do consider to take advantage of the MySQL query
-cache (can use “`SHOW VARIABLES LIKE %query_cache%`” to see settings for
+cache (can use `SHOW VARIABLES LIKE %query_cache%` to see settings for
 your system). In fact if you need a super-fast selection of the entries
 falling in a given region and the coordinates of this region can be
 *predicted* before a routine/application actually will use it, then a
@@ -1018,8 +1041,10 @@ HTM trixel Id.
 
 **Example:**
 
-      select HTMidByName('S0000000');
-        32768
+```sql
+    select HTMidByName('S0000000');
+      32768
+```
 
 ### [HTMnameById]
 
@@ -1033,8 +1058,10 @@ HTM trixel Id name.
 
 **Example:**
 
-      select HTMnameById(32768);
-        S0000000
+```sql
+    select HTMnameById(32768);
+      S0000000
+```
 
 ### [HTMBary]
 
@@ -1052,8 +1079,10 @@ Comma separated coordinates of the HTM trixel barycenter, in degrees.
 
 **Example:**
 
-      select HTMBary(6,32768);
-        0.4687499999999769, -0.46875
+```sql
+    select HTMBary(6,32768);
+      0.4687499999999769, -0.46875
+```
 
 ### [HTMBaryC]
 
@@ -1075,8 +1104,10 @@ degrees.
 
 **Example:**
 
-      select HTMBaryC(6,20,30);
-        20.03084356871285, 30.26104286747405
+```sql
+    select HTMBaryC(6,20,30);
+      20.03084356871285, 30.26104286747405
+```
 
 ### [HTMBaryDist]
 
@@ -1099,10 +1130,12 @@ Angular distance from the trixel barycenter, in arcmin.
 
 **Example:**
 
-      select HTMBaryDist(6,htmID_6,RAcs/3.6e5,DECcs/3.6e5) from
-             UCAC_2orig_htm_6 where DIF_Circle(100,0,10);
-        ...
-        260 rows in set
+```sql
+    select HTMBaryDist(6,htmID_6,RAcs/3.6e5,DECcs/3.6e5) from
+           UCAC_2orig_htm_6 where DIF_Circle(100,0,10);
+      ...
+      260 rows in set
+```
 
 ### [HTMLookup]
 
@@ -1123,13 +1156,14 @@ ID of the HTM trixel.
 
 **Example:**
 
-      select HTMLookup(6,20,30);
-        64152
+```sql
+    select HTMLookup(6,20,30);
+      64152
+```
 
 ### [HTMNeighb]
 
-Return the IDs of the HTM trixels touching the given pixel ID
-(neighbors).
+Return the IDs of the HTM trixels touching the given pixel ID (neighbors).
 
 **Syntax:**
 `HTMNeighb(Depth INT, Id INT)`
@@ -1145,8 +1179,10 @@ angles the neighbors are (typically) 10.
 
 **Example:**
 
-      select HTMNeighb(6, 32768);
-        32769, 32770, 32771, 47104, 47106, 47107, 49152, 63488, 63489, 63491
+```sql
+    select HTMNeighb(6, 32768);
+      32769, 32770, 32771, 47104, 47106, 47107, 49152, 63488, 63489, 63491
+```
 
 ### [HTMsNeighb]
 
@@ -1167,11 +1203,13 @@ A comma separated string with the HTM trixel IDs at level *oDepth*.
 
 **Example:**
 
-      select HTMsNeighb(6,32768,8);
-        524312, 524324, 524340, 524341, 524343, 524344, 524346, 524347, 524348,
-        753664, 753666, 753667, 753672, 753673, 753675,753677, 753700, 753716,
-        786432, 1015808, 1015809, 1015811, 1015812, 1015814, 1015815, 1015822,
-        1015832, 1015864
+```sql
+    select HTMsNeighb(6,32768,8);
+      524312, 524324, 524340, 524341, 524343, 524344, 524346, 524347, 524348,
+      753664, 753666, 753667, 753672, 753673, 753675,753677, 753700, 753716,
+      786432, 1015808, 1015809, 1015811, 1015812, 1015814, 1015815, 1015822,
+      1015832, 1015864
+```
 
 ### [HTMNeighbC]
 
@@ -1194,9 +1232,11 @@ Order is: the central one, the remaining 12 sorted in ascending order.
 
 **Example:**
 
-      select HTMNeighbC(6, 100,60);
-        58772, 58773, 58774, 58775, 58792, 58800, 58802, 58803, 58820, 58840,
-        58841, 58843, 58872
+```sql
+    select HTMNeighbC(6, 100,60);
+      58772, 58773, 58774, 58775, 58792, 58800, 58802, 58803, 58820, 58840,
+      58841, 58843, 58872
+```
 
 ### Wrapper to function in the HEALPix library
 
@@ -1222,8 +1262,10 @@ Comma separated coordinates of the HEALPix pixel center, in degrees.
 
 **Example:**
 
-      select HEALPBary(1,8,500);
-        48.1640625, 6.429418462523309
+```sql
+    select HEALPBary(1,8,500);
+      48.1640625, 6.429418462523309
+```
 
 ### [HEALPBaryC]
 
@@ -1246,8 +1288,10 @@ Comma separated coordinates of the HEALPix pixel center, in degrees.
 
 **Example:**
 
-      select HEALPBaryC(0,8,20.5,30.8);
-        20.390625, 30.86525625461861
+```sql
+    select HEALPBaryC(0,8,20.5,30.8);
+      20.390625, 30.86525625461861
+```
 
 ### [HEALPBaryDist]
 
@@ -1272,10 +1316,12 @@ Angular distance from the pixel center, in arcmin.
 
 **Example:**
 
-      select HEALPBaryDist(1,8,healpID_nest_8,RAcs/3.6e5,DECcs/3.6e5) from
-             UCAC_2orig_healp_nest_8 where DIF_Circle(100,0,10);
-        ...
-        260 rows in set
+```sql
+    select HEALPBaryDist(1,8,healpID_nest_8,RAcs/3.6e5,DECcs/3.6e5) from
+           UCAC_2orig_healp_nest_8 where DIF_Circle(100,0,10);
+      ...
+      260 rows in set
+```
 
 ### [HEALPLookup]
 
@@ -1298,8 +1344,10 @@ ID of the HEALPix pixel.
 
 **Example:**
 
-      select HEALPLookup(0,8,20,30);
-        196152
+```sql
+    select HEALPLookup(0,8,20,30);
+      196152
+```
 
 ### [HEALPNeighb]
 
@@ -1322,8 +1370,10 @@ Order is: the SW, W, NW, N, NE, E, SE and S neighbor.
 
 **Example:**
 
-      select HEALPNeighb(0, 8, 1000);
-        1091, 999, 912, 829, 913, 1001, 1092, 1187
+```sql
+    select HEALPNeighb(0, 8, 1000);
+      1091, 999, 912, 829, 913, 1001, 1092, 1187
+```
 
 ### [HEALPNeighbC]
 
@@ -1348,8 +1398,10 @@ Order is: central one, the SW, W, NW, N, NE, E, SE and S neighbor.
 
 **Example:**
 
-      select HEALPNeighbC(1, 8, 100,60);
-        113911, 113910, 113916, 113917, 114088, 114082, 114080, 113909, 113908
+```sql
+    select HEALPNeighbC(1, 8, 100,60);
+      113911, 113910, 113916, 113917, 114088, 114082, 114080, 113909, 113908
+```
 
 ### [HEALPBound]
 
@@ -1375,9 +1427,11 @@ coordinates.
 
 **Example:**
 
-      select HEALPBound(1, 8, 1000);
-        43.9453125, 8.38553864708132, 43.76953125, 8.234747571463606,
-        43.9453125, 8.084013907099306, 44.12109375, 8.234747571463606
+```sql
+    select HEALPBound(1, 8, 1000);
+      43.9453125, 8.38553864708132, 43.76953125, 8.234747571463606,
+      43.9453125, 8.084013907099306, 44.12109375, 8.234747571463606
+```
 
 ### [HEALPBoundC]
 
@@ -1405,9 +1459,11 @@ coordinates.
 
 **Example:**
 
-      select HEALPBoundC(1, 8, 100,60);
-        100, 60.05627904951215, 99.93865030674847, 59.86707420480209,
-        100.4268292682927, 59.67778522657881, 100.4907975460123, 59.86707420480209
+```sql
+    select HEALPBoundC(1, 8, 100,60);
+      100, 60.05627904951215, 99.93865030674847, 59.86707420480209,
+      100.4268292682927, 59.67778522657881, 100.4907975460123, 59.86707420480209
+```
 
 ### [HEALPMaxS]
 
@@ -1425,12 +1481,14 @@ furthest corner.
 
 **Example:**
 
-      select HealPMaxS(6);
-        57.24888364432666
-      select HealPMaxS(8);
-        14.34420720055738
-      select HealPMaxS(12);
-        0.8971372281806288
+```sql
+    select HealPMaxS(6);
+      57.24888364432666
+    select HealPMaxS(8);
+      14.34420720055738
+    select HealPMaxS(12);
+      0.8971372281806288
+```
 
 ### [Sphedist]
 
@@ -1475,7 +1533,9 @@ Always 1;
 
 **Example:**
 
-      SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
+```sql
+    SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
+```
 
 ### [DIF\_Rect]
 
@@ -1500,10 +1560,12 @@ Always 1.
 
 **Example:**
 
-      select htmID_8,RAcs/3.6e5,DECcs/3.6e5 from
-             UCAC_2orig_htm_6 where DIF_Rect(100,30,10);
-        ...
-        74 rows in set
+```sql
+    select htmID_8,RAcs/3.6e5,DECcs/3.6e5 from
+           UCAC_2orig_htm_6 where DIF_Rect(100,30,10);
+      ...
+      74 rows in set
+```
 
 ### [DIF\_Rectv]
 
@@ -1541,10 +1603,12 @@ Always 1.
 
 **Example:**
 
-      select htmID_6,RAcs/3.6e5,DECcs/3.6e5 from
-             UCAC_2orig_htm_6 where DIF_Rectv(10,30,10.3,30.3);
-        ...
-        776 rows in set
+```sql
+    select htmID_6,RAcs/3.6e5,DECcs/3.6e5 from
+           UCAC_2orig_htm_6 where DIF_Rectv(10,30,10.3,30.3);
+      ...
+      776 rows in set
+```
 
 ### [DIF\_NeighbC]
 
@@ -1563,7 +1627,9 @@ How many HTM/HEALPix pixels have been selected.
 
 **Example:**
 
-      SELECT * FROM Messier_htm_6 WHERE DIF_NeighbC(82, 22);
+```sql
+    SELECT * FROM Messier_htm_6 WHERE DIF_NeighbC(82, 22);
+```
 
 Note that for tables with multiple depths you can only use the smaller
 one (larger trixel).
@@ -1586,9 +1652,11 @@ NOTE: the table must be **DIF** indexed at both depths!
 
 **Example:**
 
-      SELECT * FROM Messier_htm_6 WHERE DIF_sNeighb(6, 62392, 8);
+```sql
+    SELECT * FROM Messier_htm_6 WHERE DIF_sNeighb(6, 62392, 8);
 
-      | 1 | BN   | Tau   |  8.2 | 83.625 | 22.0167  ...
+    | 1 | BN   | Tau   |  8.2 | 83.625 | 22.0167  ...
+```
 
 Note that you need first to index on depth 8 the Messier catalogue:
 
@@ -1598,10 +1666,12 @@ Also being the catalogue quite small, the values above where calculated
 on purpose with a lookup to the trixels IDs around the coordinates of
 the example above:
 
-      select htmlookup(6,83.625,22.0167);
-        62340
-      select htmlookup(6,83.45,22.0167);
-        62392
+```sql
+    select htmlookup(6,83.625,22.0167);
+      62340
+    select htmlookup(6,83.45,22.0167);
+      62392
+```
 
 ### DB engine-related functions: auxiliary functions
 
@@ -1641,8 +1711,10 @@ Cumulative CPU time (in seconds) since last reset.
 
 **Example:**
 
-      select DIF_cpuTime()/1.;
-        0.36
+```sql
+    select DIF_cpuTime()/1.;
+      0.36
+```
 
 ### Utility functions
 
@@ -1665,12 +1737,14 @@ The “smallest” depth of HTM indexes in given table.
 
 **Example:**
 
+```sql
     select DIF.getHTMDepth('MyCats','ascc25') as min_depth;
     +-----------+
     | min_depth |
     +-----------+
     |         4 |
     +-----------+
+```
 
 ### [getHEALPOrder]
 
@@ -1690,12 +1764,14 @@ table.
 
 **Example:**
 
+```sql
     select DIF.getHEALPOrder('MyCats','UCAC_2orig') as min_order;
     +-----------+
     | min_order |
     +-----------+
     |         8 |
     +-----------+
+```
 
 ### [getHEALPNested]
 
@@ -1714,12 +1790,14 @@ table.
 **Return value** (`INT`):
 Map ordering, 0 for RING, 1 for NESTED.
 
+```sql
     select DIF.getHEALPNested('MyCats','UCAC_2orig',8) as is_nested;
     +-----------+
     | is_nested |
     +-----------+
     |         1 |
     +-----------+
+```
 
 ### [difview\_Check]
 
@@ -1739,12 +1817,14 @@ to remove the entry form `DIF.tbl`.
 
 **Example:**
 
+```sql
     call DIF.difview_Check();
     +------------------------+---------------------------------------------------------+
     | in_DIF_tbl_but_no_view | to_remove_run_command                                   |
     +------------------------+---------------------------------------------------------+
     | test.ascctest          | DELETE FROM DIF.tbl where db="test" AND name="ascctest" |
     +------------------------+---------------------------------------------------------+
+```
 
 ### [difview\_htmClean]
 
@@ -1762,12 +1842,14 @@ The message(s) about unlisted tables in `DIF.tbl`.
 
 **Example:**
 
+```sql
     call DIF.difview_htmClean(0);
     +---------------------------------------------+
     | Message                                     |
     +---------------------------------------------+
     | test.simplebsc_htm_14 not listed in DIF.tbl |
     +---------------------------------------------+
+```
 
 ### [difview\_healpClean]
 
@@ -1785,12 +1867,14 @@ The message(s) about unlisted tables in `DIF.tbl`.
 
 **Example:**
 
-      call DIF.difview_healpClean(0);
+```sql
+    call DIF.difview_healpClean(0);
     +---------------------------------------------------+
     | Message                                           |
     +---------------------------------------------------+
     | test.simplebsc_healp_nest_8 not listed in DIF.tbl |
     +---------------------------------------------------+
+```
 
 ### [getRa]
 
@@ -1810,12 +1894,14 @@ The SQL expression to get the right ascension (degrees).
 
 **Example:**
 
+```sql
     select DIF.getRa('MyCats','ascc25');
     +------------------------------+
     | DIF.getra('MyCats','ascc25') |
     +------------------------------+
     | RAmas/3.6e6                  |
     +------------------------------+
+```
 
 ### [getDec]
 
@@ -1835,12 +1921,14 @@ The SQL expression to get the declination (degrees).
 
 **Example:**
 
+```sql
     select DIF.getDec('MyCats','ascc25');
     +-------------------------------+
     | DIF.getDec('MyCats','ascc25') |
     +-------------------------------+
     | DECmas/3.6e6                  |
     +-------------------------------+
+```
 
 ### [RAcol]
 
@@ -1860,12 +1948,14 @@ The name of the column with right ascension.
 
 **Example:**
 
+```sql
     select DIF.RAcol('MyCats','ascc25');
     +------------------------------+
     | DIF.RAcol('MyCats','ascc25') |
     +------------------------------+
     | RAmas                        |
     +------------------------------+
+```
 
 ### [DECcol]
 
@@ -1885,12 +1975,14 @@ The name of the column with declination.
 
 **Example:**
 
+```sql
     select DIF.DECcol('MyCats','ascc25');
-    +--.----------------------------+
+    +-------------------------------+
     | DIF.DECcol('MyCats','ascc25') |
     +-------------------------------+
     | DECmas                        |
     +-------------------------------+
+```
 
 ### [difInfo]
 
@@ -1908,6 +2000,7 @@ The fields present in `DIF.func`, i.e.
 
 **Example:**
 
+```sql
     call DIF.difInfo('difInfo');
     +---------+----------------------+------+-----------+------------+
     | name    | params               | ret  | type      | plugin_lib |
@@ -1919,6 +2012,7 @@ The fields present in `DIF.func`, i.e.
               +-------------------------------------------+
               | Show info for a DIF function or procedure |
               +-------------------------------------------+
+```
 
 ## Generating fake sky tables
 
@@ -2009,7 +2103,7 @@ not sure of what you are doing or have very limited knowledge of MySQL,
 please ask a colleague to help you. If none is available then send us an
 e-mail and we will do our best to help you.
 
-### MySQL version 5.5, 5.6 and 5.7 and 
+### MySQL version 5.5, 5.6 and 5.7
 
 Starting with version 0.5.3, DIF supports these MySQL releases as far as
 one takes care of issuing the `cmake` command with the option
@@ -2026,7 +2120,7 @@ described in section [upgrade](#upgrade) is applied. Sometimes a
 actual one. In this case one can try repeating the procedure or giving
 the path to the library as an argument, i.e.:
 `ldconfig /usr/local/mysql/lib/mysql/plugin`, better if preceeded by a
-server shutdown (`stop`) than followed by a `start`. Onother suggestion
+server shutdown (`stop`) than followed by a `start`. Another suggestion
 is to issue the install command with the “verbose” options, i.e.:
 
 	  dif --log --readonly --install
@@ -2063,13 +2157,13 @@ user manually moves the table between two databases or manually create
 or delete indices. This misalignement can be verified by quering
 `DIF.tbl` and viewing the status of the table. For example (for the
 `Messier` table):
-
+```sql
       select * from DIF.tbl where name='Messier';
       describe Messier;
       show index from Messier;
       select * from INFORMATION_SCHEMA.VIEWS where
          TABLE_NAME like 'Messier_htm%' or TABLE_NAME like 'Messier_healp%'
-
+```
 One can try to drop the trigger, but it could fail. Then the easiest way
 to solve this issue is to manually remove (need root privileges) the
 trigger file in the database directory (assume tables are in
@@ -2105,9 +2199,5 @@ to perform an upgrade.
 
 [2]: <https://healpix.sourceforge.io/> "HEALPix schema"
 
-[^3]: L. Nicastro and G. Calderone: *Multiple depth DB tables indexing
+[3]: L. Nicastro and G. Calderone: *Multiple depth DB tables indexing
     on the sphere*, AA, vol. 2010, ID 524534
-
-[^4]: Note that from Ver. 0.5.2 the prefix `HTM/HEALP` has been
-    removed from these functions as the pixelization scheme is derived
-    directly from the view used
