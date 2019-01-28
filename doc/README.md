@@ -59,7 +59,7 @@ Furthermore it provides a number of functions to generate the pixel IDs
 given a search criteria such as “Find all the objects within a given
 cone”. This way it allows very fast queries execution even on
 billion-rows tables, using the MySQL built-in indexing system.
-**DIF** provides two pixelization schemas: HTM[^1] and HEALPix[^2]
+**DIF** provides two pixelization schemas: [HTM][1] and [HEALPix][2]
 (with either RING or NESTED map ordering). **DIF** software and
 documentation is distributed as an open source package under the GPL
 license at the site <http://ross.iasfbo.inaf.it/MCS/>. Please note that
@@ -1160,7 +1160,7 @@ the given pixel ID (“smaller” neighbors).
 
 *Id* `INT` : ID of the trixel of interest;
 
-*oDepth* `INT` : depth level of the map for the border trixels ($\ge$ *Depth*);
+*oDepth* `INT` : depth level of the map for the border trixels (&ge; *Depth*);
 
 **Return value** (`STRING`):
 A comma separated string with the HTM trixel IDs at level *oDepth*.
@@ -1578,7 +1578,7 @@ NOTE: the table must be **DIF** indexed at both depths!
 **Syntax:**
 `DIF_sNeighb(Depth INT, Id INT, oDepth INT)`
 
-*Depth* `INT` : depth level ($[0:25]$) of the pixelization;
+*Depth* `INT` : depth level ([0:25]) of the pixelization;
 
 *Id* `INT` : ID of the trixel of interest;
 
@@ -1886,11 +1886,11 @@ The name of the column with declination.
 **Example:**
 
     select DIF.DECcol('MyCats','ascc25');
-    +------------------------------+
+    +--.----------------------------+
     | DIF.DECcol('MyCats','ascc25') |
-    +------------------------------+
+    +-------------------------------+
     | DECmas                        |
-    +------------------------------+
+    +-------------------------------+
 
 ### [difInfo]
 
@@ -1944,13 +1944,13 @@ Simple examples:
 ## Entries cross-matching
 
 In the `src` sub-directory of the package can find the stand-alone
-program `myXmatch`. It allows to cross-match entries in two diferent
-**DIF** indexed tables. It has several options, in particular to
-define the max separation for a positive match and the type and depth of
-the pixelization to use. It is also possible to save the output directly
-into a DB table. It uses the `spherematch` C code written by Mike
-Blanton (Fermiland). It has several limitations which we hope to remove
-in future versions. We will also partially change the matching algorithm
+programs `myXmatch` and `pix_myXmatch`. They allows to cross-match entries
+in two diferent **DIF** indexed tables. They has several options, in
+particular to define the max separation for a positive match and the type
+and depth of the pixelization to use. It is also possible to save the output
+directly into DB tables. They use the `spherematch` C code written by Mike
+Blanton (Fermiland). They still have several limitations which we hope to
+remove in future versions. We will also partially change the matching algorithm
 and add further options.
 
 **More To Be Written**
@@ -1996,7 +1996,10 @@ Simple examples:
       ./myXmatch -h
       ./myXmatch -d MyCats -x UCAC4 USNOB1 129 -40.3 50
 
-*Please see source code*
+
+Check `pix_myXmatch` too.
+
+*Please see the source code*
 
 ## Troubleshooting
 
@@ -2059,7 +2062,7 @@ the actual DIF indices present in the table. This could happen if the
 user manually moves the table between two databases or manually create
 or delete indices. This misalignement can be verified by quering
 `DIF.tbl` and viewing the status of the table. For example (for the
-`Messier` table):\
+`Messier` table):
 
       select * from DIF.tbl where name='Messier';
       describe Messier;
@@ -2098,9 +2101,9 @@ to perform an upgrade.
 
 ## References
 
-[^1]: <http://www.sdss.jhu.edu/htm/>
+[1]: <http://www.skyserver.org/htm/> "HTM scheme"
 
-[^2]: <http://healpix.jpl.nasa.gov/>
+[2]: <https://healpix.sourceforge.io/> "HEALPix schema"
 
 [^3]: L. Nicastro and G. Calderone: *Multiple depth DB tables indexing
     on the sphere*, AA, vol. 2010, ID 524534
