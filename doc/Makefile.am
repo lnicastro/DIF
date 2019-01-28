@@ -19,19 +19,8 @@
 # 
 # ----------------------------------------------------------------------$
 
-EXTRA_DIST = dif.tex includes html other
-
-dif.pdf: dif.tex
-	make -C includes pdf
-	latex dif.tex
-	dvips dif.dvi
-	ps2pdf dif.ps
-	rm -f dif.ps
-#	pdflatex dif.tex
-
+EXTRA_DIST = includes html other
 
 docdir = $(pkgdatadir)/doc
 
-dist_doc_DATA = dif.pdf
-
-CLEANFILES = dif.log dif.toc dif.aux dif.dvi
+dist_doc_DATA = README.md
