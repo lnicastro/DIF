@@ -235,7 +235,7 @@ following table.
 \* For HTM the maximum resolution is derived from the trixel minimum side, for HEALPix assuming a square-pixel equivalent area.
 
 <a name="sphe-pix-schema"></a>
-![HEALPix and HTM pixelization schemas](doc/includes/sphe_pix_schema.png)
+![HEALPix and HTM pixelization schemas](includes/sphe_pix_schema.png)
 Figure 1: (*left*) The 12 HEALPix base pixels color coded for the “ring” scheme on the plane and
 the sphere. Over-plotted the pixel boundaries for `k = 1` which gives 48 pixels. (*right*) The 8 HTM
 base pixels and recursive subdivisions on Earth surface. The “depth” d of the trixels is marked.
@@ -571,7 +571,7 @@ approximately the same for any table, provided the index has been chosen
 carefully (see § [benchmarks](#benchmarks-and-guidelines-for-using-dif)).
 A schematic view of the entire process is show in the following [Fig. 2](#dif-query-schema).
 
-![dif-query-schema](doc/includes/schema.png)
+![dif-query-schema](includes/schema.png)
 Figure 2: Schematic view of the tables involved in a DIF query.
 
 In many cases using one single index would suffice all the user’s needs.
@@ -650,7 +650,7 @@ specific views to avoid the need to change program and scripts code in
 the future.
 
 <a name="htm-neighb"></a>
-![HTM neighbors](doc/includes/htm6-10neighb_plot.png)
+![HTM neighbors](includes/htm6-10neighb_plot.png)
 Figure 3: Earth view of the HTM depth 10 neighbors to the depth 6 trixel with
 ID 64575 (covering Bologna [lon, lat] ≃ [11, 44]). This selection can be done
 via the UDF function `HTMsNeighb` or via `sNeighb` in a DIF query (see below).
