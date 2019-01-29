@@ -21,10 +21,12 @@
 // 
 // ----------------------------------------------------------------------$
 
-#include <math.h>
+#include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
-#include <regex>
+//#include <regex>
+#include <algorithm>    // std::sort
 #include <string>
 
 #include "dif.hh"
