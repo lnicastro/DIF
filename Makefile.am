@@ -19,7 +19,7 @@
 # 
 # ----------------------------------------------------------------------$
 
-EXTRA_DIST = configure reconf selectflags.pl selectlibs.pl
+EXTRA_DIST = doc configure reconf selectflags.pl selectlibs.pl
 SUBDIRS = contrib src sql scripts # doc #==> user optional make
 
 

@@ -356,7 +356,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = configure reconf selectflags.pl selectlibs.pl
+EXTRA_DIST = doc configure reconf selectflags.pl selectlibs.pl
 SUBDIRS = contrib src sql scripts # doc #==> user optional make
 all: all-recursive
 
