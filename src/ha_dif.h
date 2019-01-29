@@ -51,13 +51,15 @@
 
 #else
 
+#include "my_global.h"                   /* ulonglong */
+
 #include "thr_lock.h"                    /* THR_LOCK, THR_LOCK_DATA */
 #include "handler.h"                     /* handler */
 #include "my_base.h"                     /* ha_rows */
 
 #endif
 
-#endif
+#endif  // >= 80000
 
 #if MY_VERSION_ID >= 50600
 

@@ -27,27 +27,44 @@
 
 #include "dif.hh"
 
+#if MY_VERSION_ID >= 100000
+
+#include "ha_dif_maria.h"
+
+#include <my_config.h>
+#include <mysql/plugin.h>
+#include "sql_class.h"
+
+#else
+
 #include "ha_dif.h"
 
 // version 5.5.x doesn't contain mysql_priv.h . We need to add the provided includes.
-#if MY_VERSION_ID >= 50505
+#if MYSQL_VERSION_ID >= 50505
+
+#if MYSQL_VERSION_ID < 50700  // 5.6
+
+#include "sql_priv.h"
+#include "sql_class.h"           // MYSQL_HANDLERTON_INTERFACE_VERSION
+#include "probes_mysql.h"
+
+#else
 
 // These two are not present in 5.7.9
-#if MY_VERSION_ID < 50709 && ! defined(MARIADB_BASE_VERSION)
+#if MYSQL_VERSION_ID < 50709
 #include <my_pthread.h>
 #include <sql_priv.h>
 #endif
 
-//#include <mysql/plugin.h>
+#endif
 
-// MySQL 8 #include "sql_class.h"           // MYSQL_HANDLERTON_INTERFACE_VERSION
-
-
-//#include "probes_mysql.h"
-#include <my_global.h>
+//#include <my_global.h>
 #include "sql_plugin.h"
 
-//#include <sql/sql_table.h>
+#endif
+
+#endif  // >= 100000
+
 
 #if MY_VERSION_ID >= 50600
 
@@ -62,6 +79,8 @@ static const char* dif_system_database();
 static bool dif_is_supported_system_table(const char *db,
                                       const char *table_name,
                                       bool is_sql_layer_system_table);
+
+
 #ifdef HAVE_PSI_INTERFACE
 static PSI_mutex_key ex_key_mutex_Dif_share_mutex;
 
@@ -75,7 +94,7 @@ static void init_dif_psi_keys()
   const char* category= "dif";
   int count;
 
-  count= array_elements(all_dif_mutexes);
+  count = static_cast<int>(array_elements(all_dif_mutexes));
   mysql_mutex_register(category, all_dif_mutexes, count);
 }
 #endif
@@ -109,19 +128,17 @@ err:
   DBUG_RETURN(tmp_share);
 }
 
-#if MY_VERSION_ID >= 50709
+#if MY_VERSION_ID >= 50709  &&  MY_VERSION_ID < 100000
 #include <sql/log.h>
-#if ! defined(MARIADB_BASE_VERSION)
 #include <sql/auth/auth_common.h>
 #endif
-#endif
+
+#else
+
+#include <mysql/plugin.h>
 
 #endif  // >= 50600
 
-#else
-#include "ha_dif.h"
-#include <mysql/plugin.h>
-#endif
 
 extern ThreadSpecificData<DIF_Region> difreg;
 
@@ -411,6 +428,27 @@ struct st_mysql_storage_engine dif_storage_engine=
 { MYSQL_HANDLERTON_INTERFACE_VERSION };
 
 
+#if MY_VERSION_ID >= 100000
+maria_declare_plugin(dif)
+{
+  MYSQL_STORAGE_ENGINE_PLUGIN,
+  &dif_storage_engine,
+  "DIF",
+  "Giorgio Calderone & Luciano Nicastro, INAF (Italy)",
+  "Dynamic Index Facility",
+  PLUGIN_LICENSE_GPL,
+  dif_init, /* Plugin Init */
+  NULL, /* Plugin Deinit */
+  0x0100 /* 1.0 */,
+  NULL,                       /* status variables                */
+  NULL,                       /* system variables                */
+  "1.0",                      /* string version */
+  MariaDB_PLUGIN_MATURITY_STABLE  /* maturity */
+}
+maria_declare_plugin_end;
+
+#else
+
 mysql_declare_plugin(dif)
 {
   MYSQL_STORAGE_ENGINE_PLUGIN,
@@ -427,3 +465,5 @@ mysql_declare_plugin(dif)
   NULL                        /* config options                  */
 }
 mysql_declare_plugin_end;
+
+#endif
