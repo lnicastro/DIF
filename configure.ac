@@ -97,6 +97,12 @@ else
 # Exclude unnecessary libssl and libcrypto that could cause linking errors
   MYSQL_LIBS=`echo $MYSQL_LIBS | sed -e "s/-lssl//g;s/-lcrypto//g"`
 
+# MariaDB 10.3.12 distributes libmaridbd.so instead of libmariadb.so
+  libmaria=`echo $MYSQL_LIBS | perl selectflags.pl | sed 's/-L//; s/ *//g'`libmariadbd.so
+
+  if [[ -e "$libmaria" ]]; then
+        MYSQL_LIBS=`echo $MYSQL_LIBS | sed -e 's/mariadb/mariadbd/'`
+  fi
 fi
 
 AC_SUBST(MYSQL_LIBS)

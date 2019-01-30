@@ -28,7 +28,7 @@ HEALP_INC = -I../contrib/Healpix/HealP3
 
 AM_CPPFLAGS =  -DMYSQL_DYNAMIC_PLUGIN $(HTM_INC) $(HEALP_INC)
 
-noinst_HEADERS = dif.hh ha_dif.h udf_utils.hh my_stmt_db.h my_stmt_db2.h pix_myXmatch_def.hh
+noinst_HEADERS = dif.hh ha_dif.h ha_dif_maria.h udf_utils.hh my_stmt_db.h my_stmt_db2.h pix_myXmatch_def.hh
 
 lib_LTLIBRARIES = ha_dif.la
 ha_dif_la_CXXFLAGS = $(INCLUDES) -fno-rtti
