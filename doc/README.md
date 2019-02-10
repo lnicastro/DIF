@@ -190,10 +190,10 @@ the equatorial zone are divided into the same number of pixels; the
 remaining rings contain a varying number of pixels. The two rings
 closest to the poles always have 4 pixels and going toward the equator
 the number of pixels increases by 4 at each step. The resolution of the
-HEALPix grid is parameterized by N<sub>side</sub> = 2^k , where *k* assumes
+HEALPix grid is parameterized by N<sub>side</sub> = 2<sup>k</sup> , where *k* assumes
 integer values being 0 for the base pixelization. It is called the
 “resolution parameter” or *order*. It is then
-N<sub>pix</sub> = 12 &times; N<sub>side</sub>^2 . The HEALPix library implements
+N<sub>pix</sub> = 12 &times; N<sub>side</sub><sup>2</sup>. The HEALPix library implements
 a recursive quad-tree pixel subdivision which is naturally nested. The
 resulting pixel numbering scheme is then referred as the *nested*
 scheme. Alternatively the *ring* scheme simply counts the pixels moving
@@ -217,10 +217,10 @@ or *trixels*, by connecting the three sides middle points using great
 circle segments. As can be seen from [Fig. 1](#sphe-pix-schema), from the first
 subdivision onward the resulting trixels are no longer equal-area. The
 scatter of the trixels area remains within the &plusmn;70% of the mean
-area, which is 2&pi;/4^d+1 , being *d* the *depth* or level (step of
+area, which is 2&pi;/4<sup>d+1</sup> , being *d* the *depth* or level (step of
 recursive subdivision) of the trixel. For a given depth the number of
-trixels is N<sub>pix</sub> = 8 &times; 4^d . The minimal side length is
-&pi;/2^d+1 and the maximal is &#8771;&pi;/2 times the minimal length.
+trixels is N<sub>pix</sub> = 8 &times; 4<sup>d</sup> . The minimal side length is
+&pi;/2<sup>d+1</sup> and the maximal is &#8771;&pi;/2 times the minimal length.
 
 The relevant parameters for the two pixelizations are reported in the
 following table.
@@ -228,16 +228,16 @@ following table.
 
 |   | **HTM** | **HEALPix** |
 |:--|:--------|:------------|
-| N<sub>pix</sub>^&dagger;: | 8 &times; 4^d  |  12 &times; N<sub>side</sub>^2 (where N<sub>side</sub> = 2^k ) |
+| N<sub>pix</sub>&dagger;: | 8 &times; 4<sup>d</sup>  |  12 &times; N<sub>side</sub><sup>2</sup> (where N<sub>side</sub> = 2<sup>k</sup> ) |
 | ID range: | [N<sub>pix</sub> , 2 &times; N<sub>pix</sub> - 1]  |  [0 , N<sub>pix</sub> - 1] |
-| Max N<sub>pix</sub>: | &#8771; 9.0 &times; 10^15 &#8771;  |  3.5 &times; 10^18 |
-| Max res.^\* (&prime;&prime;): | &#8771; 1&times; 10^-2    |  &#8771; 4&times; 10^-4 (&Omega;<sub>pix</sub> = &pi;/(3 &times; N<sub>side</sub>^2 )) |
+| Max N<sub>pix</sub>: | &#8771; 9.0 &times; 10<sup>15</sup>   |  &#8771; 3.5 &times; 10<sup>18</sup> |
+| Max res.\* (&prime;&prime;): | &#8771; 1&times; 10<sup>-2</sup>  |  &#8771; 4&times; 10<sup>-4</sup> (&Omega;<sub>pix</sub> = &pi;/(3 &times; N<sub>side</sub><sup>2</sup> )) |
 
 &dagger; d (depth): [0 , 25]; k (order <=> resolution parameter): [0 , 29]<br />
 \* For HTM the maximum resolution is derived from the trixel minimum side, for HEALPix assuming a square-pixel equivalent area.
 
 <a name="sphe-pix-schema"></a>
-![HEALPix and HTM pixelization schemas](includes/sphe_pix_schema.png)
+![HEALPix and HTM pixelization schemas](doc/includes/sphe_pix_schema.png)
 Figure 1: (*left*) The 12 HEALPix base pixels color coded for the “ring” scheme on the plane and
 the sphere. Over-plotted the pixel boundaries for `k = 1` which gives 48 pixels. (*right*) The 8 HTM
 base pixels and recursive subdivisions on Earth surface. The “depth” d of the trixels is marked.
@@ -275,7 +275,7 @@ the following information to the `dif` script:
 **Note:** starting from Ver. 0.3.3-alpha1 the maximum resolution
 parameter for HEALPix is **29** (it was 13 due to the use of 32 bit
 integers) corresponding to an angular resolution of
-&sim; 4 &times; 10^-4 arcsec. However, because of 64-bit floating point
+&sim; 4 &times; 10<sup>-4</sup> arcsec. However, because of 64-bit floating point
 arithmetics limitations (e.g. minimum appreciable angular distance),
 this limit is not applicable for all the **DIF** implemented functions.
 
@@ -293,14 +293,15 @@ the total time. We also found that for tables up to several billion
 rows, the HTM pixelization at depth 8 gives the best performance[^3]
 (see also § [benchmarks](#benchmarks-and-guidelines-for-using-dif)).
 This result could be system dependent but we
-believe that typically having pixels of size &sim; 20^&prime; is a good
+believe that typically having pixels of size &sim; 20&prime; is a good
 choice. For large tables this means that it is adviceble having on
 average a few thousand entries per pixel. However the user should make
 his/her own tests and choose the most appropriate depth/order. He/she
 should also consider if it is worth creating an index on one of the
 coordinates in conjuction with the IDs, i.e. for the HTM case,
 `htmID-RA`. From our experience, the use of this two-levels index
-together with a “data” sorting (e.g via `myisamchk -R`) could reduce the
+together with a “data” sorting (e.g. via `myisamchk -R` for `MyISAM`
+tables) could reduce the
 query execution time by up to one order of magnitude for very large
 tables. Note also that in this case the **DIF** created index on
 `htmID` (only) can be dropped as MySQL/DIF will use the new one
@@ -584,7 +585,7 @@ approximately the same for any table, provided the index has been chosen
 carefully (see § [benchmarks](#benchmarks-and-guidelines-for-using-dif)).
 A schematic view of the entire process is show in the following [Fig. 2](#dif-query-schema).
 
-![dif-query-schema](includes/schema.png)
+![dif-query-schema](doc/includes/schema.png)
 Figure 2: Schematic view of the tables involved in a DIF query.
 
 In many cases using one single index would suffice all the user’s needs.
@@ -667,7 +668,7 @@ specific views to avoid the need to change program and scripts code in
 the future.
 
 <a name="htm-neighb"></a>
-![HTM neighbors](includes/htm6-10neighb_plot.png)
+![HTM neighbors](doc/includes/htm6-10neighb_plot.png)
 Figure 3: Earth view of the HTM depth 10 neighbors to the depth 6 trixel with
 ID 64575 (covering Bologna [lon, lat] ≃ [11, 44]). This selection can be done
 via the UDF function `HTMsNeighb` or via `sNeighb` in a DIF query (see below).
@@ -939,14 +940,14 @@ on-disk. In case multiple depths are used, i.e. several indices match
 several spatial scales, the user should sort on the index closer to the
 most likely queried region size. As already mentioned in
 § [pixelization schemas](#the-healpix-and-htm-pixelization-schemas),
-using a pixel size of &sim; 20^&prime; (i.e. split
+using a pixel size of &sim; 20<sup>&prime;</sup> (i.e. split
 the sky in &sim; 1/2 million pixels) is a choice which is adequate for
 a generic-use table with up to some billion entries.
 
 In case a table is only used for `SELECT` queries, i.e. it is not being
 modified, "assuming you are using the `MyISAM` storage engine",
 ordering the data on disk can be easily achieved using the
-shell command (as root) `myisamchk -R` *index* *TableName* (see
+shell command (as root) `myisamchk -R` *index TableName* (see
 `myisamchk` manual). Note that sorting
 time depends both on the size of the table and the “disorder” of the
 data. Adding new data with random sky positions would require a new sort
@@ -960,14 +961,15 @@ execution time can reduce by up an order of magnitude! Actual speed
 depends on the size of the queried region with respect to the pixel
 size. Without going into the details of pixelization used and machine
 configurations but just to give an example from our experience,
-selecting the objects falling into a 10^&prime; &times; 10^&prime; region
+selecting the objects falling into a 10&prime; &times; 10&prime; region
 from a one billion object catalogue reduces from &sim; 100-200 ms,
 using `DIF_Rect` alone, to &sim; 20 ms adding the RA boundary
 condition.
 
 Sometimes it would also be a good idea to compress read-only tables as
-this would reduce the seek and access time. In this case can use
-`myisampack`. If you still need to improve performance, it is also
+this would reduce the seek and access time. In this case one can use
+`myisampack`. Check the options for other DB engines.
+If you still need to improve performance, it is also
 adviceable to put the table(s) on a RAID system, in particular level 10
 or 50 would be safe and fast both in read and write mode. Otherwise, the
 more the disks in the RAID the faster a `SELECT` query runs. Finally,
@@ -2199,5 +2201,5 @@ to perform an upgrade.
 
 [2]: <https://healpix.sourceforge.io/> "HEALPix schema"
 
-[3]: L. Nicastro and G. Calderone: *Multiple depth DB tables indexing
+[^3]: L. Nicastro and G. Calderone: *Multiple depth DB tables indexing
     on the sphere*, AA, vol. 2010, ID 524534
