@@ -98,9 +98,14 @@ wget https://downloads.mariadb.org/interstitial/mariadb-10.3.11/source/mariadb-1
 tar zxvf mariadb-10.3.11.tar.gz
 cd mariadb-10.3.11
 
-cmake . -DDEBUG_ON=0 -DWITH_DEBUG=0 -DPLUGIN_EXAMPLE=YES -DPLUGIN_TOKUDB=NO -DPLUGIN_TOKUDB=NO
+cmake . -DENABLE_DTRACE=0 -DDEBUG_ON=0 -DWITH_DEBUG=0 -DPLUGIN_EXAMPLE=YES -DPLUGIN_TOKUDB=NO -DPLUGIN_TOKUDB=NO
    -DPLUGIN_ROCKSDB=NO -DPLUGIN_MROONGA=NO -DPLUGIN_FEDERATED=NO -DPLUGIN_CASSANDRA=NO
    -DPLUGIN_SPHINX=NO -DPLUGIN_CONNECT=NO -DPLUGIN_SPIDER=NO
+```
+
+*Note*: the `-DENABLE_DTRACE=0` on some systems is necessary to avoid the compilation error
+```
+... error: probes_mysql_dtrace.h: No such file or directory
 ```
 
 **Case 2: MySQL/MariaDB installed via source code**
