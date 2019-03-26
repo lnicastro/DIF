@@ -316,7 +316,7 @@ aggregate index. An example is:
 The table below shows the number of pixels and memory requirements associated to different
 levels of resolution parameter for HTM (*depth*) and HEALPix (*order*).
 
-| **Depth**/**Order**  |  ** Nside**  |  **HTM** Npix  |  **HEALPix** Npix  |  **Bytes**  |  **Data type** |
+| **Depth**/**Order**  |  **Nside**  |  **HTM** Npix  |  **HEALPix** Npix  |  **Bytes**  |  **Data type**  |
 |----------:|------------:|-------------------------:|--------------------------------:|-------|-----------|
 |       0   |          1  |                       8  |                          12     |   1   |  TINYINT  |
 |       1   |          2  |                      32  |                          48     |   1   |  TINYINT  |
