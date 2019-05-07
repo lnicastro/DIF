@@ -30,6 +30,7 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_HEADERS([src/binlog_config.h])
 AM_INIT_AUTOMAKE([dist-bzip2])
 m4_include([ax_compare_version.m4])
+m4_include([ax_cxx_compile_stdcxx.m4])
 
 mypath_mysql_source=""
 
@@ -47,9 +48,9 @@ AC_SUBST(MYSQL_SOURCE)
 
 
 AC_PROG_CC_STDC
-#AX_CXX_COMPILE_STDCXX11
 AC_LANG_PUSH(C++)
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX(14, ext, optional)
 AC_PROG_LIBTOOL
 
 AC_PATH_PROG([PERL], [perl])
@@ -91,7 +92,7 @@ CPPFLAGS="-D MY_VERSION_ID=$MY_VERSION_ID $CPPFLAGS"
 # NOT MariaDB
 if test $MY_VERSION_ID -lt "100000" ; then
   CPPFLAGS="$CPPFLAGS $MYSQL_INCLUDE"
-  CXXFLAGS="-std=c++11"
+  # CXXFLAGS="-std=c++11"
 else
 
 # Exclude unnecessary libssl and libcrypto that could cause linking errors
