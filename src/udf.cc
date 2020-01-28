@@ -1843,6 +1843,14 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
     de1 = DARGS(1);
     ra2 = DARGS(2);
     de2 = DARGS(3);
+
+    // Sort RA
+    if (ra1 > ra2) {
+      double ratemp = ra1;
+      ra1 = ra2;
+      ra2 = ratemp;
+    }
+    
   } else {
     vector<double> ra(4,0.), de(4,0.);
     for (int i=0; i<4; i++) {
@@ -1871,6 +1879,13 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   }
 
 // Order ranges (clockwise) assuming a convex
+  if (ra1 < ra2) {
+    difreg->ra1 = ra1;
+    difreg->ra3 = ra2;
+  } else {
+    difreg->ra1 = ra2;
+    difreg->ra2 = ra1;
+  }
   difreg->ra1 = ra1;
   difreg->ra3 = ra2;
   difreg->ra2 = difreg->ra1;
