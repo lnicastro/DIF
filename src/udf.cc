@@ -1532,10 +1532,10 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
     double de = DARGS(1);
     double ra1 = difreg->ra1;
     double de1 = difreg->de1;
-    double ra2 = difreg->ra3;    // Clockwise coords
+    double ra2 = difreg->ra3;    // Clockwise coords. See DIF_Rectv_init !
     double de2 = difreg->de2;
     double rad = difreg->rad;
-    int ret = 0;
+    longlong ret = 0;
 
     if (*(args->args[2]))
       return 1; //If the pixel is "full" return immediately
@@ -1556,8 +1556,8 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
 // Note:
 // the rectangle is always defined by its 4 vertices therefore the
 // two following cases should never be verified!
-	case DIF_REG_RECT:
 /*
+	case DIF_REG_RECT:
 	    //Actually ra2 and de2 are the sides in arcmin
 	    side1 = ra2 / 60.; //arcmin to degree
 	    side2 = de2 / 60.;
@@ -1583,9 +1583,8 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
 		    ret = 1;
 	    }
 	    break;
-*/    
+
 	case DIF_REG_2VERT:
-/*
 	    //At this point we know that ra2 > 0
 	    if ((ra1 > ra2)    ||    (ra2 > 360.))   {  //Cross 0
 		if (ra2 > 360.)
@@ -1603,7 +1602,7 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
 	    }
 	    break;
 */
-            break;
+
         case DIF_REG_4VERT: //Simple range check
 /* Check for 0 crossing effects: only two cases considered here! See also DIF_Rectv_init */
           if (ra1 < 0.)
@@ -1621,7 +1620,7 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
             if ((ra1 <= ra    &&   ra <= ra2)   &&
                 (de1 <= de    &&   de <= de2))     // Clockwise coords
 	      ret = 1;
-	  }	    
+	  }
 	  break;
 
 	case DIF_REG_NEIGHBC:
@@ -1636,7 +1635,7 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
 	    break;
     }
 
-    
+
     difreg->subStop();
     return ret;
 }
@@ -1850,12 +1849,19 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
       ra1 = ra2;
       ra2 = ratemp;
     }
-    
+ 
+    // Sort Dec
+    if (de1 > de2) {
+      double detemp = de1;
+      de1 = de2;
+      de2 = detemp;
+    }
+ 
   } else {
     vector<double> ra(4,0.), de(4,0.);
-    for (int i=0; i<4; i++) {
-      ra[i] = DARGS(i);
-      de[i] = DARGS(i+1);
+    for (int i=0; i<8; i+=2) {
+      ra[i/2] = DARGS(i);
+      de[i/2] = DARGS(i+1);
     }
 
 // Use maximum rectangle including the given coordinates
@@ -1884,13 +1890,10 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
     difreg->ra3 = ra2;
   } else {
     difreg->ra1 = ra2;
-    difreg->ra2 = ra1;
+    difreg->ra3 = ra1;
   }
-  difreg->ra1 = ra1;
-  difreg->ra3 = ra2;
   difreg->ra2 = difreg->ra1;
   difreg->ra4 = difreg->ra3;
-
 
   if (difreg->getSchema() == DIF_HEALP_NEST || difreg->getSchema() == DIF_HEALP_RING)
   {
@@ -1902,13 +1905,18 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
     } else if (de1 == -90.)
       de1 += MIN_OFF_DEG;
 
-    if (de2 >  90.) {
+    if (de2 > 90.) {
       //if (is_ring)
         de2 = 90. - MIN_OFF_DEG;
       //else
         //de2 = 180. - de2;
     } else if (de2 == 90.)
       de2 -= MIN_OFF_DEG;
+  }
+
+  if (de1 == de2) {
+    de1 = MIN_OFF_DEG;
+    de2 = 90. - MIN_OFF_DEG;
   }
 
   if (de1 < de2) {
@@ -1921,6 +1929,8 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   difreg->de3 = difreg->de2;
   difreg->de4 = difreg->de1;
 
+//sprintf(message, "%13.8lf,%13.8lf %13.8lf,%13.8lf  \0", difreg->ra1,difreg->de1, difreg->ra3,difreg->de2);
+//return 1;
   difreg->regtype = DIF_REG_4VERT;
   return 0;
 }
