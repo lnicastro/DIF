@@ -87,6 +87,7 @@ cd mysql-5.7.29
 
 pwd
 ```
+Annotate the directory name and [go to install section](#comp-end-inst)!
 If instead the installed version is e.g. 8.0.19 (in a temporary directory):
 ```shell
 wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.19.tar.gz
@@ -100,7 +101,7 @@ cmake .. -DWITH_BOOST=../boost
 pwd
 ```
 Note that we run `cmake` in a scratch `bld` sub-directory.
-Annotate the directory name and then you are ready to install DIF.
+Annotate the directory name and then you are ready to [install DIF](#comp-end-inst).
 
 Similarly for **MariaDB 10.3**. However here we use a configuration command that avoids
 unnecessary plugins (a similar approach could have been used for MySQL too):
@@ -114,9 +115,11 @@ cd bld
 cmake .. -DENABLE_DTRACE=0 -DDEBUG_ON=0 -DWITH_DEBUG=0 -DPLUGIN_EXAMPLE=YES -DPLUGIN_TOKUDB=NO -DPLUGIN_TOKUDB=NO \
    -DPLUGIN_ROCKSDB=NO -DPLUGIN_MROONGA=NO -DPLUGIN_FEDERATED=NO -DPLUGIN_CASSANDRA=NO \
    -DPLUGIN_SPHINX=NO -DPLUGIN_CONNECT=NO -DPLUGIN_SPIDER=NO
-```
 
+pwd
+```
 The `-DENABLE_DTRACE=0` on some systems is necessary to avoid the compilation error
+Annotate the directory name and then you are ready to [install DIF](#comp-end-inst).
 ```
 ... error: probes_mysql_dtrace.h: No such file or directory
 ```
@@ -124,18 +127,22 @@ The `-DENABLE_DTRACE=0` on some systems is necessary to avoid the compilation er
 **Case 2: MySQL/MariaDB installed via source code**
 
 Assuming that you have downloaded, configured, compiled and **installed**
-MySQL/MariaDB from source, then you only need to know the directory name and be sure that
-you have not cleaned the required include files in the source directory.
-Eventually rerun the `cmake` command. Below we assume you installed MySQL 5.7.29.
+MySQL/MariaDB from source, then you only need to know the directory name with the code and be sure that
+you have not cleaned the required include files after compilation.
+Eventually rerun the `cmake` command.
 
-**Compile and install**
+<a name="#comp-end-inst"></a>**Compile and install**
+
+Below we assume you installed a prebuilt MySQL 5.7.29. In any case, remember that the
+`--with-mysql-source` argument must point to the dir where you eventually run `cmake`
+(so e.g. add `/bld` for the examples above).
 
 - If you download DIF via `git`:
 ```
 git clone https://github.com/lnicastro/DIF.git
 cd DIF
 touch configure aclocal.m4 Makefile.in src/config.h.in
-./configure --with-mysql-source=/path_to/mysql-5.7.29/bld
+./configure --with-mysql-source=/path_to/mysql-5.7.29
 make
 sudo make install
 ```
@@ -145,7 +152,7 @@ sudo make install
 unzip DIF-master.zip
 cd DIF-master
 touch configure aclocal.m4 Makefile.in src/config.h.in
-./configure --with-mysql-source=/path_to/mysql-5.7.29/bld
+./configure --with-mysql-source=/path_to/mysql-5.7.29
 make
 sudo make install
 ```
@@ -154,13 +161,16 @@ sudo make install
 ```
 tar zxvf dif-0.5.5.tar.gz
 cd dif-0.5.5
-./configure --with-mysql-source=/path_to/mysql-5.7.29/bld
+./configure --with-mysql-source=/path_to/mysql-5.7.29
 make
 sudo make install
 ```
 
-Note that here we also assumed that you compiled MySQL in a build sub-directory `bld`
-rather than in its root source directory.
+Again, if you compiled MySQL in a build sub-directory `bld` rather than in its
+root source directory, then the configure command would be
+```
+  ./configure --with-mysql-source=/path_to/mysql-5.7.29/bld
+```
 
 ## Installing DIF facilities in MySQL
 `dif` is a DIF provided Perl script used to perform various DIF-related tasks.
