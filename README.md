@@ -87,7 +87,7 @@ cd mysql-5.7.29
 
 pwd
 ```
-Annotate the directory name and [go to install section](#comp-end-inst)!
+Annotate the directory name and [go to install section](#dif_compile)!
 If instead the installed version is e.g. 8.0.19 (in a temporary directory):
 ```shell
 wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.19.tar.gz
@@ -101,7 +101,7 @@ cmake .. -DWITH_BOOST=../boost
 pwd
 ```
 Note that we run `cmake` in a scratch `bld` sub-directory.
-Annotate the directory name and then you are ready to [install DIF](#comp-end-inst).
+Annotate the directory name and then you are ready to [install DIF](#dif_compile).
 
 Similarly for **MariaDB 10.3**. However here we use a configuration command that avoids
 unnecessary plugins (a similar approach could have been used for MySQL too):
@@ -119,7 +119,7 @@ cmake .. -DENABLE_DTRACE=0 -DDEBUG_ON=0 -DWITH_DEBUG=0 -DPLUGIN_EXAMPLE=YES -DPL
 pwd
 ```
 The `-DENABLE_DTRACE=0` on some systems is necessary to avoid the compilation error
-Annotate the directory name and then you are ready to [install DIF](#comp-end-inst).
+Annotate the directory name and then you are ready to [install DIF](#dif_compile).
 ```
 ... error: probes_mysql_dtrace.h: No such file or directory
 ```
@@ -131,7 +131,7 @@ MySQL/MariaDB from source, then you only need to know the directory name with th
 you have not cleaned the required include files after compilation.
 Eventually rerun the `cmake` command.
 
-<a name="#comp-end-inst"></a>**Compile and install**
+<a name="dif_compile"></a>**Compile and install**
 
 Below we assume you installed a prebuilt MySQL 5.7.29. In any case, remember that the
 `--with-mysql-source` argument must point to the dir where you eventually run `cmake`
