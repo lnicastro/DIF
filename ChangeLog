@@ -1,3 +1,9 @@
+2020-03-17 LN, ver. 0.5.5
+	- Fixed rectangular region selection defined by 4 corners.
+	  Affected file: src/udf.cc
+	  Affected DIF function: DIF_RectV
+	- README.md documentation updated in main page and doc dir.
+
 2020-01-28 LN, ver. 0.5.5
 	- Removed -fno-rtti from ha_dif_la_CXXFLAGS in src/Makefile.am
 	- README.md documentation updated

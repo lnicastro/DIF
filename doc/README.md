@@ -1034,7 +1034,7 @@ directly from SQL.
 ### [HTMidByName]
 
 **Syntax:**
-`HTMidByName(IdName STRING)`
+`HTMidByName(IdName)`
 
 *IdName* `STRING` : ID name of the trixel of interest;
 
@@ -1051,7 +1051,7 @@ HTM trixel Id.
 ### [HTMnameById]
 
 **Syntax:**
-`HTMnameById(Id INT)`
+`HTMnameById(Id)`
 
 *Id* `INT` : ID of the trixel of interest;
 
@@ -1070,7 +1070,7 @@ HTM trixel Id name.
 Return the HTM trixel barycenter coordinates given depth and trixel ID.
 
 **Syntax:**
-`HTMBary(Depth INT, Id INT)`
+`HTMBary(Depth, Id)`
 
 *Depth* `INT` : depth ([0:25]) of the pixelization scheme;
 
@@ -1082,7 +1082,7 @@ Comma separated coordinates of the HTM trixel barycenter, in degrees.
 **Example:**
 
 ```sql
-    select HTMBary(6,32768);
+    select HTMBary(6, 32768);
       0.4687499999999769, -0.46875
 ```
 
@@ -1092,7 +1092,7 @@ Return the HTM trixel barycenter coordinates given depth and a pair of
 spherical coordinates.
 
 **Syntax:**
-`HTMBaryC(Depth INT, Ra DOUBLE, Dec DOUBLE)`
+`HTMBaryC(Depth, Ra, Dec)`
 
 *Depth* `INT` : depth ([0:25]) of the pixelization scheme;
 
@@ -1107,7 +1107,7 @@ degrees.
 **Example:**
 
 ```sql
-    select HTMBaryC(6,20,30);
+    select HTMBaryC(6, 20, 30);
       20.03084356871285, 30.26104286747405
 ```
 
@@ -1117,7 +1117,7 @@ Return the distance from the HTM trixel barycenter given depth and a
 pair of spherical coordinates.
 
 **Syntax:**
-`HTMBaryDist(Depth INT, Id INT, Ra DOUBLE, Dec DOUBLE)`
+`HTMBaryDist(Depth, Id, Ra, Dec)`
 
 *Depth* `INT` : depth ([0:25]) of the pixelization scheme;
 
@@ -1133,8 +1133,8 @@ Angular distance from the trixel barycenter, in arcmin.
 **Example:**
 
 ```sql
-    select HTMBaryDist(6,htmID_6,RAcs/3.6e5,DECcs/3.6e5) from
-           UCAC_2orig_htm_6 where DIF_Circle(100,0,10);
+    select HTMBaryDist(6, htmID_6, RAmas/3.6e6, DECmas/3.6e6) from
+           UCAC_2orig_htm_6 where DIF_Circle(100, 0, 10);
       ...
       260 rows in set
 ```
@@ -1145,7 +1145,7 @@ Return the ID of the HTM trixel given depth and a pair of spherical
 coordinates.
 
 **Syntax:**
-`HTMLookup(Depth INT, Ra DOUBLE, Dec DOUBLE)`
+`HTMLookup(Depth, Ra, Dec)`
 
 *Depth* `INT` : depth ([0:25]) of the pixelization scheme;
 
@@ -1159,7 +1159,7 @@ ID of the HTM trixel.
 **Example:**
 
 ```sql
-    select HTMLookup(6,20,30);
+    select HTMLookup(6, 20, 30);
       64152
 ```
 
@@ -1168,7 +1168,7 @@ ID of the HTM trixel.
 Return the IDs of the HTM trixels touching the given pixel ID (neighbors).
 
 **Syntax:**
-`HTMNeighb(Depth INT, Id INT)`
+`HTMNeighb(Depth, Id)`
 
 *Depth* `INT` : depth level ([0:25]) of the pixelization;
 
@@ -1192,7 +1192,7 @@ Return the IDs of the HTM trixels, at the same or higher depth, touching
 the given pixel ID (“smaller” neighbors).
 
 **Syntax:**
-`HTMsNeighb(Depth INT, Id INT, oDepth INT)`
+`HTMsNeighb(Depth, Id, oDepth)`
 
 *Depth* `INT` : depth level ([0:25]) of the pixelization;
 
@@ -1206,7 +1206,7 @@ A comma separated string with the HTM trixel IDs at level *oDepth*.
 **Example:**
 
 ```sql
-    select HTMsNeighb(6,32768,8);
+    select HTMsNeighb(6, 32768, 8);
       524312, 524324, 524340, 524341, 524343, 524344, 524346, 524347, 524348,
       753664, 753666, 753667, 753672, 753673, 753675,753677, 753700, 753716,
       786432, 1015808, 1015809, 1015811, 1015812, 1015814, 1015815, 1015822,
@@ -1219,7 +1219,7 @@ Return the IDs of the HTM trixels and its neighbours given a pair of
 spherical coordinates.
 
 **Syntax:**
-`HTMNeighbC(Depth INT, Ra DOUBLE, Dec DOUBLE)`
+`HTMNeighbC(Depth, Ra, Dec)`
 
 *Depth* `INT` : depth level ([0:25]) of the pixelization;
 
@@ -1235,14 +1235,14 @@ Order is: the central one, the remaining 12 sorted in ascending order.
 **Example:**
 
 ```sql
-    select HTMNeighbC(6, 100,60);
+    select HTMNeighbC(6, 100, 60);
       58772, 58773, 58774, 58775, 58792, 58800, 58802, 58803, 58820, 58840,
       58841, 58843, 58872
 ```
 
 ### Wrapper to function in the HEALPix library
 
-These functions allows calling underlying functions in the HEALPix
+These functions allow calling underlying functions in the HEALPix
 library directly from SQL.
 
 ### [HEALPBary]
@@ -1251,7 +1251,7 @@ Return the HEALPix barycenter (center) coordinates given scheme, order
 and pixel ID.
 
 **Syntax:**
-`HEALPBary(Nested INT, Order INT, Id INT)`
+`HEALPBary(Nested, Order, Id)`
 
 *Nested* `INT` : map ordering, 0 for RING, 1 for NESTED;
 
@@ -1265,7 +1265,7 @@ Comma separated coordinates of the HEALPix pixel center, in degrees.
 **Example:**
 
 ```sql
-    select HEALPBary(1,8,500);
+    select HEALPBary(1, 8, 500);
       48.1640625, 6.429418462523309
 ```
 
@@ -1275,7 +1275,7 @@ Return the HEALPix barycenter (center) coordinates given scheme, order
 and a pair of spherical coordinates.
 
 **Syntax:**
-`HEALPBaryC(Nested INT, Order INT, Ra DOUBLE, Dec DOUBLE)`
+`HEALPBaryC(Nested, Order, Ra, Dec)`
 
 *Nested* `INT` : map ordering, 0 for RING, 1 for NESTED;
 
@@ -1291,7 +1291,7 @@ Comma separated coordinates of the HEALPix pixel center, in degrees.
 **Example:**
 
 ```sql
-    select HEALPBaryC(0,8,20.5,30.8);
+    select HEALPBaryC(0, 8, 20.5, 30.8);
       20.390625, 30.86525625461861
 ```
 
@@ -1301,7 +1301,7 @@ Return the distance from the HEALPix barycenter (center) given scheme,
 order and a pair of spherical coordinates.
 
 **Syntax:**
-`HEALPBaryDist(Nested INT, Order INT, Id INT, Ra DOUBLE, Dec DOUBLE)`
+`HEALPBaryDist(Nested, Order, Id, Ra, Dec)`
 
 *Nested* `INT` : map ordering, 0 for RING, 1 for NESTED;
 
@@ -1319,8 +1319,8 @@ Angular distance from the pixel center, in arcmin.
 **Example:**
 
 ```sql
-    select HEALPBaryDist(1,8,healpID_nest_8,RAcs/3.6e5,DECcs/3.6e5) from
-           UCAC_2orig_healp_nest_8 where DIF_Circle(100,0,10);
+    select HEALPBaryDist(1, 8, healpID_nest_8, RAmas/3.6e6, DECmas/3.6e6) from
+           UCAC_2orig_healp_nest_8 where DIF_Circle(100, 0, 10);
       ...
       260 rows in set
 ```
@@ -1331,7 +1331,7 @@ Return the ID of the HEALPix pixel given scheme, order and a pair of
 spherical coordinates.
 
 **Syntax:**
-`HEALPLookup(Nested INT, Order INT, Ra DOUBLE, Dec DOUBLE)`
+`HEALPLookup(Nested, Order, Ra, Dec)`
 
 *Nested* `INT` : map ordering, 0 for RING, 1 for NESTED;
 
@@ -1347,7 +1347,7 @@ ID of the HEALPix pixel.
 **Example:**
 
 ```sql
-    select HEALPLookup(0,8,20,30);
+    select HEALPLookup(0, 8, 20, 30);
       196152
 ```
 
@@ -1357,7 +1357,7 @@ Return the IDs of the HEALPix pixels touching the given pixel ID
 (neighbors).
 
 **Syntax:**
-`HEALPNeighb(Nested INT, Order INT, Id INT)`
+`HEALPNeighb(Nested, Order, Id)`
 
 *Nested* `INT` : map ordering, 0 for RING, 1 for NESTED;
 
@@ -1383,7 +1383,7 @@ Return the IDs of the HEALPix pixel and its neighbours given a pair of
 spherical coordinates.
 
 **Syntax:**
-`HEALPNeighbC(Nested INT, Order INT, Ra DOUBLE, Dec DOUBLE)`
+`HEALPNeighbC(Nested, Order, Ra, Dec)`
 
 *Nested* `INT` : map ordering, 0 for RING, 1 for NESTED;
 
@@ -1413,7 +1413,7 @@ the number of returned coordinates along the boundaries. If `Step = 1`
 then the 4 pixel corners (N, W, S and E) are returned.
 
 **Syntax:**
-`HEALPBound(Nested INT, Order INT, Id INT [, Step INT])`
+`HEALPBound(Nested, Order, Id [, Step])`
 
 *Nested* `INT` : map ordering, 0 for RING, 1 for NESTED;
 
@@ -1443,7 +1443,7 @@ determines the number of returned coordinates along the boundaries. If
 `Step = 1` then the 4 pixel corners (N, W, S and E) are returned.
 
 **Syntax:**
-`HEALPBoundC(Nested INT, Order INT, Ra DOUBLE, Dec DOUBLE [, Step INT])`
+`HEALPBoundC(Nested, Order, Ra, Dec [, Step])`
 
 *Nested* `INT` : map ordering, 0 for RING, 1 for NESTED;
 
@@ -1473,7 +1473,7 @@ Return the HEALPix pixel max size (in arcmin) from center to corner
 (both RING or NESTED), given the order.
 
 **Syntax:**
-`HEALPMaxS(Order INT)`
+`HEALPMaxS(Order)`
 
 *Order* `INT` : order ([0:29]) of the pixelization scheme;
 
@@ -1498,7 +1498,7 @@ Compute the angular distance given the coordinates of two points on a
 sphere.
 
 **Syntax:**
-`Sphedist(Ra1 DOUBLE, Dec1 DOUBLE, Ra2 DOUBLE, Dec2 DOUBLE)`
+`Sphedist(Ra1, Dec1, Ra2, Dec2)`
 
 *Ra1* `DOUBLE` : right ascension (or longitude) of the first point, in degrees;
 
@@ -1522,7 +1522,7 @@ Define a circular search region entered at the given coordinates and
 with the given radius.
 
 **Syntax:**
-`DIF_Circle(Ra DOUBLE, Dec DOUBLE, Rad DOUBLE)`
+`DIF_Circle(Ra, Dec, Rad)`
 
 *Ra* `DOUBLE` : right ascension (or longitude) of the center, in degrees;
 
@@ -1545,7 +1545,7 @@ Define a rectangular search region whose sides lie along lines of
 constant right ascension (longitude) and declination (latitude).
 
 **Syntax:**
-`DIF_Rect(Ra DOUBLE, Dec DOUBLE, side DOUBLE [, side2 DOUBLE])`
+`DIF_Rect(Ra, Dec, side [, side2])`
 
 *Ra* `DOUBLE` : right ascension (or longitude) of the center, in degrees;
 
@@ -1563,13 +1563,13 @@ Always 1.
 **Example:**
 
 ```sql
-    select htmID_8,RAcs/3.6e5,DECcs/3.6e5 from
-           UCAC_2orig_htm_6 where DIF_Rect(100,30,10);
+    select htmID_8, RAmas/3.6e6, DECmas/3.6e6 from
+           UCAC_2orig_htm_6 where DIF_Rect(100, 30, 10);
       ...
       74 rows in set
 ```
 
-### [DIF\_Rectv]
+### [DIF\_RectV]
 
 Define a rectangle (or four sides polygon) search region with given
 coordinates of the vertices. This function can be called either with
@@ -1582,7 +1582,7 @@ largest rectangle included in the polygon is used. In the future any
 type of polygons will be supported.
 
 **Syntax:**
-`DIF_RectV(Ra1 DOUBLE, Dec1 DOUBLE, Ra2 DOUBLE, Dec2 DOUBLE [, Ra3 DOUBLE, Dec3 DOUBLE, Ra4 DOUBLE, Dec4 DOUBLE])`
+`DIF_RectV(Ra1, Dec1, Ra2, Dec2 [, Ra3, Dec3, Ra4, Dec4])`
 
 *Ra1* `DOUBLE` : right ascension (or longitude) of the first vertex, in degrees;
 
@@ -1606,8 +1606,8 @@ Always 1.
 **Example:**
 
 ```sql
-    select htmID_6,RAcs/3.6e5,DECcs/3.6e5 from
-           UCAC_2orig_htm_6 where DIF_Rectv(10,30,10.3,30.3);
+    select htmID_6, RAmas/3.6e6, DECmas/3.6e6 from
+           UCAC_2orig_htm_6 where DIF_RectV(10, 30, 10.3, 30.3);
       ...
       776 rows in set
 ```
@@ -1618,7 +1618,7 @@ Define a search region composed of a HTM/HEALPix pixel and its neighbors
 given a pair of spherical coordinates.
 
 **Syntax:**
-`DIF_NeighbC(Ra DOUBLE, Dec DOUBLE)`
+`DIF_NeighbC(Ra, Dec)`
 
 *Ra* `DOUBLE` : right ascension (or longitude), in degrees;
 
@@ -1634,17 +1634,17 @@ How many HTM/HEALPix pixels have been selected.
 ```
 
 Note that for tables with multiple depths you can only use the smaller
-one (larger trixel).
+one (larger pixel).
 
 ### [DIF\_sNeighb]
 
 Given a HTM trixel at a given depth, it defines a search region composed
 of the neighbors trixels at a higher depth (smaller).
 
-NOTE: the table must be **DIF** indexed at both depths!
+NOTE: the table must be **DIF** indexed at both depths! Not available (yet) for HEALPix indexing.
 
 **Syntax:**
-`DIF_sNeighb(Depth INT, Id INT, oDepth INT)`
+`DIF_sNeighb(Depth, Id, oDepth)`
 
 *Depth* `INT` : depth level ([0:25]) of the pixelization;
 
@@ -1669,9 +1669,9 @@ on purpose with a lookup to the trixels IDs around the coordinates of
 the example above:
 
 ```sql
-    select htmlookup(6,83.625,22.0167);
+    select htmlookup(6, 83.625, 22.0167);
       62340
-    select htmlookup(6,83.45,22.0167);
+    select htmlookup(6, 83.45, 22.0167);
       62392
 ```
 
@@ -1728,7 +1728,7 @@ Return the “smallest” (or only) depth of the HTM index created on a
 table.
 
 **Syntax:**
-`DIF.getHTMDepth(db CHAR(64), table CHAR(64))`
+`DIF.getHTMDepth(db, table)`
 
 *db* `CHAR(64)` : name of the database which contains the table;
 
@@ -1740,7 +1740,7 @@ The “smallest” depth of HTM indexes in given table.
 **Example:**
 
 ```sql
-    select DIF.getHTMDepth('MyCats','ascc25') as min_depth;
+    select DIF.getHTMDepth('MyCats', 'ascc25') as min_depth;
     +-----------+
     | min_depth |
     +-----------+
@@ -1754,7 +1754,7 @@ Return the “smallest” (or only) resolution parameter (order) of the
 HEALPix index(es) created on a table.
 
 **Syntax:**
-`DIF.getHEALPOrder(db CHAR(64), table CHAR(64))`
+`DIF.getHEALPOrder(db, table)`
 
 *db* `CHAR(64)` : name of the database which contains the table;
 
@@ -1767,7 +1767,7 @@ table.
 **Example:**
 
 ```sql
-    select DIF.getHEALPOrder('MyCats','UCAC_2orig') as min_order;
+    select DIF.getHEALPOrder('MyCats', 'UCAC_2orig') as min_order;
     +-----------+
     | min_order |
     +-----------+
@@ -1781,7 +1781,7 @@ Return the HEALPix map ID ordering scheme used to create the index on a
 table.
 
 **Syntax:**
-`DIF.getHEALPNested(db CHAR(64), table CHAR(64), order INTEGER)`
+`DIF.getHEALPNested(db, table, order)`
 
 *db* `CHAR(64)` : name of the database which contains the table;
 
@@ -1793,7 +1793,7 @@ table.
 Map ordering, 0 for RING, 1 for NESTED.
 
 ```sql
-    select DIF.getHEALPNested('MyCats','UCAC_2orig',8) as is_nested;
+    select DIF.getHEALPNested('MyCats', 'UCAC_2orig', 8) as is_nested;
     +-----------+
     | is_nested |
     +-----------+
@@ -1835,7 +1835,7 @@ Shows and optionally removes the HTM views present in
 corresponsding entry is present in `DIF.tbl`.
 
 **Syntax:**
-`call DIF.difview_htmClean(IN doclean BOOLEAN)`
+`call DIF.difview_htmClean(IN doclean)`
 
 *doclean* `BOOLEAN` : if 1 then drops the views for tables not listed in `DIF.tbl`;
 
@@ -1860,7 +1860,7 @@ Shows and optionally removes the HEALPix views present in
 corresponsding entry is present in `DIF.tbl`.
 
 **Syntax:**
-`call DIF.difview_healpClean(IN doclean BOOLEAN)`
+`call DIF.difview_healpClean(IN doclean)`
 
 *doclean* `BOOLEAN` : if 1 then drops the views for tables not listed in `DIF.tbl`;
 
@@ -1885,7 +1885,7 @@ expression to get the right ascension / longitude as degrees for entries
 of a given table.
 
 **Syntax:**
-`DIF.getRa(db CHAR(64), table CHAR(64))`
+`DIF.getRa(db, table)`
 
 *db* `CHAR(64)` : name of the database which contains the table;
 
@@ -1897,12 +1897,12 @@ The SQL expression to get the right ascension (degrees).
 **Example:**
 
 ```sql
-    select DIF.getRa('MyCats','ascc25');
-    +------------------------------+
-    | DIF.getra('MyCats','ascc25') |
-    +------------------------------+
-    | RAmas/3.6e6                  |
-    +------------------------------+
+    select DIF.getRa('MyCats', 'ascc25') as RA_field;
+    +-------------+
+    | RA_field    |
+    +-------------+
+    | RAmas/3.6e6 |
+    +-------------+
 ```
 
 ### [getDec]
@@ -1912,7 +1912,7 @@ expression to get the declination / latitude as degrees for entries of a
 given table.
 
 **Syntax:**
-`DIF.getDec(db CHAR(64), table CHAR(64))`
+`DIF.getDec(db, table)`
 
 *db* `CHAR(64)` : name of the database which contains the table;
 
@@ -1924,12 +1924,12 @@ The SQL expression to get the declination (degrees).
 **Example:**
 
 ```sql
-    select DIF.getDec('MyCats','ascc25');
-    +-------------------------------+
-    | DIF.getDec('MyCats','ascc25') |
-    +-------------------------------+
-    | DECmas/3.6e6                  |
-    +-------------------------------+
+    select DIF.getDec('MyCats', 'ascc25') as Dec_field;
+    +--------------+
+    | Dec_field    |
+    +--------------+
+    | DECmas/3.6e6 |
+    +--------------+
 ```
 
 ### [RAcol]
@@ -1939,7 +1939,7 @@ field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
 and `Ra_field` in `DIF.tbl`
 
 **Syntax:**
-`DIF.RAcol(db CHAR(64), table CHAR(64))`
+`DIF.RAcol(db, table)`
 
 *db* `CHAR(64)` : name of the database which contains the table;
 
@@ -1951,12 +1951,12 @@ The name of the column with right ascension.
 **Example:**
 
 ```sql
-    select DIF.RAcol('MyCats','ascc25');
-    +------------------------------+
-    | DIF.RAcol('MyCats','ascc25') |
-    +------------------------------+
-    | RAmas                        |
-    +------------------------------+
+    select DIF.RAcol('MyCats', 'ascc25') as RA_colname;
+    +------------+
+    | RA_colname |
+    +------------+
+    | RAmas      |
+    +------------+
 ```
 
 ### [DECcol]
@@ -1966,7 +1966,7 @@ field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
 and `Dec_field` in `DIF.tbl`
 
 **Syntax:**
-`DIF.DECcol(db CHAR(64), table CHAR(64))`
+`DIF.DECcol(db, table)`
 
 *db* `CHAR(64)` : name of the database which contains the table;
 
@@ -1978,12 +1978,12 @@ The name of the column with declination.
 **Example:**
 
 ```sql
-    select DIF.DECcol('MyCats','ascc25');
-    +-------------------------------+
-    | DIF.DECcol('MyCats','ascc25') |
-    +-------------------------------+
-    | DECmas                        |
-    +-------------------------------+
+    select DIF.DECcol('MyCats', 'ascc25') as Dec_colname;
+    +-------------+
+    | Dec_colname |
+    +-------------+
+    | DECmas      |
+    +-------------+
 ```
 
 ### [difInfo]
@@ -1992,9 +1992,9 @@ Show info about a given **DIF** function or procedure reading from
 `DIF.func`.
 
 **Syntax:**
-`call DIF.difInfo(IN udf VARCHAR(64))`
+`call DIF.difInfo(IN udf)`
 
-*udf* `VARCHAR` : the name of the function or procedure;
+*udf* `VARCHAR(64)` : the name of the function or procedure;
 
 **Return value** (`6 VARCHAR`):
 The fields present in `DIF.func`, i.e.
