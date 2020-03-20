@@ -17061,6 +17061,10 @@ DIF_VERSION="$PACKAGE_VERSION"
 ac_config_files="$ac_config_files Makefile version doc/Makefile contrib/Makefile src/Makefile scripts/Makefile sql/Makefile sql/Messier.sql sql/funcdesc.sql scripts/dif"
 
 
+# Touch aclocal managed files - ignore returned status
+  echo "...touching 'configure aclocal.m4 Makefile.in src/config.h.in'"
+  dummy=`touch configure aclocal.m4 Makefile.in src/config.h.in`
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure

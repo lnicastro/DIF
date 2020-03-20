@@ -10,7 +10,7 @@ fast query execution even on billion-row tables.
   MySQL source version anymore. It's enough to get the source code and execute
   a `cmake` configuration. See below.
 
-See also [web page](http://ross.iasfbo.inaf.it/dif/) or the
+See also [web page](http://ross.oas.inaf.it/dif/) or the
 [documentation](doc/) and the
 [reference paper](http://www.hindawi.com/journals/aa/2010/524534.html).
 
@@ -30,21 +30,8 @@ This is the **Version 0.5.5** development tree.
 
 ## Compile and install
 Compiling DIF depends on how you installed MySQL/MariaDB on your machine.
-
-> **Note:** if you download DIF from GitHub, to avoid autotools requirements
->   with a message like this:
-```
-...
-DIF/config/missing: line 81: aclocal-1.16: command not found
-WARNING: 'aclocal-1.16' is missing on your system.
-...
-```
-
-give a `touch` command before running `configure`. So, from the code main directory:
-
+Typically.
 ```shell
-touch configure aclocal.m4 Makefile.in src/config.h.in
-
 ./configure --with-mysql-source=/path_to/mysql_source_directory
 make
 sudo make install
@@ -53,7 +40,24 @@ sudo make install
 
 DIF v. 0.5.5 should work on MySQL 5.1, 5.5, 5.6, 5.7 and 8.0. Implementation
 for MariaDB is at the moment limited to version 10.3.
-Let's consider the two possible MySQL installations.
+
+**Note:** if you retrieved DIF from GitHub and running `make` you get a message like this
+```
+...
+DIF/config/missing: line 81: aclocal-1.16: command not found
+WARNING: 'aclocal-1.16' is missing on your system.
+...
+```
+then give a `touch` command before running `configure`. So, from the code main directory:
+
+```shell
+touch configure aclocal.m4 Makefile.in src/config.h.in
+
+./configure --with-mysql-source=/path_to/mysql_source_directory
+make
+sudo make install
+```
+Let's now consider the two possible MySQL installations.
 
 **Case 1: MySQL/MariaDB installed via prebuilt package**
 
@@ -264,12 +268,12 @@ mysql> select * from mysql.func;
 **Test with an astro-cat**
 
 Download the reduced version of the
-[ASCC 2.5](http://ross2.iasfbo.inaf.it/dif/data/ascc25_mini.sql.gz) star
+[ASCC 2.5](http://ross2.oas.inaf.it/dif/data/ascc25_mini.sql.gz) star
 catalogue in a working directory, say `dif_data`. From a terminal:
 ```
 shell> mkdir ~/dif_data
 shell> cd ~/dif_data
-shell> wget http://ross2.iasfbo.inaf.it/dif/data/ascc25_mini.sql.gz
+shell> wget http://ross2.oas.inaf.it/dif/data/ascc25_mini.sql.gz
 shell> gunzip ascc25_mini.sql.gz
 ```
 
@@ -313,26 +317,26 @@ Enter the MySQL client terminal, e.g. `mysql -u root -p Catalogs`, then:
 
 ```sql
 -- all the info for objects in a circle of radius 18 arcmin around RA=30, Dec=30
-  SELECT * FROM ascc25_mini_htm_6 WHERE dif_Circle(30,30,18);
+  SELECT * FROM ascc25_mini_htm_6 WHERE dif_Circle(30, 30, 18);
 
 -- as above, but returning coordinates and magnitudes in standard format
   SELECT RAmas/3.6e6 as RA, DECmas/3.6e6 as Decl, Bmm/1000 as B, Vmm/1000 as V
     FROM ascc25_mini_htm_6
-    WHERE dif_Circle(30,30,18);
+    WHERE dif_Circle(30, 30, 18);
 
 -- only magnitudes V less than 11 for objects in a square with side 33 arcmin
   SELECT Bmm/1000 as B, Vmm/1000 as V
      FROM ascc25_mini_htm_6
-     WHERE dif_Rect(100,-20,33) and Vmm < 11000;
+     WHERE dif_Rect(100, -20, 33) and Vmm < 11000;
 
 -- only magnitudes V less than 12 for objects in a pseudo-rectangle with sides
 -- 30, 15 arcmin (along RA, Dec)
   SELECT Bmm/1000 as B, Vmm/1000 as V
      FROM ascc25_mini_htm_6
-     WHERE dif_Rect(100,-20, 30, 15) and Vmm < 12000;
+     WHERE dif_Rect(100, -20, 30, 15) and Vmm < 12000;
 
 -- a query using the HEALPix indexing
   SELECT ramas/3.6e6 as radeg, decmas/3.6e6 as decdeg, Vmm/1000 as Vmag, (Bmm-Vmm)/1000 as color
      FROM ascc25_mini_healp_nest_10
-     WHERE dif_Circle(30,-20,30);
+     WHERE dif_Circle(30, -20, 30);
 ```

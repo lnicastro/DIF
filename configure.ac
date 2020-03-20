@@ -177,4 +177,8 @@ AC_CONFIG_FILES([
    scripts/dif
 ])
 
+# Touch aclocal managed files - ignore returned status
+  echo "...touching 'configure aclocal.m4 Makefile.in src/config.h.in'"
+  dummy=`touch configure aclocal.m4 Makefile.in src/config.h.in`
+
 AC_OUTPUT
