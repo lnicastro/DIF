@@ -10,9 +10,8 @@ fast query execution even on billion-row tables.
   MySQL source version anymore. It's enough to get the source code and execute
   a `cmake` configuration. See below.
 
-See also [web page](http://ross.oas.inaf.it/dif/) or the
-[documentation](doc/) and the
-[reference paper](http://www.hindawi.com/journals/aa/2010/524534.html).
+See also the [documentation](doc/) or the [web page](http://ross.oas.inaf.it/dif/)
+and the [reference paper](http://www.hindawi.com/journals/aa/2010/524534.html).
 
 If you want to use almost all of the DIF capabilities but avoid to use MySQL /
 MariaDB source code, please use [SID](https://github.com/lnicastro/SID) instead.
@@ -145,7 +144,6 @@ Below we assume you installed a prebuilt MySQL 5.7.29. In any case, remember tha
 ```
 git clone https://github.com/lnicastro/DIF.git
 cd DIF
-touch configure aclocal.m4 Makefile.in src/config.h.in
 ./configure --with-mysql-source=/path_to/mysql-5.7.29
 make
 sudo make install
@@ -155,7 +153,6 @@ sudo make install
 ```
 unzip DIF-master.zip
 cd DIF-master
-touch configure aclocal.m4 Makefile.in src/config.h.in
 ./configure --with-mysql-source=/path_to/mysql-5.7.29
 make
 sudo make install
