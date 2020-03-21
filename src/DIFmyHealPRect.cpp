@@ -29,7 +29,7 @@
   Return 0 on success.
 
 
-  LN@IASF-INAF, July 2016                   ( Last change: 08/06/2017 )
+  LN@INAF-OAS, July 2016                   ( Last change: 21/03/2020 )
 */
 
 #include <algorithm>
@@ -117,7 +117,7 @@ for (unsigned short i=0; i<4; i++)
 #endif
 
 // All interested pixels!
-      base->query_polygon_inclusive(vertex, pixset, 2);
+      base->query_polygon_inclusive(vertex, pixset, 8);
 
 // If just 1 then stop here
 
@@ -161,12 +161,14 @@ for (unsigned short i=0; i<4; i++)
 #endif
 
 // maximum angular distance between any pixel center and its corners, in radians
-    double mpr = base->max_pixrad();
+// Mar. 2020 -> incrementated by 50%
+    double mpr = base->max_pixrad() * 1.5;
 
 // Decrease by the max pix. radius. This would give all pixel (approx ?!)
 // fully covered by the rectangle.
 
     double mpr_c = mpr / cos(PID2 - (vertex[0].theta+vertex[1].theta)/2.);
+
     vertex[0].phi += mpr_c;
     vertex[0].theta -= mpr;
     vertex[2].phi -= mpr_c;
@@ -183,7 +185,7 @@ for (unsigned short i=0; i<4; i++)
 #endif
 
     if (vertex[0].theta - vertex[1].theta > 0) {
-      base->query_polygon_inclusive(vertex, pixset, 4);
+      base->query_polygon_inclusive(vertex, pixset, 8);
 
       if (pixset.size() > 0) {
 
