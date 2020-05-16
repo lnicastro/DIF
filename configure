@@ -17064,8 +17064,8 @@ ac_config_files="$ac_config_files Makefile version doc/Makefile contrib/Makefile
 # Touch aclocal managed files - ignore returned status
 { $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
 $as_echo "$as_me: " >&6;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}:  \"...touching 'configure aclocal.m4 Makefile.in src/config.h.in'" >&5
-$as_echo "$as_me:  \"...touching 'configure aclocal.m4 Makefile.in src/config.h.in'" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: ...touching 'configure aclocal.m4 Makefile.in src/config.h.in'" >&5
+$as_echo "$as_me: ...touching 'configure aclocal.m4 Makefile.in src/config.h.in'" >&6;}
   dummy=`touch configure aclocal.m4 Makefile.in src/config.h.in`
 { $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
 $as_echo "$as_me: " >&6;}
