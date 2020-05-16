@@ -416,6 +416,18 @@ END//
 
 
 #@ONERR_IGNORE||
+DROP FUNCTION IF EXISTS getRaDec//
+
+#@ONERR_DIE|Cannot create function getRaDec|
+CREATE FUNCTION getRaDec(p_db CHAR(64), p_name CHAR(64))
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+  RETURN (SELECT CONCAT(Ra_field, ',', Dec_field) FROM (SELECT Ra_field, Dec_field FROM DIF.tbl WHERE db=p_db AND name=p_name LIMIT 1) as t);
+END//
+
+
+#@ONERR_IGNORE||
 DROP FUNCTION IF EXISTS RAcol//
 
 #@ONERR_DIE|Cannot create function RAcol|
@@ -437,7 +449,7 @@ BEGIN
     FETCH c INTO colname;
     IF NOT eof THEN
       IF ((locate(colname,RAfield)) > 0) THEN
-        RETURN colname;
+        RETURN CONCAT('`', colname, '`');
       END IF;
     END IF;
   UNTIL eof END REPEAT;
@@ -469,7 +481,50 @@ BEGIN
     FETCH c INTO colname;
     IF NOT eof THEN
       IF ((locate(colname,DECfield)) > 0) THEN
-        RETURN colname;
+        RETURN CONCAT('`', colname, '`');
+      END IF;
+    END IF;
+  UNTIL eof END REPEAT;
+  CLOSE c;
+
+  RETURN '';
+END//
+
+
+#@ONERR_IGNORE||
+DROP FUNCTION IF EXISTS RADECcol//
+
+#@ONERR_DIE|Cannot create function RADECcol|
+CREATE FUNCTION RADECcol(p_db CHAR(64), p_name CHAR(64))
+RETURNS VARCHAR(64)
+DETERMINISTIC
+BEGIN
+  DECLARE RAfield VARCHAR(100);
+  DECLARE DECfield VARCHAR(100);
+  DECLARE colRA VARCHAR(64) DEFAULT '';
+  DECLARE colDE VARCHAR(64) DEFAULT '';
+  DECLARE colname VARCHAR(64);
+  DECLARE eof INT DEFAULT 0;
+  DECLARE c CURSOR FOR SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=p_db AND TABLE_NAME=p_name;
+  DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET eof = 1;
+
+  SELECT Ra_field, Dec_field INTO RAfield, DECfield FROM DIF.tbl WHERE db=p_db AND name=p_name LIMIT 1;
+
+  OPEN c;
+
+  REPEAT
+    FETCH c INTO colname;
+    IF NOT eof THEN
+      IF ((locate(colname,RAfield)) > 0) THEN
+	SET colRA = CONCAT('`', colname, '`');
+	IF (colDE != '') THEN
+	  RETURN CONCAT(colRA, ',', colDE);
+	END IF;
+      ELSEIF ((locate(colname,DECfield)) > 0) THEN
+        SET colDE = CONCAT('`', colname, '`');
+	IF (colRA != '') THEN
+	  RETURN CONCAT(colRA, ',', colDE);
+	END IF;
       END IF;
     END IF;
   UNTIL eof END REPEAT;

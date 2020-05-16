@@ -1,4 +1,9 @@
 2020-03-17 LN, ver. 0.5.5
+	- Added getRaDec and RADECcol SQL functions.
+	- Minor change to configure.ac, RAcol and DECcol.
+	- Documentation updated.
+
+2020-03-17 LN, ver. 0.5.5
 	- Fixed rectangular region selection defined by 4 corners.
 	  Affected file: src/udf.cc
 	  Affected DIF function: DIF_RectV
@@ -16,8 +21,8 @@
 	- configure.ac updated in order to allow installation with MariaDB 10.3.12:
 	  libmariadbd.so replaces libmariadb.so
 	- Updated: src/ha_dif.h, src/ha_dif.cc, src/udf.cc
-	- In HEALPix lib. Makefile use -std=c++x0 instead of c++11 to allow compilation
-	  with gcc 4.4.7 (CentOS 6.10)
+	- In HEALPix lib. Makefile uses -std=c++x0 instead of -std=c++11 to allow
+	  compilation with gcc 4.4.7 (CentOS 6.10)
 	- Removed dif.tex and dif.pdf from doc (Makefile.am updated)
 	- Added README.md documentation and png images in doc, doc/includes
 

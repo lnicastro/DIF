@@ -48,8 +48,6 @@ typedef unsigned long long      uint64;
 #define NOT_FIXED_DEC                   31
 #endif
 
-
-
 /* Minimum cone radius or rectangle half side: ~ 1 mas - this is function
   of K and "fact" in "query_disc_inclusive" and "query_multidisc" - TBC
 */
@@ -344,9 +342,14 @@ char * HTMnameById(UDF_INIT *init, UDF_ARGS *args,
   //char idname[33];
 
   if ( getHTMnameById1(id, idname) ) {
-    *error = 1;
+const char *e = "Wrong input ID";
+strcpy(error, e); 
+*length = 0;
+    //*error = 1;
     *is_null = 1;
-    return NULL;
+    //return NULL;
+    const char *ee = "Incorrect input";
+    return (char *)ee;
   } else {
     *length = (unsigned long) strlen(idname);
     //result = idname;
@@ -1259,10 +1262,10 @@ my_bool HEALPBoundC_init(UDF_INIT *init, UDF_ARGS *args, char *message)
 // Initial buffer size is 2048 chars
   init->ptr = NULL;
   if ( !(init->ptr = (char *) malloc(sizeof(char) * 2048)) ) {
-        strcpy(message, "Couldn't allocate memory!");
-        return 1;
-   }
-   memset( init->ptr, 0, sizeof(char) * 2048 );
+	strcpy(message, "Couldn't allocate memory!");
+	return 1;
+  }
+  memset( init->ptr, 0, sizeof(char) * 2048 );
 
   return 0;
 }
@@ -1527,14 +1530,13 @@ my_bool DIF_FineSearch_init(UDF_INIT* init, UDF_ARGS *args, char *message)
 longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
                         char *is_null, char* error)
 {
-    double side1, side2, sep;
+    double sep; // side1, side2;
     double ra = DARGS(0);
     double de = DARGS(1);
     double ra1 = difreg->ra1;
     double de1 = difreg->de1;
-    double ra2 = difreg->ra3;    // Clockwise coords. See DIF_Rectv_init !
-    double de2 = difreg->de2;
-    double rad = difreg->rad;
+    double ra2 = difreg->ra3;    // Clockwise coords. See DIF_Rect_init and DIF_Rectv_init !
+    double de2 = difreg->de3;
     longlong ret = 0;
 
     if (*(args->args[2]))
@@ -1544,20 +1546,20 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
       return 0;
     difreg->subStart();
     
-    unsigned short ra1border=0; // Toggle for negative start RA range
+    //unsigned short ra1border=0; // Toggle for negative start RA range
 
     switch (difreg->regtype) {
 	case DIF_REG_CIRCLE:
 	    sep = skysep_h(ra1, de1, ra, de, 0);
-	    if (sep >= 0. && sep <= rad)
+	    if (sep >= 0. && sep <= difreg->rad)
 		ret = 1;
 	    break;
 
 // Note:
 // the rectangle is always defined by its 4 vertices therefore the
 // two following cases should never be verified!
-/*
 	case DIF_REG_RECT:
+/*
 	    //Actually ra2 and de2 are the sides in arcmin
 	    side1 = ra2 / 60.; //arcmin to degree
 	    side2 = de2 / 60.;
@@ -1583,8 +1585,9 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
 		    ret = 1;
 	    }
 	    break;
-
+*/
 	case DIF_REG_2VERT:
+/*
 	    //At this point we know that ra2 > 0
 	    if ((ra1 > ra2)    ||    (ra2 > 360.))   {  //Cross 0
 		if (ra2 > 360.)
@@ -1605,6 +1608,8 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
 
         case DIF_REG_4VERT: //Simple range check
 /* Check for 0 crossing effects: only two cases considered here! See also DIF_Rectv_init */
+/* Not needed */
+/*
           if (ra1 < 0.)
           {
             ra1 += 360.;
@@ -1617,10 +1622,12 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
                 (de1 <= de    &&   de <= de2))     // Clockwise coords
 	      ret = 1;
 	  } else {
+*/
             if ((ra1 <= ra    &&   ra <= ra2)   &&
                 (de1 <= de    &&   de <= de2))     // Clockwise coords
 	      ret = 1;
-	  }
+
+	//}
 	  break;
 
 	case DIF_REG_NEIGHBC:
@@ -1637,6 +1644,10 @@ longlong DIF_FineSearch(UDF_INIT *init, UDF_ARGS *args,
 
 
     difreg->subStop();
+//char ee[128];
+//sprintf(ee, "%13.8lf,%13.8lf %13.8lf,%13.8lf  %13.8lf,%13.8lf\0", ra1,de1, ra2,de2, ra,de);
+//const char *e = ee;
+//strcpy(error, e);
     return ret;
 }
 
@@ -1718,10 +1729,12 @@ my_bool DIF_Rect_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   }
 
 // Some parameter checks
-  while (cra < 0.) cra += 360.;
+    while (cra < 0.)
+    cra += 360.;
+  while (cra > 360.)
+    cra -= 360.;
 
-  if ( (! (  0. <= cra      &&  cra       <  360.))  ||
-       (! (-90. <= cde      &&  cde       <=  90.))  ||
+  if ( (! (-90. <= cde      &&  cde       <=  90.))  ||
        (! (  0. < hside_ra  &&  hside_ra  <= 180.))  ||
        (! (  0. < hside_de  &&  hside_de  <=  90.)) ) {
     strcpy(message, argerr);
@@ -1730,6 +1743,9 @@ my_bool DIF_Rect_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   }
 
   hside_ra /= cos(cde*M_PI/180.);
+
+  if (hside_ra > 180.)
+    hside_ra = 180.;
 
 // Note:
 // always calculate the 4 corners in order to use always the
@@ -1740,18 +1756,12 @@ my_bool DIF_Rect_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   double de2 = cde + hside_de;
   bool is_ring = false;
 
-  if (hside_ra >= 180.) {
-    is_ring = true;
-    hside_ra = 180.;
-    ra1 = MIN_OFF_DEG;
-    ra3 = 360.;
-  } else {
-    if (ra1 < 0.)
-      ra1 += 360.;
+// RA in range
+  if (ra1 < 0.)
+    ra1 += 360.;
+  if (ra3 > 360.)
+    ra3 -= 360.;
 
-    if (ra3 > 360.)
-      ra3 -= 360.;
-  }
   difreg->ra1 = ra1;
   difreg->ra3 = ra3;
   difreg->ra2 = difreg->ra1;
@@ -1865,18 +1875,18 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
     }
 
 // Use maximum rectangle including the given coordinates
-    sort(ra.begin(),ra.end());
-    sort(de.begin(),de.end());
+    sort(ra.begin(), ra.end());
+    sort(de.begin(), de.end());
     ra1 = ra[0];
     de1 = de[0];
     ra2 = ra[3];
     de2 = de[3];
   }
 
-  if (ra1 < 0.)
+// RA in 0 - 2pi
+  while (ra1 < 0.)
     ra1 += 360.;
-
-  if (ra2 > 360.)
+  while (ra2 > 360.)
     ra2 -= 360.;
 
   if (ra1 == ra2) {
@@ -1897,6 +1907,7 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
 
   if (difreg->getSchema() == DIF_HEALP_NEST || difreg->getSchema() == DIF_HEALP_RING)
   {
+// Peculiar Dec
     if (de1 < -90.) {
       //if (is_ring)
         de1 = -90. + MIN_OFF_DEG;
@@ -1929,7 +1940,7 @@ my_bool DIF_Rectv_init(UDF_INIT* init, UDF_ARGS *args, char *message)
   difreg->de3 = difreg->de2;
   difreg->de4 = difreg->de1;
 
-//sprintf(message, "%13.8lf,%13.8lf %13.8lf,%13.8lf  \0", difreg->ra1,difreg->de1, difreg->ra3,difreg->de2);
+//sprintf(message, "%13.8lf,%13.8lf %13.8lf,%13.8lf  \0", difreg->ra1,difreg->de1, difreg->ra3,difreg->de3);
 //return 1;
   difreg->regtype = DIF_REG_4VERT;
   return 0;

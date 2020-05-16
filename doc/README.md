@@ -103,12 +103,13 @@ Some of the changes/additions listed were already introduced in later 0.5.4 vers
 
 - Changed `DIF.tbl` column definitions.
 
-- Added RAcol and DECcol SQL procedures.
+- Added RAcol and DECcol SQL functions.
 
 - Added sub dif\_update in dif script.
 
 - Added --ra-key option to dif script.
 
+- Added getRaDec and RADECcol SQL functions.
 
 To Be Continued
 
@@ -1932,6 +1933,33 @@ The SQL expression to get the declination (degrees).
     +--------------+
 ```
 
+### [getRaDec]
+
+Simply read the `Ra_field` and `Dec_field` from `DIF.tbl`, i.e. return the SQL
+expression to get the declination / latitude as degrees for entries of a
+given table.
+
+**Syntax:**
+`DIF.getRaDec(db, table)`
+
+*db* `CHAR(64)` : name of the database which contains the table;
+
+*table* `CHAR(64)` : name of the table;
+
+**Return value** (`VARCHAR`):
+The SQL expression to get the declination (degrees).
+
+**Example:**
+
+```sql
+    select DIF.getDec('MyCats', 'ascc25') as RaDec_field;
+    +--------------------------+
+    | RaDec_field              |
+    +--------------------------+
+    | RAmas/3.6e6,DECmas/3.6e6 |
+    +--------------------------+
+```
+
 ### [RAcol]
 
 Return the column name containing the RA in a given table. It performs
@@ -1955,7 +1983,7 @@ The name of the column with right ascension.
     +------------+
     | RA_colname |
     +------------+
-    | RAmas      |
+    | `RAmas`    |
     +------------+
 ```
 
@@ -1982,8 +2010,35 @@ The name of the column with declination.
     +-------------+
     | Dec_colname |
     +-------------+
-    | DECmas      |
+    | `DECmas`    |
     +-------------+
+```
+
+### [RADECcol]
+
+Return the column name containing the RA and Dec in a given table. It performs
+field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
+and `Ra_field`, `Dec_field` in `DIF.tbl`
+
+**Syntax:**
+`DIF.RADECcol(db, table)`
+
+*db* `CHAR(64)` : name of the database which contains the table;
+
+*table* `CHAR(64)` : name of the table;
+
+**Return value** (`VARCHAR`):
+The name of the column with right ascension.
+
+**Example:**
+
+```sql
+    select DIF.RADECcol('MyCats', 'ascc25') as RADEC_colnames;
+    +------------------+
+    | RADEC_colnames   |
+    +------------------+
+    | `RAmas`,`DECmas` |
+    +------------------+
 ```
 
 ### [difInfo]

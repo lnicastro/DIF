@@ -91,11 +91,11 @@ cd mysql-5.7.29
 pwd
 ```
 Annotate the directory name and [go to install section](#dif_compile)!
-If instead the installed version is e.g. 8.0.19 (in a temporary directory):
+If instead the installed version is e.g. 8.0.20 (in a temporary directory):
 ```shell
-wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.19.tar.gz
-tar zxvf mysql-boost-8.0.19.tar.gz
-cd mysql-8.0.19
+wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.20.tar.gz
+tar zxvf mysql-boost-8.0.20.tar.gz
+cd mysql-8.0.20
 
 mkdir bld
 cd bld
@@ -121,7 +121,8 @@ cmake .. -DENABLE_DTRACE=0 -DDEBUG_ON=0 -DWITH_DEBUG=0 -DPLUGIN_EXAMPLE=YES -DPL
 
 pwd
 ```
-The `-DENABLE_DTRACE=0` on some systems is necessary to avoid the compilation error
+The `-DENABLE_DTRACE=0` on some systems is necessary to avoid the compilation error.
+
 Annotate the directory name and then you are ready to [install DIF](#dif_compile).
 ```
 ... error: probes_mysql_dtrace.h: No such file or directory
