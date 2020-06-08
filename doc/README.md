@@ -1045,8 +1045,8 @@ HTM trixel Id.
 **Example:**
 
 ```sql
-    select HTMidByName('S0000000');
-      32768
+select HTMidByName('S0000000');
+  32768
 ```
 
 ### [HTMnameById]
@@ -1062,8 +1062,8 @@ HTM trixel Id name.
 **Example:**
 
 ```sql
-    select HTMnameById(32768);
-      S0000000
+select HTMnameById(32768);
+  S0000000
 ```
 
 ### [HTMBary]
@@ -1083,8 +1083,8 @@ Comma separated coordinates of the HTM trixel barycenter, in degrees.
 **Example:**
 
 ```sql
-    select HTMBary(6, 32768);
-      0.4687499999999769, -0.46875
+select HTMBary(6, 32768);
+  0.4687499999999769, -0.46875
 ```
 
 ### [HTMBaryC]
@@ -1102,14 +1102,13 @@ spherical coordinates.
 *Dec* `DOUBLE` : declination (or latitude), in degrees;
 
 **Return value** (`STRING`):
-Comma separated coordinates of the HTM trixel barycenter, in
-degrees.
+Comma separated coordinates of the HTM trixel barycenter, in degrees.
 
 **Example:**
 
 ```sql
-    select HTMBaryC(6, 20, 30);
-      20.03084356871285, 30.26104286747405
+select HTMBaryC(6, 20, 30);
+  20.03084356871285, 30.26104286747405
 ```
 
 ### [HTMBaryDist]
@@ -1134,16 +1133,18 @@ Angular distance from the trixel barycenter, in arcmin.
 **Example:**
 
 ```sql
-    select HTMBaryDist(6, htmID_6, RAmas/3.6e6, DECmas/3.6e6) from
-           UCAC_2orig_htm_6 where DIF_Circle(100, 0, 10);
-      ...
-      260 rows in set
+select HTMBaryDist(6, 36896, 101.5, 0.5) as bc36896_dist;
+  91.78552061262009
+
+select HTMBaryDist(6, htmID_6, RAmas/3.6e6, DECmas/3.6e6) from
+         UCAC_2orig_htm_6 where DIF_Circle(100, 0, 10);
+...
+  260 rows in set
 ```
 
 ### [HTMLookup]
 
-Return the ID of the HTM trixel given depth and a pair of spherical
-coordinates.
+Return the ID of the HTM trixel given depth and a pair of spherical coordinates.
 
 **Syntax:**
 `HTMLookup(Depth, Ra, Dec)`
@@ -1160,8 +1161,8 @@ ID of the HTM trixel.
 **Example:**
 
 ```sql
-    select HTMLookup(6, 20, 30);
-      64152
+select HTMLookup(6, 20, 30);
+  64152
 ```
 
 ### [HTMNeighb]
@@ -1183,8 +1184,8 @@ angles the neighbors are (typically) 10.
 **Example:**
 
 ```sql
-    select HTMNeighb(6, 32768);
-      32769, 32770, 32771, 47104, 47106, 47107, 49152, 63488, 63489, 63491
+select HTMNeighb(6, 32768);
+  32769, 32770, 32771, 47104, 47106, 47107, 49152, 63488, 63489, 63491
 ```
 
 ### [HTMsNeighb]
@@ -1207,11 +1208,11 @@ A comma separated string with the HTM trixel IDs at level *oDepth*.
 **Example:**
 
 ```sql
-    select HTMsNeighb(6, 32768, 8);
-      524312, 524324, 524340, 524341, 524343, 524344, 524346, 524347, 524348,
-      753664, 753666, 753667, 753672, 753673, 753675,753677, 753700, 753716,
-      786432, 1015808, 1015809, 1015811, 1015812, 1015814, 1015815, 1015822,
-      1015832, 1015864
+select HTMsNeighb(6, 32768, 8);
+  524312, 524324, 524340, 524341, 524343, 524344, 524346, 524347, 524348,
+  753664, 753666, 753667, 753672, 753673, 753675,753677, 753700, 753716,
+  786432, 1015808, 1015809, 1015811, 1015812, 1015814, 1015815, 1015822,
+  1015832, 1015864
 ```
 
 ### [HTMNeighbC]
@@ -1236,9 +1237,9 @@ Order is: the central one, the remaining 12 sorted in ascending order.
 **Example:**
 
 ```sql
-    select HTMNeighbC(6, 100, 60);
-      58772, 58773, 58774, 58775, 58792, 58800, 58802, 58803, 58820, 58840,
-      58841, 58843, 58872
+select HTMNeighbC(6, 100, 60);
+  58772, 58773, 58774, 58775, 58792, 58800, 58802, 58803, 58820, 58840,
+  58841, 58843, 58872
 ```
 
 ### Wrapper to function in the HEALPix library
@@ -1266,8 +1267,8 @@ Comma separated coordinates of the HEALPix pixel center, in degrees.
 **Example:**
 
 ```sql
-    select HEALPBary(1, 8, 500);
-      48.1640625, 6.429418462523309
+select HEALPBary(1, 8, 500);
+  48.1640625, 6.429418462523309
 ```
 
 ### [HEALPBaryC]
@@ -1292,8 +1293,8 @@ Comma separated coordinates of the HEALPix pixel center, in degrees.
 **Example:**
 
 ```sql
-    select HEALPBaryC(0, 8, 20.5, 30.8);
-      20.390625, 30.86525625461861
+select HEALPBaryC(0, 8, 20.5, 30.8);
+  20.390625, 30.86525625461861
 ```
 
 ### [HEALPBaryDist]
@@ -1320,10 +1321,13 @@ Angular distance from the pixel center, in arcmin.
 **Example:**
 
 ```sql
-    select HEALPBaryDist(1, 8, healpID_nest_8, RAmas/3.6e6, DECmas/3.6e6) from
-           UCAC_2orig_healp_nest_8 where DIF_Circle(100, 0, 10);
-      ...
-      260 rows in set
+select HEALPBaryDist(1, 8, 354650, 101.5, 0.5) as bc354650_dist;
+  93.75625570631003 |
+
+select HEALPBaryDist(1, 8, healpID_nest_8, RAmas/3.6e6, DECmas/3.6e6) from
+         UCAC_2orig_healp_nest_8 where DIF_Circle(100, 0, 10);
+...
+  260 rows in set
 ```
 
 ### [HEALPLookup]
@@ -1348,8 +1352,8 @@ ID of the HEALPix pixel.
 **Example:**
 
 ```sql
-    select HEALPLookup(0, 8, 20, 30);
-      196152
+select HEALPLookup(0, 8, 20, 30);
+  196152
 ```
 
 ### [HEALPNeighb]
@@ -1374,8 +1378,8 @@ Order is: the SW, W, NW, N, NE, E, SE and S neighbor.
 **Example:**
 
 ```sql
-    select HEALPNeighb(0, 8, 1000);
-      1091, 999, 912, 829, 913, 1001, 1092, 1187
+select HEALPNeighb(0, 8, 1000);
+  1091, 999, 912, 829, 913, 1001, 1092, 1187
 ```
 
 ### [HEALPNeighbC]
@@ -1402,8 +1406,8 @@ Order is: central one, the SW, W, NW, N, NE, E, SE and S neighbor.
 **Example:**
 
 ```sql
-    select HEALPNeighbC(1, 8, 100,60);
-      113911, 113910, 113916, 113917, 114088, 114082, 114080, 113909, 113908
+select HEALPNeighbC(1, 8, 100,60);
+  113911, 113910, 113916, 113917, 114088, 114082, 114080, 113909, 113908
 ```
 
 ### [HEALPBound]
@@ -1431,9 +1435,9 @@ coordinates.
 **Example:**
 
 ```sql
-    select HEALPBound(1, 8, 1000);
-      43.9453125, 8.38553864708132, 43.76953125, 8.234747571463606,
-      43.9453125, 8.084013907099306, 44.12109375, 8.234747571463606
+select HEALPBound(1, 8, 1000);
+  43.9453125, 8.38553864708132, 43.76953125, 8.234747571463606,
+  43.9453125, 8.084013907099306, 44.12109375, 8.234747571463606
 ```
 
 ### [HEALPBoundC]
@@ -1463,9 +1467,9 @@ coordinates.
 **Example:**
 
 ```sql
-    select HEALPBoundC(1, 8, 100,60);
-      100, 60.05627904951215, 99.93865030674847, 59.86707420480209,
-      100.4268292682927, 59.67778522657881, 100.4907975460123, 59.86707420480209
+select HEALPBoundC(1, 8, 100,60);
+  100, 60.05627904951215, 99.93865030674847, 59.86707420480209,
+  100.4268292682927, 59.67778522657881, 100.4907975460123, 59.86707420480209
 ```
 
 ### [HEALPMaxS]
@@ -1479,24 +1483,24 @@ Return the HEALPix pixel max size (in arcmin) from center to corner
 *Order* `INT` : order ([0:29]) of the pixelization scheme;
 
 **Return value** (`DOUBLE`):
-Angular distance in arcmin from the center of the pixel to the
-furthest corner.
+Angular distance in arcmin from the center of the pixel to the furthest corner.
 
 **Example:**
 
 ```sql
-    select HealPMaxS(6);
-      57.24888364432666
-    select HealPMaxS(8);
-      14.34420720055738
-    select HealPMaxS(12);
-      0.8971372281806288
+select HealPMaxS(6);
+  57.24888364432666
+
+select HealPMaxS(8);
+  14.34420720055738
+
+select HealPMaxS(12);
+  0.8971372281806288
 ```
 
 ### [Sphedist]
 
-Compute the angular distance given the coordinates of two points on a
-sphere.
+Compute the angular distance given the coordinates of two points on a sphere.
 
 **Syntax:**
 `Sphedist(Ra1, Dec1, Ra2, Dec2)`
@@ -1511,6 +1515,13 @@ sphere.
 
 **Return value** (`DOUBLE`):
 Angular distance between the points, in arcmin.
+
+**Example:**
+
+```sql
+select Sphedist(129.56, -47.66, 131.11, -48.34) as sep_arcmin;
+  74.40942531477204
+```
 
 ### DB engine-related functions: region selections
 
@@ -1532,12 +1543,12 @@ with the given radius.
 *Rad* `DOUBLE` : radius of the cicle, in arcmin;
 
 **Return value** (`BIGINT`):
-Always 1;
+Always 1.
 
 **Example:**
 
 ```sql
-    SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
+SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
 ```
 
 ### [DIF\_Rect]
@@ -1564,10 +1575,10 @@ Always 1.
 **Example:**
 
 ```sql
-    select htmID_8, RAmas/3.6e6, DECmas/3.6e6 from
-           UCAC_2orig_htm_6 where DIF_Rect(100, 30, 10);
-      ...
-      74 rows in set
+select htmID_8, RAmas/3.6e6, DECmas/3.6e6 from
+         UCAC_2orig_htm_6 where DIF_Rect(100, 30, 10);
+...
+  74 rows in set
 ```
 
 ### [DIF\_RectV]
@@ -1607,10 +1618,10 @@ Always 1.
 **Example:**
 
 ```sql
-    select htmID_6, RAmas/3.6e6, DECmas/3.6e6 from
-           UCAC_2orig_htm_6 where DIF_RectV(10, 30, 10.3, 30.3);
-      ...
-      776 rows in set
+select htmID_6, RAmas/3.6e6, DECmas/3.6e6 from
+         UCAC_2orig_htm_6 where DIF_RectV(10, 30, 10.3, 30.3);
+...
+  776 rows in set
 ```
 
 ### [DIF\_NeighbC]
@@ -1631,7 +1642,7 @@ How many HTM/HEALPix pixels have been selected.
 **Example:**
 
 ```sql
-    SELECT * FROM Messier_htm_6 WHERE DIF_NeighbC(82, 22);
+SELECT * FROM Messier_htm_6 WHERE DIF_NeighbC(82, 22);
 ```
 
 Note that for tables with multiple depths you can only use the smaller
@@ -1656,24 +1667,26 @@ NOTE: the table must be **DIF** indexed at both depths! Not available (yet) for 
 **Example:**
 
 ```sql
-    SELECT * FROM Messier_htm_6 WHERE DIF_sNeighb(6, 62392, 8);
+SELECT * FROM Messier_htm_6 WHERE DIF_sNeighb(6, 62392, 8);
 
     | 1 | BN   | Tau   |  8.2 | 83.625 | 22.0167  ...
 ```
 
 Note that you need first to index on depth 8 the Messier catalogue:
-
-      dif --index-htm DIF Messier 8 Ra Decl
+```shell
+dif --index-htm DIF Messier 8 Ra Decl
+```
 
 Also being the catalogue quite small, the values above where calculated
 on purpose with a lookup to the trixels IDs around the coordinates of
 the example above:
 
 ```sql
-    select htmlookup(6, 83.625, 22.0167);
-      62340
-    select htmlookup(6, 83.45, 22.0167);
-      62392
+select htmlookup(6, 83.625, 22.0167);
+  62340
+
+select htmlookup(6, 83.45, 22.0167);
+  62392
 ```
 
 ### DB engine-related functions: auxiliary functions
@@ -1715,8 +1728,8 @@ Cumulative CPU time (in seconds) since last reset.
 **Example:**
 
 ```sql
-    select DIF_cpuTime()/1.;
-      0.36
+select DIF_cpuTime()/1.;
+  0.36
 ```
 
 ### Utility functions
@@ -1725,8 +1738,7 @@ This functions return information about **DIF** indexed tables.
 
 ### [getHTMDepth]
 
-Return the “smallest” (or only) depth of the HTM index created on a
-table.
+Return the “smallest” (or only) depth of the HTM index created on a table.
 
 **Syntax:**
 `DIF.getHTMDepth(db, table)`
@@ -1741,12 +1753,8 @@ The “smallest” depth of HTM indexes in given table.
 **Example:**
 
 ```sql
-    select DIF.getHTMDepth('MyCats', 'ascc25') as min_depth;
-    +-----------+
-    | min_depth |
-    +-----------+
-    |         4 |
-    +-----------+
+select DIF.getHTMDepth('MyCats', 'ascc25') as min_depth;
+  4
 ```
 
 ### [getHEALPOrder]
@@ -1762,24 +1770,18 @@ HEALPix index(es) created on a table.
 *table* `CHAR(64)` : name of the table;
 
 **Return value** (`INT`):
-Smallest resolution parameter of the HEALPix indexes in the given
-table.
+Smallest resolution parameter of the HEALPix indexes in the given table.
 
 **Example:**
 
 ```sql
-    select DIF.getHEALPOrder('MyCats', 'UCAC_2orig') as min_order;
-    +-----------+
-    | min_order |
-    +-----------+
-    |         8 |
-    +-----------+
+select DIF.getHEALPOrder('MyCats', 'UCAC_2orig') as min_order;
+  8
 ```
 
 ### [getHEALPNested]
 
-Return the HEALPix map ID ordering scheme used to create the index on a
-table.
+Return the HEALPix map ID ordering scheme used to create the index on a table.
 
 **Syntax:**
 `DIF.getHEALPNested(db, table, order)`
@@ -1794,12 +1796,8 @@ table.
 Map ordering, 0 for RING, 1 for NESTED.
 
 ```sql
-    select DIF.getHEALPNested('MyCats', 'UCAC_2orig', 8) as is_nested;
-    +-----------+
-    | is_nested |
-    +-----------+
-    |         1 |
-    +-----------+
+select DIF.getHEALPNested('MyCats', 'UCAC_2orig', 8) as is_nested;
+  1
 ```
 
 ### [difview\_Check]
@@ -1821,12 +1819,12 @@ to remove the entry form `DIF.tbl`.
 **Example:**
 
 ```sql
-    call DIF.difview_Check();
-    +------------------------+---------------------------------------------------------+
-    | in_DIF_tbl_but_no_view | to_remove_run_command                                   |
-    +------------------------+---------------------------------------------------------+
-    | test.ascctest          | DELETE FROM DIF.tbl where db="test" AND name="ascctest" |
-    +------------------------+---------------------------------------------------------+
+call DIF.difview_Check();
++------------------------+---------------------------------------------------------+
+| in_DIF_tbl_but_no_view | to_remove_run_command                                   |
++------------------------+---------------------------------------------------------+
+| test.ascctest          | DELETE FROM DIF.tbl where db="test" AND name="ascctest" |
++------------------------+---------------------------------------------------------+
 ```
 
 ### [difview\_htmClean]
@@ -1846,12 +1844,12 @@ The message(s) about unlisted tables in `DIF.tbl`.
 **Example:**
 
 ```sql
-    call DIF.difview_htmClean(0);
-    +---------------------------------------------+
-    | Message                                     |
-    +---------------------------------------------+
-    | test.simplebsc_htm_14 not listed in DIF.tbl |
-    +---------------------------------------------+
+call DIF.difview_htmClean(0);
++---------------------------------------------+
+| Message                                     |
++---------------------------------------------+
+| test.simplebsc_htm_14 not listed in DIF.tbl |
++---------------------------------------------+
 ```
 
 ### [difview\_healpClean]
@@ -1871,19 +1869,18 @@ The message(s) about unlisted tables in `DIF.tbl`.
 **Example:**
 
 ```sql
-    call DIF.difview_healpClean(0);
-    +---------------------------------------------------+
-    | Message                                           |
-    +---------------------------------------------------+
-    | test.simplebsc_healp_nest_8 not listed in DIF.tbl |
-    +---------------------------------------------------+
+call DIF.difview_healpClean(0);
++---------------------------------------------------+
+| Message                                           |
++---------------------------------------------------+
+| test.simplebsc_healp_nest_8 not listed in DIF.tbl |
++---------------------------------------------------+
 ```
 
 ### [getRa]
 
-Simply read the `Ra_field` from `DIF.tbl`, i.e. return the SQL
-expression to get the right ascension / longitude as degrees for entries
-of a given table.
+Simply read the `Ra_field` from `DIF.tbl`, i.e. return the SQL expression
+to get the right ascension / longitude as degrees for entries of a given table.
 
 **Syntax:**
 `DIF.getRa(db, table)`
@@ -1898,19 +1895,14 @@ The SQL expression to get the right ascension (degrees).
 **Example:**
 
 ```sql
-    select DIF.getRa('MyCats', 'ascc25') as RA_field;
-    +-------------+
-    | RA_field    |
-    +-------------+
-    | RAmas/3.6e6 |
-    +-------------+
+select DIF.getRa('MyCats', 'ascc25') as RA_field;
+  RAmas/3.6e6
 ```
 
 ### [getDec]
 
-Simply read the `Dec_field` from `DIF.tbl`, i.e. return the SQL
-expression to get the declination / latitude as degrees for entries of a
-given table.
+Simply read the `Dec_field` from `DIF.tbl`, i.e. return the SQL expression
+to get the declination / latitude as degrees for entries of a given table.
 
 **Syntax:**
 `DIF.getDec(db, table)`
@@ -1925,19 +1917,14 @@ The SQL expression to get the declination (degrees).
 **Example:**
 
 ```sql
-    select DIF.getDec('MyCats', 'ascc25') as Dec_field;
-    +--------------+
-    | Dec_field    |
-    +--------------+
-    | DECmas/3.6e6 |
-    +--------------+
+select DIF.getDec('MyCats', 'ascc25') as Dec_field;
+  DECmas/3.6e6
 ```
 
 ### [getRaDec]
 
 Simply read the `Ra_field` and `Dec_field` from `DIF.tbl`, i.e. return the SQL
-expression to get the declination / latitude as degrees for entries of a
-given table.
+expression to get the declination / latitude as degrees for entries of a given table.
 
 **Syntax:**
 `DIF.getRaDec(db, table)`
@@ -1952,19 +1939,15 @@ The SQL expression to get the declination (degrees).
 **Example:**
 
 ```sql
-    select DIF.getDec('MyCats', 'ascc25') as RaDec_field;
-    +--------------------------+
-    | RaDec_field              |
-    +--------------------------+
-    | RAmas/3.6e6,DECmas/3.6e6 |
-    +--------------------------+
+select DIF.getRaDec('MyCats', 'ascc25') as RaDec_field;
+  RAmas/3.6e6,DECmas/3.6e6
 ```
 
 ### [RAcol]
 
 Return the column name containing the RA in a given table. It performs
 field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
-and `Ra_field` in `DIF.tbl`
+and `Ra_field` in `DIF.tbl`.
 
 **Syntax:**
 `DIF.RAcol(db, table)`
@@ -1979,19 +1962,15 @@ The name of the column with right ascension.
 **Example:**
 
 ```sql
-    select DIF.RAcol('MyCats', 'ascc25') as RA_colname;
-    +------------+
-    | RA_colname |
-    +------------+
-    | `RAmas`    |
-    +------------+
+select DIF.RAcol('MyCats', 'ascc25') as RA_colname;
+  `RAmas`
 ```
 
 ### [DECcol]
 
 Return the column name containing the Dec in a given table. It performs
 field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
-and `Dec_field` in `DIF.tbl`
+and `Dec_field` in `DIF.tbl`.
 
 **Syntax:**
 `DIF.DECcol(db, table)`
@@ -2006,19 +1985,15 @@ The name of the column with declination.
 **Example:**
 
 ```sql
-    select DIF.DECcol('MyCats', 'ascc25') as Dec_colname;
-    +-------------+
-    | Dec_colname |
-    +-------------+
-    | `DECmas`    |
-    +-------------+
+select DIF.DECcol('MyCats', 'ascc25') as Dec_colname;
+  `DECmas`
 ```
 
 ### [RADECcol]
 
 Return the column name containing the RA and Dec in a given table. It performs
 field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
-and `Ra_field`, `Dec_field` in `DIF.tbl`
+and `Ra_field`, `Dec_field` in `DIF.tbl`.
 
 **Syntax:**
 `DIF.RADECcol(db, table)`
@@ -2033,18 +2008,13 @@ The name of the column with right ascension.
 **Example:**
 
 ```sql
-    select DIF.RADECcol('MyCats', 'ascc25') as RADEC_colnames;
-    +------------------+
-    | RADEC_colnames   |
-    +------------------+
-    | `RAmas`,`DECmas` |
-    +------------------+
+select DIF.RADECcol('MyCats', 'ascc25') as RADec_colnames;
+  `RAmas`,`DECmas`
 ```
 
 ### [difInfo]
 
-Show info about a given **DIF** function or procedure reading from
-`DIF.func`.
+Show info about a given **DIF** function or procedure reading from `DIF.func`.
 
 **Syntax:**
 `call DIF.difInfo(IN udf)`
@@ -2053,22 +2023,23 @@ Show info about a given **DIF** function or procedure reading from
 
 **Return value** (`6 VARCHAR`):
 The fields present in `DIF.func`, i.e.
+
 `name | params | ret | type | plugin_lib | description`.
 
 **Example:**
 
 ```sql
-    call DIF.difInfo('difInfo');
-    +---------+----------------------+------+-----------+------------+
-    | name    | params               | ret  | type      | plugin_lib |
-    +---------+----------------------+------+-----------+------------+
-    | difInfo | (IN udf VARCHAR(50)) | void | procedure | void       |
-    +---------+----------------------+------+-----------+------------+
-              +-------------------------------------------+
-              | description                               |
-              +-------------------------------------------+
-              | Show info for a DIF function or procedure |
-              +-------------------------------------------+
+call DIF.difInfo('difInfo');
++---------+----------------------+------+-----------+------------+
+| name    | params               | ret  | type      | plugin_lib |
++---------+----------------------+------+-----------+------------+
+| difInfo | (IN udf VARCHAR(50)) | void | procedure | void       |
++---------+----------------------+------+-----------+------------+
+          +-------------------------------------------+
+          | description                               |
+          +-------------------------------------------+
+          | Show info for a DIF function or procedure |
+          +-------------------------------------------+
 ```
 
 ## Generating fake sky tables
@@ -2147,7 +2118,6 @@ Simple examples:
       ./myXmatch -h
       ./myXmatch -d MyCats -x UCAC4 USNOB1 129 -40.3 50
 
-
 Check `pix_myXmatch` too.
 
 *Please see the source code*
@@ -2180,7 +2150,9 @@ the path to the library as an argument, i.e.:
 server shutdown (`stop`) than followed by a `start`. Another suggestion
 is to issue the install command with the “verbose” options, i.e.:
 
+```shell
 	  dif --log --readonly --install
+```
 
 this way all the commands that `dif` is trying to execute are printed on
 the terminal and the user can try to track the problem, eventually
@@ -2203,32 +2175,37 @@ which by default is installed in `/usr/local/lib` (or in the
 subdirectory `lib` of the prefix you gave to the `configure` script).
 So, for example:
 
+```shell
       ln -s /usr/local/lib/ha_dif.so
       /usr/local/mysql/lib/mysql/plugin/ha_dif.so`
+```
 
 **FATAL: Cannot create trigger**
 
 This error typically occurs when the `DIF.tbl` table is not aligned with
 the actual DIF indices present in the table. This could happen if the
 user manually moves the table between two databases or manually create
-or delete indices. This misalignement can be verified by quering
-`DIF.tbl` and viewing the status of the table. For example (for the
-`Messier` table):
+or delete indices. This misalignement can be verified by quering `DIF.tbl`
+and viewing the status of the table. For example (for the `Messier` table):
+
 ```sql
-      select * from DIF.tbl where name='Messier';
-      describe Messier;
-      show index from Messier;
-      select * from INFORMATION_SCHEMA.VIEWS where
-         TABLE_NAME like 'Messier_htm%' or TABLE_NAME like 'Messier_healp%'
+select * from DIF.tbl where name='Messier';
+describe Messier;
+show index from Messier;
+select * from INFORMATION_SCHEMA.VIEWS where
+  TABLE_NAME like 'Messier_htm%' or TABLE_NAME like 'Messier_healp%'
 ```
+
 One can try to drop the trigger, but it could fail. Then the easiest way
 to solve this issue is to manually remove (need root privileges) the
 trigger file in the database directory (assume tables are in
 `/usr/local/mysql/var/MyCats`):
 
-	ls /usr/local/mysql/var/MyCats/Messier*.TR*
-	Messier.TRG
-	difi_Messier.TRN
+```shell
+ls /usr/local/mysql/var/MyCats/Messier*.TR*
+  Messier.TRG
+  difi_Messier.TRN
+```
 
 **MySQL error: Function ‘dif’ already exists**
 
@@ -2236,7 +2213,9 @@ This error occurs when a previous execution of `dif --install` failed.
 In this case you should, in general, first remove all
 **DIF** objects with:
 
+```shell
       dif --uninstall (for older versions `dif --deinstall`)
+```
 
 then try again with `dif --install`. Note: in case you are performing
 an upgrade, please refer to section [upgrade](#upgrade).
@@ -2252,9 +2231,8 @@ to perform an upgrade.
 
 ## References
 
-[1]: <http://www.skyserver.org/htm/> "HTM scheme"
+1- [HTM scheme](http://www.skyserver.org/htm/)
 
-[2]: <https://healpix.sourceforge.io/> "HEALPix schema"
+2- [HEALPix schema](https://healpix.sourceforge.io/)
 
-[^3]: L. Nicastro and G. Calderone: *Multiple depth DB tables indexing
-    on the sphere*, AA, vol. 2010, ID 524534
+3- L. Nicastro and G. Calderone: *Multiple depth DB tables indexing on the sphere*, AA, vol. 2010, ID 524534
