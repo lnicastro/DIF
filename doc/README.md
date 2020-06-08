@@ -1032,7 +1032,7 @@ The reference documentation for each function is reported below.
 These functions allow calling underlying functions in the HTM library
 directly from SQL.
 
-### [HTMidByName]
+### [ HTMidByName ]
 
 **Syntax:**
 `HTMidByName(IdName)`
@@ -1049,7 +1049,7 @@ select HTMidByName('S0000000');
   32768
 ```
 
-### [HTMnameById]
+### [ HTMnameById ]
 
 **Syntax:**
 `HTMnameById(Id)`
@@ -1066,7 +1066,7 @@ select HTMnameById(32768);
   S0000000
 ```
 
-### [HTMBary]
+### [ HTMBary ]
 
 Return the HTM trixel barycenter coordinates given depth and trixel ID.
 
@@ -1087,7 +1087,7 @@ select HTMBary(6, 32768);
   0.4687499999999769, -0.46875
 ```
 
-### [HTMBaryC]
+### [ HTMBaryC ]
 
 Return the HTM trixel barycenter coordinates given depth and a pair of
 spherical coordinates.
@@ -1111,7 +1111,7 @@ select HTMBaryC(6, 20, 30);
   20.03084356871285, 30.26104286747405
 ```
 
-### [HTMBaryDist]
+### [ HTMBaryDist ]
 
 Return the distance from the HTM trixel barycenter given depth and a
 pair of spherical coordinates.
@@ -1142,7 +1142,7 @@ select HTMBaryDist(6, htmID_6, RAmas/3.6e6, DECmas/3.6e6) from
   260 rows in set
 ```
 
-### [HTMLookup]
+### [ HTMLookup ]
 
 Return the ID of the HTM trixel given depth and a pair of spherical coordinates.
 
@@ -1165,7 +1165,7 @@ select HTMLookup(6, 20, 30);
   64152
 ```
 
-### [HTMNeighb]
+### [ HTMNeighb ]
 
 Return the IDs of the HTM trixels touching the given pixel ID (neighbors).
 
@@ -1188,7 +1188,7 @@ select HTMNeighb(6, 32768);
   32769, 32770, 32771, 47104, 47106, 47107, 49152, 63488, 63489, 63491
 ```
 
-### [HTMsNeighb]
+### [ HTMsNeighb ]
 
 Return the IDs of the HTM trixels, at the same or higher depth, touching
 the given pixel ID (“smaller” neighbors).
@@ -1215,7 +1215,7 @@ select HTMsNeighb(6, 32768, 8);
   1015832, 1015864
 ```
 
-### [HTMNeighbC]
+### [ HTMNeighbC ]
 
 Return the IDs of the HTM trixels and its neighbours given a pair of
 spherical coordinates.
@@ -1247,7 +1247,7 @@ select HTMNeighbC(6, 100, 60);
 These functions allow calling underlying functions in the HEALPix
 library directly from SQL.
 
-### [HEALPBary]
+### [ HEALPBary ]
 
 Return the HEALPix barycenter (center) coordinates given scheme, order
 and pixel ID.
@@ -1271,7 +1271,7 @@ select HEALPBary(1, 8, 500);
   48.1640625, 6.429418462523309
 ```
 
-### [HEALPBaryC]
+### [ HEALPBaryC ]
 
 Return the HEALPix barycenter (center) coordinates given scheme, order
 and a pair of spherical coordinates.
@@ -1297,7 +1297,7 @@ select HEALPBaryC(0, 8, 20.5, 30.8);
   20.390625, 30.86525625461861
 ```
 
-### [HEALPBaryDist]
+### [ HEALPBaryDist ]
 
 Return the distance from the HEALPix barycenter (center) given scheme,
 order and a pair of spherical coordinates.
@@ -1330,7 +1330,7 @@ select HEALPBaryDist(1, 8, healpID_nest_8, RAmas/3.6e6, DECmas/3.6e6) from
   260 rows in set
 ```
 
-### [HEALPLookup]
+### [ HEALPLookup ]
 
 Return the ID of the HEALPix pixel given scheme, order and a pair of
 spherical coordinates.
@@ -1356,7 +1356,7 @@ select HEALPLookup(0, 8, 20, 30);
   196152
 ```
 
-### [HEALPNeighb]
+### [ HEALPNeighb ]
 
 Return the IDs of the HEALPix pixels touching the given pixel ID
 (neighbors).
@@ -1382,7 +1382,7 @@ select HEALPNeighb(0, 8, 1000);
   1091, 999, 912, 829, 913, 1001, 1092, 1187
 ```
 
-### [HEALPNeighbC]
+### [ HEALPNeighbC ]
 
 Return the IDs of the HEALPix pixel and its neighbours given a pair of
 spherical coordinates.
@@ -1410,7 +1410,7 @@ select HEALPNeighbC(1, 8, 100,60);
   113911, 113910, 113916, 113917, 114088, 114082, 114080, 113909, 113908
 ```
 
-### [HEALPBound]
+### [ HEALPBound ]
 
 Return the spherical coordinates of the HEALPix pixel boundaries given
 scheme, order and ID. The (optional) input oversampling step determines
@@ -1440,7 +1440,7 @@ select HEALPBound(1, 8, 1000);
   43.9453125, 8.084013907099306, 44.12109375, 8.234747571463606
 ```
 
-### [HEALPBoundC]
+### [ HEALPBoundC ]
 
 Return the spherical coordinates of the HEALPix pixel boundaries given a
 pair of spherical coordinates. The (optional) input oversampling step
@@ -1472,7 +1472,7 @@ select HEALPBoundC(1, 8, 100,60);
   100.4268292682927, 59.67778522657881, 100.4907975460123, 59.86707420480209
 ```
 
-### [HEALPMaxS]
+### [ HEALPMaxS ]
 
 Return the HEALPix pixel max size (in arcmin) from center to corner
 (both RING or NESTED), given the order.
@@ -1498,7 +1498,7 @@ select HealPMaxS(12);
   0.8971372281806288
 ```
 
-### [Sphedist]
+### [ Sphedist ]
 
 Compute the angular distance given the coordinates of two points on a sphere.
 
@@ -1528,7 +1528,7 @@ select Sphedist(129.56, -47.66, 131.11, -48.34) as sep_arcmin;
 These functions are dedicated to the definition of a search region.
 Typically they are used in the `WHERE` of a `SELECT` query.
 
-### [DIF\_Circle]
+### [ DIF\_Circle ]
 
 Define a circular search region entered at the given coordinates and
 with the given radius.
@@ -1551,7 +1551,7 @@ Always 1.
 SELECT * FROM Messier_htm_6 WHERE DIF_Circle(82, 22, 100);
 ```
 
-### [DIF\_Rect]
+### [ DIF\_Rect ]
 
 Define a rectangular search region whose sides lie along lines of
 constant right ascension (longitude) and declination (latitude).
@@ -1581,7 +1581,7 @@ select htmID_8, RAmas/3.6e6, DECmas/3.6e6 from
   74 rows in set
 ```
 
-### [DIF\_RectV]
+### [ DIF\_RectV ]
 
 Define a rectangle (or four sides polygon) search region with given
 coordinates of the vertices. This function can be called either with
@@ -1624,7 +1624,7 @@ select htmID_6, RAmas/3.6e6, DECmas/3.6e6 from
   776 rows in set
 ```
 
-### [DIF\_NeighbC]
+### [ DIF\_NeighbC ]
 
 Define a search region composed of a HTM/HEALPix pixel and its neighbors
 given a pair of spherical coordinates.
@@ -1648,7 +1648,7 @@ SELECT * FROM Messier_htm_6 WHERE DIF_NeighbC(82, 22);
 Note that for tables with multiple depths you can only use the smaller
 one (larger pixel).
 
-### [DIF\_sNeighb]
+### [ DIF\_sNeighb ]
 
 Given a HTM trixel at a given depth, it defines a search region composed
 of the neighbors trixels at a higher depth (smaller).
@@ -1711,7 +1711,7 @@ the thread of a previous user connection.
 **Return value** (`BIGINT`):
 Always 1.
 
-### [DIF\_cpuTime]
+### [ DIF\_cpuTime ]
 
 This function returns the cumulative usage of CPU time by the DIF
 functions. It is useful to quantify the impact of DIF usage with respect
@@ -1736,7 +1736,7 @@ select DIF_cpuTime()/1.;
 
 This functions return information about **DIF** indexed tables.
 
-### [getHTMDepth]
+### [ getHTMDepth ]
 
 Return the “smallest” (or only) depth of the HTM index created on a table.
 
@@ -1757,7 +1757,7 @@ select DIF.getHTMDepth('MyCats', 'ascc25') as min_depth;
   4
 ```
 
-### [getHEALPOrder]
+### [ getHEALPOrder ]
 
 Return the “smallest” (or only) resolution parameter (order) of the
 HEALPix index(es) created on a table.
@@ -1779,7 +1779,7 @@ select DIF.getHEALPOrder('MyCats', 'UCAC_2orig') as min_order;
   8
 ```
 
-### [getHEALPNested]
+### [ getHEALPNested ]
 
 Return the HEALPix map ID ordering scheme used to create the index on a table.
 
@@ -1800,7 +1800,7 @@ select DIF.getHEALPNested('MyCats', 'UCAC_2orig', 8) as is_nested;
   1
 ```
 
-### [difview\_Check]
+### [ difview\_Check ]
 
 Recursively shows the SQL expression to get rid of tables present in
 `DIF.tbl` but no corresponding view exists (check is done in
@@ -1827,7 +1827,7 @@ call DIF.difview_Check();
 +------------------------+---------------------------------------------------------+
 ```
 
-### [difview\_htmClean]
+### [ difview\_htmClean ]
 
 Shows and optionally removes the HTM views present in
 `INFORMATION_SCHEMA.VIEWS` (checking for `_htm` string) but no
@@ -1852,7 +1852,7 @@ call DIF.difview_htmClean(0);
 +---------------------------------------------+
 ```
 
-### [difview\_healpClean]
+### [ difview\_healpClean ]
 
 Shows and optionally removes the HEALPix views present in
 `INFORMATION_SCHEMA.VIEWS` (checking for `_healp_` string) but no
@@ -1877,7 +1877,7 @@ call DIF.difview_healpClean(0);
 +---------------------------------------------------+
 ```
 
-### [getRa]
+### [ getRa ]
 
 Simply read the `Ra_field` from `DIF.tbl`, i.e. return the SQL expression
 to get the right ascension / longitude as degrees for entries of a given table.
@@ -1899,7 +1899,7 @@ select DIF.getRa('MyCats', 'ascc25') as RA_field;
   RAmas/3.6e6
 ```
 
-### [getDec]
+### [ getDec ]
 
 Simply read the `Dec_field` from `DIF.tbl`, i.e. return the SQL expression
 to get the declination / latitude as degrees for entries of a given table.
@@ -1921,7 +1921,7 @@ select DIF.getDec('MyCats', 'ascc25') as Dec_field;
   DECmas/3.6e6
 ```
 
-### [getRaDec]
+### [ getRaDec ]
 
 Simply read the `Ra_field` and `Dec_field` from `DIF.tbl`, i.e. return the SQL
 expression to get the declination / latitude as degrees for entries of a given table.
@@ -1943,7 +1943,7 @@ select DIF.getRaDec('MyCats', 'ascc25') as RaDec_field;
   RAmas/3.6e6,DECmas/3.6e6
 ```
 
-### [RAcol]
+### [ RAcol ]
 
 Return the column name containing the RA in a given table. It performs
 field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
@@ -1966,7 +1966,7 @@ select DIF.RAcol('MyCats', 'ascc25') as RA_colname;
   `RAmas`
 ```
 
-### [DECcol]
+### [ DECcol ]
 
 Return the column name containing the Dec in a given table. It performs
 field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
@@ -1989,7 +1989,7 @@ select DIF.DECcol('MyCats', 'ascc25') as Dec_colname;
   `DECmas`
 ```
 
-### [RADECcol]
+### [ RADECcol ]
 
 Return the column name containing the RA and Dec in a given table. It performs
 field comparison between column names in `INFORMATION_SCHEMA.COLUMNS`
@@ -2012,7 +2012,7 @@ select DIF.RADECcol('MyCats', 'ascc25') as RADec_colnames;
   `RAmas`,`DECmas`
 ```
 
-### [difInfo]
+### [ difInfo ]
 
 Show info about a given **DIF** function or procedure reading from `DIF.func`.
 
@@ -2151,7 +2151,7 @@ server shutdown (`stop`) than followed by a `start`. Another suggestion
 is to issue the install command with the “verbose” options, i.e.:
 
 ```shell
-	  dif --log --readonly --install
+dif --log --readonly --install
 ```
 
 this way all the commands that `dif` is trying to execute are printed on
@@ -2167,7 +2167,9 @@ library `ha_dif.so`, which must be located in the path stored in the
 MySQL system variable `plugin_dir`. To show the content of the variable
 issue the following command in a MySQL terminal:
 
-      show variables like 'plugin_dir';
+```sql
+show variables like 'plugin_dir';
+```
 
 You should check that the library is available in the returned path. If
 not you should make manually a logical link to the `ha_dif.so` library
@@ -2176,8 +2178,7 @@ subdirectory `lib` of the prefix you gave to the `configure` script).
 So, for example:
 
 ```shell
-      ln -s /usr/local/lib/ha_dif.so
-      /usr/local/mysql/lib/mysql/plugin/ha_dif.so`
+sudo ln -s /usr/local/lib/ha_dif.so /usr/local/mysql/lib/mysql/plugin/ha_dif.so
 ```
 
 **FATAL: Cannot create trigger**
