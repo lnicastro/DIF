@@ -1059,9 +1059,8 @@ t.in_full = false;
 
 
 
-  unsigned long inr1, nr1_old, nr2_old, nr1=0, nr2=0, i, j, ij, iin_id, n, n_unmatched, ndup=0, npix=1,
-                *id_list=NULL, *id1=NULL, *mt1=NULL, *mt2=NULL, *rn1=NULL, *rn2=NULL;
-
+  unsigned long inr1, nr1_old, nr2_old, nr1 = 0, nr2 = 0, i, j, ij, iin_id, n, n_unmatched, ndup = 0, npix = 1,
+                *id_list = NULL, *id1 = NULL, *mt1 = NULL, *mt2 = NULL, *rn1 = NULL, *rn2 = NULL;
 
   char **refid1 = NULL;  // catwise
   if (t.use_master_id1)
@@ -1072,8 +1071,8 @@ t.in_full = false;
 
   //char (*refid1)[STRING_SIZE];  // catwise
 
-  long long l_ra=0, l_de=0;
-  double *ra1=NULL, *de1=NULL, *ra2=NULL, *de2=NULL, rac=0., decc=0.;
+  long long l_ra = 0, l_de = 0;
+  double *ra1 = NULL, *de1 = NULL, *ra2 = NULL, *de2 = NULL, rac = 0., decc = 0.;
   char **row;
   string in_id;
   //bool tab_swapped;
@@ -1146,7 +1145,7 @@ t.in_full = false;
   qry_str = "SELECT count(*) FROM "+ db.cat1;
 
 if (verbose)
-  cout<<"Query: "<< qry_str<<endl;
+  cout<<"Query: "<< qry_str << endl;
 
   if (!db_query(my_cID, qry_str.c_str())) {
     cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
@@ -1250,20 +1249,20 @@ if (verbose)
 cout<<"Query: "<< qry_str<<endl;
 
     if (!db_query(my_cID, qry_str.c_str())) {
-      cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
-      exit(1);
+	cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
+	exit(1);
     }
 
     npix = db_num_rows(my_cID);
     cout << db.cat1 <<": N_pixels to process: "<< npix << endl;
 
     if (npix == 0) {
-      cerr << PROGNAME <<": no pixel IDs found in "<< db.cat1 << endl;
-      exit(1);
+	cerr << PROGNAME <<": no pixel IDs found in "<< db.cat1 << endl;
+	exit(1);
     }
     if (!(id_list = (unsigned long *) malloc(npix * sizeof(unsigned long)))) {
-      cerr << PROGNAME <<": error allocating memory.\n";
-      exit(-1);
+	cerr << PROGNAME <<": error allocating memory.\n";
+	exit(-1);
     }
 
     in_id = db_data(my_cID, 0, 0);
@@ -1351,7 +1350,7 @@ if (verbose) {
 
   qry_str = "DROP TABLE if exists "+ tmp_tab;
 if (verbose)
-  cout<<"Query: "<< qry_str<<endl;
+  cout <<"Query: "<< qry_str << endl;
   ret = db_query(my_cID, qry_str.c_str());
 
   qry_str = difqry_ini1 + db.cat1;
@@ -1369,14 +1368,14 @@ if (verbose)
 
 
 if (verbose)
-  cout<<"Query: "<< qry_str<<endl;
+  cout <<"Query: "<< qry_str << endl;
 
 // Note: temporary use only order1 to bind dynamically the query buffer.
 // This means we use MASTERhpx6 (smallint -> MYSQL_TYPE_SHORT) and runningnumber (long int -> MYSQL_TYPE_LONG)
   //ret = db_stmt_prepexe2(my_cID, qry_str.c_str(), t.order1.c_str(), 0);
   ret = db_query(my_cID, qry_str.c_str());
 if (verbose)
-  cout<<"TMP table created"<<endl;
+  cout <<"TMP table created"<< endl;
 
   if (!ret) {
     cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
@@ -1389,7 +1388,7 @@ if (verbose)
   qry_str = "select * from "+ tmp_tab;
 
 if (verbose)
-  cout<<"Query: "<< qry_str<<endl;
+  cout <<"Query: "<< qry_str << endl;
 
 
   ret = db_stmt_prepexe2(my_cID, qry_str.c_str(), t.order1.c_str(), 0);
@@ -1415,9 +1414,18 @@ if (verbose) {
   }
 
 
-  if (!(id1 = (unsigned long *) realloc(id1, nr1 * sizeof(unsigned long)))) exit(-1);
-  if (!(ra1 = (double *) realloc(ra1, nr1 * sizeof(double)))) exit (-1);
-  if (!(de1 = (double *) realloc(de1, nr1 * sizeof(double)))) exit(-1);
+  if ( !(id1 = (unsigned long *) realloc(id1, nr1 * sizeof(unsigned long))) ) {
+	cerr << PROGNAME <<": error re-allocating memory.\n";
+	exit(-1);
+  }
+  if ( !(ra1 = (double *) realloc(ra1, nr1 * sizeof(double))) ) {
+	cerr << PROGNAME <<": error re-allocating memory.\n";
+	exit(-1);
+  }
+  if ( !(de1 = (double *) realloc(de1, nr1 * sizeof(double))) ) {
+	cerr << PROGNAME <<": error re-allocating memory.\n";
+	exit(-1);
+  }
 
   //if (t.use_master_id1)
 	//if (!(refid1 = (unsigned long long *) realloc(refid1, nr1 * sizeof(unsigned long)))) exit(-1);
@@ -1516,11 +1524,20 @@ if (verbose) {
 }
   if (nr2 > 0) {
 
-    if (!(ra2 = (double *) realloc(ra2, nr2 * sizeof(double)))) exit(-1);
-    if (!(de2 = (double *) realloc(de2, nr2 * sizeof(double)))) exit(-1);
+    if ( !(ra2 = (double *) realloc(ra2, nr2 * sizeof(double))) ) {
+	cerr << PROGNAME <<": error re-allocating memory.\n";
+	exit(-1);
+    }
+    if ( !(de2 = (double *) realloc(de2, nr2 * sizeof(double))) ) {
+	cerr << PROGNAME <<": error re-allocating memory.\n";
+	exit(-1);
+    }
 
     if (t.use_master_id2)
-	if (!(refid2 = (unsigned long long *) realloc(refid2, nr2 * sizeof(unsigned long)))) exit(-1);
+	if ( !(refid2 = (unsigned long long *) realloc(refid2, nr2 * sizeof(unsigned long))) ) {
+	  cerr << PROGNAME <<": error re-allocating memory.\n";
+	  exit(-1);
+	}
 
     //if (t.use_master_id2 && nr2 > nr2_old)
 	//refid2 = resize2d(nr2_old, (STRING_SIZE+1), nr2, (STRING_SIZE+1), refid2);
