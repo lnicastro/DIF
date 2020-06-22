@@ -1,22 +1,24 @@
 /*
    Definitions for pix_myXmatch
 
-   LN@IASF-INAF, January 2016                   ( Last change: 09/11/2016 )
+   LN@IASF-INAF, January 2016                   ( Last change: 22/06/2020 )
 */
 
 #define MIN(a,b) ( ((a) < (b)) ? (a) : (b) )
 #define MAX(a,b) ( ((a) > (b)) ? (a) : (b) )
 
 // Global variables
-static string bl = " ";
-static string co = ",";
-static string dt = ".";
+static const string bl = " ";
+static const string co = ",";
+static const string dt = ".";
+static const string sq = "'";
+static const string bt = "`";
 
 // Progran name
 const char PROGNAME[] = "pix_myXmatch";
 
 // Version ID string
-static string VERID="Ver 0.1i, 03-02-2016, LN@IASF-INAF";
+static string VERID="Ver 0.2b, 22-06-2020, LN@INAF-OAS";
 
 extern "C" {
   double deg_ra(char *ra_str);
@@ -25,14 +27,14 @@ extern "C" {
   //char *enc_str_decdeg(double dec);
 }
 
-long spherematch2(long npoints1, double *ra1, double *dec1,
-                 long npoints2, double *ra2, double *dec2,
+long spherematch2(unsigned long npoints1, double *ra1, double *dec1,
+                 unsigned long npoints2, double *ra2, double *dec2,
                  double matchlength, double minchunksize,
-                 vector<long> &match1, vector<long>&match2, vector<double>&distance12, long *nmatch);
-long spherematch2_mm(long npoints1, double *ra1, double *dec1,
-                 long npoints2, double *ra2, double *dec2,
+                 vector<long> &match1, vector<long>&match2, vector<float>&distance12, unsigned long *nmatch);
+long spherematch2_mm(unsigned long npoints1, double *ra1, double *dec1,
+                 unsigned long npoints2, double *ra2, double *dec2,
                  double matchlength, double minchunksize,
-                 vector<long> &match1, vector<long>&match2, vector<double>&distance12, long *nmatch);
+                 vector<long> &match1, vector<long>&match2, vector<float>&distance12, unsigned long *nmatch);
 /* Unused
    MYSQL_ROW record;
  

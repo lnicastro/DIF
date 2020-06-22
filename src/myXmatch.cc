@@ -2,7 +2,7 @@
   A simple implementation of the "spherematch" algorithm querying DIF
   indexed catalogues.
 
-  LN @ IASF-INAF, Sep. 2010                         Last changed: 09/11/2016 
+  LN @ IASF-INAF, Sep. 2010                         Last changed: 22/06/2020 
 */
 
 using namespace std;
@@ -28,7 +28,7 @@ static string co = ",";
 const char PROGNAME[] = "myXmatch";
 
 // Version ID string
-static string VERID="Ver 1.0b, 24-10-2014, LN@IASF-INAF";
+static string VERID="Ver 1.0c, 22-06-2020, LN@INAF-OAS";
 
 
 /* Unused
@@ -230,14 +230,14 @@ extern "C" {
   double deg_dec(char *dec_str);
 }
 
-long spherematch2(long npoints1, double *ra1, double *dec1,
-                 long npoints2, double *ra2, double *dec2,
+long spherematch2(unsigned long npoints1, double *ra1, double *dec1,
+                 unsigned long npoints2, double *ra2, double *dec2,
                  double matchlength, double minchunksize,
-                 vector<long> &match1, vector<long>&match2, vector<double>&distance12, long *nmatch);
-long spherematch2_mm(long npoints1, double *ra1, double *dec1,
-                 long npoints2, double *ra2, double *dec2,
+                 vector<long> &match1, vector<long>&match2, vector<float>&distance12, unsigned long *nmatch);
+long spherematch2_mm(unsigned long npoints1, double *ra1, double *dec1,
+                 unsigned long npoints2, double *ra2, double *dec2,
                  double matchlength, double minchunksize,
-                 vector<long> &match1, vector<long>&match2, vector<double>&distance12, long *nmatch);
+                 vector<long> &match1, vector<long>&match2, vector<float>&distance12, unsigned long *nmatch);
 
 
  
@@ -864,9 +864,9 @@ i++;
 
   double matchlength=1./3600,  // def. match dist.= 1''
          minchunksize;
-  vector<double> distance12;
+  vector<float> distance12;
   vector<long> match1, match2;
-  long nmatch, nmatchmax, nmatchret;
+  unsigned long nmatch, nmatchmax, nmatchret;
 
   if (min_dist >= 0.)  {
     matchlength = min_dist/3600;
@@ -882,21 +882,21 @@ i++;
 //cout << matchlength << " " << minchunksize << endl;
 
 
-// Make sure first list is the longest
-  if (nr1 < nr2) {
+// TODO: Make sure first list is the longest or the other way around?
+  if (nr1 > nr2) {
     if (multi_match)
-      spherematch2_mm(nr2, ra2, de2, nr1, ra1, de1, matchlength, minchunksize,
-                  match2, match1, distance12, &nmatch);
-  else
-      spherematch2(nr2, ra2, de2, nr1, ra1, de1, matchlength, minchunksize,
-                  match2, match1, distance12, &nmatch);
+	spherematch2_mm(nr2, ra2, de2, nr1, ra1, de1, matchlength, minchunksize,
+			match2, match1, distance12, &nmatch);
+    else
+	spherematch2(nr2, ra2, de2, nr1, ra1, de1, matchlength, minchunksize,
+			match2, match1, distance12, &nmatch);
   } else {
     if (multi_match)
-      spherematch2_mm(nr1, ra1, de1, nr2, ra2, de2, matchlength, minchunksize,
-                  match1, match2, distance12, &nmatch);
+	spherematch2_mm(nr1, ra1, de1, nr2, ra2, de2, matchlength, minchunksize,
+			match1, match2, distance12, &nmatch);
     else
-      spherematch2(nr1, ra1, de1, nr2, ra2, de2, matchlength, minchunksize,
-                  match1, match2, distance12, &nmatch);
+	spherematch2(nr1, ra1, de1, nr2, ra2, de2, matchlength, minchunksize,
+			match1, match2, distance12, &nmatch);
   }
 
   if (nmatch == 0) {
@@ -906,6 +906,8 @@ i++;
   }
 
   nmatchret = MIN(nmatch,nmatchmax);
+// 23/06/2020: separation returned in arcsec
+/*
   if (use_arcmin) {
     for (i=0; i<nmatchret; i++)
       distance12[i] *= 60;
@@ -913,6 +915,7 @@ i++;
     for (i=0; i<nmatchret; i++)
       distance12[i] *= 3600;
   }
+*/
 
   if (save_match) {
     if (my_tab.empty()) {
@@ -937,7 +940,7 @@ cout << "Output DB table: "<<out_db<<"."<<my_tab << endl;
     qry_str = string("CREATE TABLE IF NOT EXISTS ") + out_db +"."+ my_tab +
               " (SeqID1 int unsigned, "+ db_cat1 +"_"+ id_coln1 +bl+
               dif_sqltype(orde1) +", RAdeg1 double, DECdeg1 double, SeqID2 int unsigned, "+
-              db_cat2 +"_"+ id_coln2 +bl+ dif_sqltype(orde2) +", RAdeg2 double, DECdeg2 double, Sep double)";
+              db_cat2 +"_"+ id_coln2 +bl+ dif_sqltype(orde2) +", RAdeg2 double, DECdeg2 double, Sep double) ENGINE=MyISAM, CHARSET=ASCII";
 //cout <<qry_str<<endl;
     ret = db_query(cID, qry_str.c_str());
     if (!ret) {

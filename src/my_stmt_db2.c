@@ -3,7 +3,7 @@
 
   Note: here use "pix_myXmatch" custom bind function "my_difbind2"
 
-  LN @ IASF-INAF, Sep. 2010                         Last changed: 02/02/2016
+  LN @ IASF-INAF, Sep. 2010                         Last changed: 09/05/2020
 */
 
 #include <stdlib.h>
@@ -67,7 +67,7 @@ int db_stmt_prep(int ID, const char *query, const char *param) {
 }
 
 
-int db_stmt_prepexe2(int ID, const char *query, const char *param) {
+int db_stmt_prepexe2(int ID, const char *query, const char *param, const unsigned short tid) {
 
   unsigned long type= CURSOR_TYPE_READ_ONLY;
 
@@ -90,7 +90,7 @@ int db_stmt_prepexe2(int ID, const char *query, const char *param) {
   mysql_stmt_attr_set(stmt, STMT_ATTR_CURSOR_TYPE, (const void*) &type);
 
 /* Get the parameter count from the statement */
-  param_count= mysql_stmt_param_count(stmt);
+  param_count = mysql_stmt_param_count(stmt);
 //fprintf(stdout, " total parameters in SELECT: %d\n", param_count);
 
   if (param_count != 0) /* validate parameter count */
@@ -131,12 +131,13 @@ int db_stmt_prepexe2(int ID, const char *query, const char *param) {
     return (1);
   }
 
-/* Bind the result buffers for all 3 or more columns before fetching them */
+/* Bind the result buffers for all the columns before fetching them */
   memset(bind, 0, sizeof(bind));
 
-  my_difbind2(num_fields[ID], param, bind);
+  my_difbind2(num_fields[ID], param, bind, tid);
 
 /* Now buffer all results to client (optional step) */
+
   if (mysql_stmt_store_result(stmt))
   {
     fprintf(stderr, " mysql_stmt_store_result() failed\n");
@@ -144,6 +145,11 @@ int db_stmt_prepexe2(int ID, const char *query, const char *param) {
     return (1);
   }
 
+/*
+  int rc;
+  bool upd = true;
+  rc = mysql_stmt_attr_set(stmt, STMT_ATTR_UPDATE_MAX_LENGTH, (void*) &upd);
+*/
 
   num_rows[ID] = mysql_stmt_num_rows(stmt);
 
@@ -151,11 +157,11 @@ int db_stmt_prepexe2(int ID, const char *query, const char *param) {
 }
 
 
-int my_difbind2(unsigned int n_fields, const char *param, MYSQL_BIND *bind)  // bind results
+int my_difbind2(unsigned int n_fields, const char *param, MYSQL_BIND *bind, const unsigned short tid)  // bind results
 {
   int id = atoi(param);
 
-/* First 2 columns are DOUBLE */
+/* First 2 columns are DOUBLE -> e.g. RA, Dec */
   bind[0].buffer_type= MYSQL_TYPE_DOUBLE;
   bind[0].buffer= (char *)&dbl_data[0];
   bind[0].is_null= &is_null[0];
@@ -199,30 +205,32 @@ int my_difbind2(unsigned int n_fields, const char *param, MYSQL_BIND *bind)  // 
 
   }
 
-  bind[2].buffer= (char *)&long_data[0];  // always use largest INT
-  bind[2].is_unsigned= 1;             // always UNSIGNED
-  bind[2].is_null= &is_null[2];
-  bind[2].length= &length[2];
-  bind[2].error= &error[2];
+  bind[2].buffer = (char *)&long_data[0];  // always use largest INT
+  bind[2].is_unsigned = 1;             // always UNSIGNED
+  bind[2].is_null = &is_null[2];
+  bind[2].length = &length[2];
+  bind[2].error = &error[2];
 
-// This is temporary!
-  if (n_fields == 5) {
-// MASTERhpx6
-    bind[3].buffer_type= MYSQL_TYPE_SHORT;
-    bind[3].buffer= (char *)&long_data[1];  // always use largest INT
-    bind[3].is_unsigned = 1;             // always UNSIGNED
-    bind[3].is_null= &is_null[3];
-    bind[3].length= &length[3];
-    bind[3].error= &error[3];
 
-// runningnumber
-    bind[4].buffer_type= MYSQL_TYPE_LONG;
-    bind[4].buffer= (char *)&long_data[2];  // always use largest INT
-    bind[4].is_unsigned = 1;             // always UNSIGNED
-    bind[4].is_null= &is_null[4];
-    bind[4].length= &length[4];
-    bind[4].error= &error[4];
+/* This is temporary! Adjust for your needs! */
+  if (n_fields == 4) {
+	if (tid == 0) {  // catwise source_name
+  //MYSQL_FIELD* aField = &metadata->fields[3];
+	  bind[3].buffer_type = MYSQL_TYPE_STRING;
+	  bind[3].buffer = str_data;
+	  bind[3].buffer_length = STRING_SIZE;
+	  //bind[3].buffer_length = aField->length;
+	} else {  // GAIA DR2 source_id
+	  bind[3].buffer_type = MYSQL_TYPE_LONGLONG;
+	  bind[3].buffer = (char *)&long_data[1];  // always use largest INT
+	  bind[3].is_unsigned = 1;                 // always UNSIGNED
+	}
+	bind[3].length = &length[3];
+	bind[3].is_null = &is_null[3];
+	bind[3].error = &error[3];
   }
+
+  //mysql_free_result(metadata);
 
 /* Bind the result buffers */
   if (mysql_stmt_bind_result(stmt, bind))

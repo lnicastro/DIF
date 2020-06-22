@@ -1,5 +1,5 @@
 /*
-  Xmatch catalogue Cat_in against a reference catalogue Cat_ref.
+  Xmatch catalogue InCat against a reference catalogue RefCat.
   A simple implementation of the "spherematch" algorithm querying on
   HTM/HELAPix pixels indexed MySQL tables.
 
@@ -7,38 +7,41 @@
     1. HEALPix pixelization X-match not yet implemented. Use HTM.
     2. Unless a specific pixel ID (or range) is given, the full catalogue is
        processed.
-    3. Use option "-I" for Turin Observatory standard format for DB catalogues,
-       i.e. the columns MASTERhpx6 and runningnumber must be present in Cat_ref
-       (with their combination being a unique index). If also the -K option is
-       used, then these columns must be also present in Cat_in.
+    3. Use option "-I refIdField" for adding a (possibly) unique source identificator
+       (integer) which must be present in RefCat. Assumed to be integer type.
+       If the "-K inIdField" option is used, then also the (possibly) unique identificator
+       from InCat is added. Note that at the moment it is assumed to be of type char.
        By default just use HTM IDs and coordinates (default RAmas, DECmas).
        For the first case the (optional) output catalogue will have the columns:
 
-       | Field         | Type                 |
-       +---------------+----------------------+
-       | ref_htmID_6   | smallint(5) unsigned |
-       | htmID_6       | smallint(5) unsigned |
-       | MASTERhpx6    | smallint(5) unsigned |
-       | runningnumber | int(10) unsigned     |
-       | RAmas         | int(10) unsigned     |
-       | DECmas        | int(11)              |
-       | Sep           | float                |
-       | origID        | tinyint(4)           |
-       +---------------+----------------------+
+       | Field         | Type              |
+       +---------------+-------------------+
+       | htmID_6       | smallint unsigned |
+       | ref_htmID_6   | smallint unsigned |
+       | source_id     | bigint unsigned   |  <-- this is for "gaiadr2"
+       | RAmas         | int unsigned      |
+       | DECmas        | int               |
+       | ref_RAmas     | int unsigned      |
+       | ref_DECmas    | int               |
+       | Sep           | float             |
+       | origID        | tinyint           |
+       +---------------+-------------------+
 
        whereas in the second, default case:
 
-       | Field         | Type                 |
-       +---------------+----------------------+
-       | ref_htmID_6   | smallint(5) unsigned |
-       | htmID_6       | smallint(5) unsigned |
-       | ref_RAmas     | int(10) unsigned     |
-       | ref_DECmas    | int(10)              |
-       | RAmas         | int(10) unsigned     |
-       | DECmas        | int(11)              |
-       | Sep           | float                |
-       | origID        | tinyint(4)           |
-       +---------------+----------------------+
+       | Field         | Type              |
+       +---------------+-------------------+
+       | htmID_6       | smallint unsigned |
+       | ref_htmID_6   | smallint unsigned |
+       | source_name   | char(22)          |  <-- this is for "catwise"
+       | source_id     | bigint unsigned   |
+       | RAmas         | int unsigned      |
+       | DECmas        | int               |
+       | ref_RAmas     | int unsigned      |
+       | ref_DECmas    | int               |
+       | Sep           | float             |
+       | origID        | tinyint           |
+       +---------------+-------------------+
 
     4. Notice the various defaults in the help text.
 
@@ -56,10 +59,10 @@
      of depth 14 (about 15 arcsec) to those of depth 6. Specify in/out DBs with table names.
     pix_myXmatch -x DBin1.ascc25 DBin2.tycho2 -t DBout.xout_tab -D 6 14 -qA
   5. use -I for Turin schema catalogues:
-    pix_myXmatch -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 6 14 -qAI
+    pix_myXmatch -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 8 14 -qA -I source_id 524288 1048575
 
 
-  LN @ INAF-OAS, June 2013                         Last changed: 24/01/2019
+  LN @ INAF-OAS, June 2013                         Last changed: 19/06/2020
 */
 
 using namespace std;
@@ -70,6 +73,7 @@ using namespace std;
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <cstring>
 
 #include <vector>
 #include <algorithm>
@@ -107,8 +111,8 @@ string ltos(long long i)
 
 string dtos(double f)
 {
-  char buf[20];
-  sprintf(buf, "%lf", f);
+  char buf[23];
+  sprintf(buf, "%.16g", f);
   return string(buf);
 }
 
@@ -325,14 +329,18 @@ typedef struct TabInfo_st {
   bool use_master_id1;
   bool use_master_id2;
   bool in_full;
-  string orde1;
-  string orde2;
+  string order1;
+  string order2;
   string id_coln1;
   string id_coln2;
-  string ra_coln;
-  string de_coln;
-  string mt_coln;
-  string rn_coln;
+  string ra_coln1;
+  string ra_coln2;
+  string de_coln1;
+  string de_coln2;
+  string rf_coln1;
+  string rf_coln2;
+  //string mt_coln;
+  //string rn_coln;
   string deg_fac;
   string id_sqltype;
   OTabs_st otab;
@@ -359,6 +367,65 @@ vector<DIFtbl_st> catinfo;
 
 
 
+// Allocate a 2-d char array
+inline char** alloc2d(int height, int width, char **arr)
+{
+  int i;
+  if ( !(arr = (char**) malloc(sizeof(char*) * height)) ) {
+	  cout<<"Could not allocate "<< height <<" rows."<<endl;
+	  exit (-1);
+  }
+
+  for (i = 0; i < height; i++)
+	arr[i] = NULL;
+
+  for (i = 0; i < height; i++) {
+	if ( !(arr[i] = (char*) malloc(sizeof(char*) * width)) ) {
+	  cout<<"Could not allocate elements of "<< height <<" rows."<<endl;
+	  exit (-1);
+	}
+  }
+
+  return arr;
+}
+
+// Realloc a 2-d char array (here N elements of fixed N chars)
+inline char** resize2d(int oldHeight, int oldWidth, int height, int width, char **arr)
+{
+  int i;
+  char** tmpr = NULL;
+  char* tmpc = NULL;
+  if ( !(tmpr = (char**) realloc(arr, sizeof(char*) * height)) ) {
+	  cout<<"Could not realloc "<< height <<" rows."<<endl;
+	  exit (-1);
+  }
+  arr = tmpr;
+
+cout<<oldHeight<<" "<<oldWidth<<" "<<height<<" "<<width<<endl;
+
+//for (i = 0; i < height; i++)
+  for (i = oldHeight; i < height; i++)  // Assume constant width -> field with fixed Nr of chars
+	arr[i] = NULL;
+//cout<<"Here"<<endl;
+
+//for (i = 0; i < height; i++) {
+  for (i = oldHeight; i < height; i++) {  // Assume constant width -> field with fixed Nr of chars
+	if ( !(tmpc = (char*) realloc(arr[i], sizeof(char*) * width)) ) {
+	  cout<<"Could not realloc elements of "<< height <<" rows."<<endl;
+	  exit (-1);
+	}
+	arr[i] = tmpc;
+	//for (int col=oldWidth; col < width; col++)
+		//arr[i][col] = 0;
+  }
+//cout<<"Here"<<endl;
+
+  return arr;
+}
+
+
+
+
 void set_out_tabs(string my_user, string cat1, string cat2)
 {
   const char root_otab[]="pix_Xmatch_";
@@ -378,11 +445,11 @@ void set_out_tabs(string my_user, string cat1, string cat2)
 
 void print_out_tabs()
 {
-  cout <<"Output matched objects DB table: "<<t.otab.out_db<<dt<<t.otab.x<<endl
-       <<"Output unmatched objects DB table: "<<t.otab.out_db<<dt<<t.otab.nx<<endl
-       <<"Output unmatched cleaned objects DB table: "<<t.otab.out_db<<dt<<t.otab.nxc<<endl
-       <<"Output extended unmatched objects DB table: "<<t.otab.out_db<<dt<<t.otab.nxcf<<endl
-       <<"Output external objects DB table: "<<t.otab.out_db<<dt<<t.otab.ext << endl;
+  cout <<"Output matched objects DB table: "<< t.otab.out_db<<dt<<t.otab.x <<endl
+       <<"Output unmatched objects DB table: "<< t.otab.out_db<<dt<<t.otab.nx <<endl
+       <<"Output unmatched cleaned objects DB table: "<< t.otab.out_db<<dt<<t.otab.nxc <<endl
+       <<"Output extended unmatched objects DB table: "<< t.otab.out_db<<dt<<t.otab.nxcf <<endl
+       <<"Output external objects DB table: "<< t.otab.out_db<<dt<<t.otab.ext <<endl;
 }
 
 
@@ -433,34 +500,60 @@ if (verbose)
 // Because of ALTER TABLE cannot use "IF EXISTS" on creation
   qry_str_i = string("CREATE TABLE ")+ t.otab.out_db +dt;
   string tabname;
+
   for (i=0; i<3; i++) {
     if (!tab_exists[i]) {
       if (i==0) {
-        tabname = t.otab.x;
-// Matched objects table
-        qry_str = qry_str_i + tabname +" SELECT "+ t.id_coln1 +" AS ref_"+ t.id_coln1 +co+ t.id_coln1 +co;
-        if (t.use_master_id2)
-          qry_str += t.mt_coln +co+ t.rn_coln;
-        else
-          qry_str += t.ra_coln +" AS ref_"+ t.ra_coln +co+ t.de_coln +" AS ref_"+ t.de_coln;
 
-        qry_str += co+ t.ra_coln +co+ t.de_coln +" FROM "+ db.my_db2 +dt+ db.cat2 +" LIMIT 0";
+// Matched objects table
+/*
+
++---------+-------------+-------------+-----------+-------+--------+-----------+------------+-------+--------+
+| htmID_8 | ref_htmID_8 | source_name | source_id | RAmas | DECmas | ref_RAmas | ref_DECmas | Sep   | origID |
++---------+-------------+-------------+-----------+-------+--------+-----------+------------+-------+--------+
+
+source_name, source_id -> optional
+
+*/
+
+	tabname = t.otab.x;
+	qry_str = qry_str_i + tabname +" SELECT i."+  t.id_coln1 +" AS "+ t.id_coln1 +",r."+ t.id_coln1 +" AS ref_"+ t.id_coln1;
+
+	if (t.use_master_id1)
+	  qry_str += ",i."+ t.rf_coln1;
+	if (t.use_master_id2)
+	  qry_str += ",r."+ t.rf_coln2;
+
+          //qry_str += co+ "r."+ t.ra_coln2 +" AS ref_"+ t.ra_coln2 +co+"r."+bt+ t.de_coln +"` AS ref_"+ t.de_coln;
+
+
+        //qry_str += co+"i."+ t.ra_coln +co+"i."+bt+ t.de_coln +"` FROM "+ db.my_db2 +dt+ db.cat2 +" AS r, "+ db.my_db1 +dt+ db.cat1 +" AS i LIMIT 0";
+
+	qry_str += " FROM "+ db.my_db1 +dt+ db.cat1 +" AS i,"+ db.my_db2 +dt+ db.cat2 +" AS r LIMIT 0";
 
       } else if (i==1) {
-        tabname = t.otab.nx;
-// Unmatched objects table
-        qry_str = qry_str_i + tabname +" SELECT "+ t.id_coln1 +co;
-        if (t.use_master_id1)
-          qry_str += t.mt_coln +co+ t.rn_coln +co;
 
-        qry_str += t.ra_coln +co+ t.de_coln +" FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
+// Unmatched objects table
+	tabname = t.otab.nx;
+	qry_str = qry_str_i + tabname +" SELECT "+ t.id_coln1;
+	if (t.use_master_id1)
+	  qry_str += co+ t.rf_coln1;
+
+	qry_str += " FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
+
+        //qry_str += t.ra_coln +co+bt+ t.de_coln +"` FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
       } else {
+
 // External objects table
-        tabname = t.otab.ext;
-        qry_str = qry_str_i + tabname +" SELECT "+ t.id_coln1 +co;
-         if (t.use_master_id1)
-           qry_str += t.mt_coln +co+ t.rn_coln +co;
-         qry_str += t.ra_coln +co+ t.de_coln +" FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
+	tabname = t.otab.ext;
+	qry_str = qry_str_i + tabname +" SELECT "+ t.id_coln1;
+	if (t.use_master_id1)
+	  qry_str += co+ t.rf_coln1;
+           //qry_str += t.mt_coln +co+ t.rn_coln +co;
+
+	 qry_str += " FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
+
+         //qry_str += t.ra_coln +co+bt+ t.de_coln +"` FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
       }
 
 if (verbose)
@@ -472,11 +565,11 @@ if (verbose)
 
 // What to alter for matched/unmatched/external catalogue
       if (i==0)
-        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD Sep FLOAT NOT NULL DEFAULT 0, ADD origID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM";
+        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD ref_RAmas int unsigned not null, ADD ref_DECmas int not null, ADD Sep FLOAT NOT NULL DEFAULT 0, ADD origID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
       else if (i==1) 
-        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD origID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM";
+        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD origID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
       else 
-        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD Sep FLOAT NOT NULL DEFAULT 0, ENGINE=MyISAM";
+        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD Sep FLOAT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
 
       if (! qry_str.empty()) {
 
@@ -507,7 +600,7 @@ int dif_cat_info(const int cID, string dbname, string catname, bool htm_only=fal
   if (cID < 0) {
     cid = 0;
     if (!db_init(cid)) {
-      cerr << PROGNAME <<": cannot set CONNECT_TIMEOUT for MySQL connection."<< endl;
+      cerr <<"--> Error: cannot set CONNECT_TIMEOUT for MySQL connection."<< endl;
       exit(1);
     }
 
@@ -518,7 +611,7 @@ int dif_cat_info(const int cID, string dbname, string catname, bool htm_only=fal
       server_ip = "localhost";
 
     if (!db_connect(cid, server_ip.c_str(), db.my_user.c_str(), db.my_passw.c_str(), db.my_db1.c_str())) {
-      cerr << PROGNAME <<": DB error: "<< db_error(cid) << endl;
+      cerr <<"--> Error: DB error: "<< db_error(cid) << endl;
       exit(1);
     }
     do_close = true;
@@ -534,7 +627,7 @@ int dif_cat_info(const int cID, string dbname, string catname, bool htm_only=fal
      while (1) {
        w = catname.find("*");
        if (w != string::npos)
-         catname.replace(w,1,"%");
+         catname.replace(w, 1, "%");
        else
          break;
      }
@@ -542,7 +635,7 @@ int dif_cat_info(const int cID, string dbname, string catname, bool htm_only=fal
      if (w != string::npos)
        t = "name like '"+  catname +"'";
      else
-       t = " name='"+ catname +"'";
+       t = "name='"+ catname +"'";
    }
 
   difqry += d +" AND "+ t;
@@ -551,15 +644,15 @@ int dif_cat_info(const int cID, string dbname, string catname, bool htm_only=fal
     difqry += " AND id_type=1";
   //else
     //difqry += "'";
-  cout << difqry << endl;
+//cout << difqry << endl;
 
   if (!db_query(cid, difqry.c_str())) {
-    cerr << PROGNAME <<": DB error: "<< db_error(cid) << endl;
+    cerr <<"--> Error: DB error: "<< db_error(cid) << endl;
     exit(1);
   }
 
   if (db_num_rows(cid) == 0) {
-    cerr << PROGNAME <<": "<< dbname <<dt<< catname;
+    cerr <<"--> Error: "<< dbname <<dt<< catname;
     if (htm_only)
       cerr <<": no HTM indexing found.\n";
     else
@@ -602,25 +695,39 @@ void set_dif_params(bool use_hpx=false)
 
 // ID col names have additional depth/order given in input
   if (use_hpx) {
-   t.id_coln1 = "healpID_nest_"; //+ t.orde1;
-   t.id_coln2 = "healpID_nest_"; //+ t.orde2;
+   t.id_coln1 = "healpID_nest_"; //+ t.order1;
+   t.id_coln2 = "healpID_nest_"; //+ t.order2;
   } else {
-    t.id_coln1 = "htmID_"; //+ t.orde1;
-    t.id_coln2 = "htmID_"; //+ t.orde2;
+    t.id_coln1 = "htmID_"; //+ t.order1;
+    t.id_coln2 = "htmID_"; //+ t.order2;
   }
 
-  t.ra_coln = "RAmas";
-  t.de_coln = "DECmas";
+  t.ra_coln1 = "RAmas";
+  t.de_coln1 = "DECmas";
+  t.ra_coln2 = "RAmas";
+  t.de_coln2 = "DECmas";
   t.deg_fac = "/3.6e6";
+  t.rf_coln1 = "";
+  t.rf_coln2 = "";
 
+/*
+  if (t.use_master_id1)
+    t.rf_coln1 = "source_name";
+
+  if (t.use_master_id2)
+    t.rf_coln2 = "source_id";
+*/
+
+/*
   if (t.use_master_id1 || t.use_master_id2) {
-    t.mt_coln = "MASTERhpx6";
-    t.rn_coln = "runningnumber";
+    //t.mt_coln = "MASTERhpx6";
+    //t.rn_coln = "runningnumber";
   } else {
     t.mt_coln = "none";
     t.rn_coln = "none";
   }
-  t.id_sqltype = dif_sqltype(t.orde1);  // Unused
+*/
+  t.id_sqltype = dif_sqltype(t.order1);  // Unused
 }
 
 
@@ -629,33 +736,34 @@ void set_dif_params(bool use_hpx=false)
 void usage()
 {
   cout << PROGNAME <<bl<<bl<< VERID << endl<<endl
-       << "Match an input catalogue CatIn against a reference one, CatRef,\n and optionally produce an output Table. All reside in DIF indexed MySQL tables.\n\n"
-       << "Usage: "<< PROGNAME <<" -x CatIn CatRef [OPTIONS] [Pixel_ID] [Start_Pixel_ID End_Pixel_ID]\n"
+       << "Match an input catalogue InCat against a reference one, RefCat,\n and optionally produce an output Table. All reside in DIF indexed MySQL tables.\n\n"
+       << "Usage: "<< PROGNAME <<" -x InCat RefCat [OPTIONS] [Pixel_ID] [Start_Pixel_ID End_Pixel_ID]\n"
        << "Where OPTIONS are:\n"
        << "  -h: print this help\n"
        << "  -H: print help on available DIF indexed catalogues\n"
        << "  -a: archive (append if it exists) matched/unmatched objects into DB tables (see -t)\n"
        << "  -A: like -a but (if exists) first remove DB table\n"
        << "  -B: like -A but also create the unmatched table with all input catalogue columns\n"
-       << "  -F: full match of CatIn in one shot (no loop on pixels)\n"
-       << "  -I: use Turin specific unique ID (= MASTERhpx6+runningnumber) of ref cat. in out table (+ CatIn coords)\n"
-       << "  -K: if -I given, then also read and display the corresponding MASTERhpx6+runningnumber of CatIn\n"
+       << "  -F: full match of InCat in one shot (no loop on pixels)\n"
        << "  -l: list on screen selected and matched objects\n"
        << "  -m: input (see -S) and returned separation are arcmin (def. arcsec)\n"
        << "  -M: accept multiple matches within given max separation (see -S) (def. 1 match only)\n"
        << "  -q: do not list on screen matched objects\n"
        << "  -Q: only list on screen matched objects outside the pixel\n"
        << "  -v: be verbose\n"
-       << "  -c ID1 ID2 Ra Dec: column names for HTM/HPX IDs and Coords (def. htmID_ + Depth1/2, RAmas, DECmas)\n"
+       << "  -c ID1 ID2 Ra Dec: column names for HTM/HPX IDs and Coords of InCat (def. htmID_ + Depth1/2, RAmas, DECmas)\n"
+       << "  -C Ra Dec: column names for Coords of RefCat (def. RAmas, DECmas)\n"
        << "  -d DBnane: use 'DBnane' as input database (def. '"<< t.otab.out_db <<"', implies one of -aAB)\n"
-       << "  -i catID: set 'catID' as user defined catalogue ID for 'CatRef' (e.g. sky2000 = 1, def. 0)\n"
+       << "  -i catID: set 'catID' as user defined catalogue ID for 'RefCat' (e.g. sky2000 = 1, def. 0)\n"
        << "  -o OutDB: use 'OutDB' as output database (def. test, implies one of -aAB)\n"
-       << "  -p Password: MySQL user password is 'Password' (def. '"<<db.my_passw <<"')\n"
+       << "  -p Password: MySQL user password is 'Password' (def. '"<< db.my_passw <<"')\n"
        << "  -s Server: send query to DB server 'Server' (def. '"<< db.my_host <<"')\n"
-       << "  -t Table: root matched objects table will be 'Table' (def. pix_Xmatch_User_CatIn_x_CatRef)\n"
+       << "  -t Table: root matched objects table will be 'Table' (def. pix_Xmatch_User_InCat_x_RefCat)\n"
        << "  -u User: MySQL user name is 'User' (def. '"<< db.my_user <<"')\n"
-       << "  -x CatIn CatRef: cross match catalogue 'CatIn' against reference 'CatRef'\n"
-       << "  -D Depth1 Depth2: HTM pixelization depths to use are 'Depth1' and 'Depth2' (def. 6 15 : excludes -O)\n"
+       << "  -x InCat RefCat: cross match catalogue 'InCat' against reference 'RefCat'\n"
+       << "  -D Depth1 Depth2: HTM pixelization depths to use are 'Depth1' and 'Depth2' (def. 8 14 : excludes -O)\n"
+       << "  -I refIdField: field Id (e.g. source_id in Gaia) to read from RefCat and add to out table (integer type)\n"
+       << "  -K inIdField: field Id (e.g. source_name in catwise) to read from InCat and add to out table (char type - TODO)\n"
        << "  [-O Order1 Order2]: HEALPix pixelization order (NESTED) to use are 'Order1' and 'Order2' (def. 6 14 : excludes -D)\n"
        << "  -R nRows: process 'nRows' per INSERT query to increase speed (def. 300 : require -A or -a)\n"
        << "  -S Sep: max separation defining a positive match is 'Sep' arcsec (def. 1 : see -m)\n"
@@ -663,7 +771,7 @@ void usage()
        << "   Option -O is not implemented yet.\n"
        << "   Options -D and -O apply to both catalogues.\n"
        << "   If -O not given then assume both catalogues are HTM indexed.\n"
-       << "\nCan join DB name with table name, e.g.: "<< db.my_db1 <<".CatIn or "<< t.otab.out_db <<".CatIn_xm_CatRef"
+       << "\nCan join DB name with table name, e.g.: "<< db.my_db1 <<".InCat or "<< t.otab.out_db <<".InCat_xm_RefCat"
        << endl<<endl;
   exit(0);
 }
@@ -671,18 +779,19 @@ void usage()
 
 int main(int argc, char *argv[])
 {
-  unsigned short kwds=0, use_hpx=0, do_list_match=1, do_list_external=1, do_list_all=0, do_list_cats=0,
-                 use_arcmin=0, save_match=0, drop_prematch=0, out_unmatched_full=0, idb_set=0, odb_set=0,
-                 multi_match=0, full_scan=1, verbose=0, input_col_names=0;
+  unsigned short full_scan = 1, do_list_match = 1, do_list_external = 1, do_list_all = 0, do_list_cats = 0,
+                 use_arcmin = 0, save_match = 0, drop_prematch = 0, out_unmatched_full = 0, idb_set = 0, odb_set = 0,
+                 input_col_names1 = 0, input_col_names2 = 0, kwds = 0, use_hpx = 0, multi_match = 0, verbose = 0;
   static const int my_cID = 0;  // MySQL connection ID
-  int ret=0, insert_Nrows=300;
-  double minchunksize, min_dist=-1.,
-         matchlength=1./3600;  // def. match dist.= 1''
-  unsigned long nmatchret, nmatchext; // nmatchmax
-  long nmatch, totals_read=0, totals_match=0, totals_ext=0, totals_unmatch=0;
+  int ret = 0, insert_Nrows = 300, sep_scale = 3600;
+  unsigned long nmatch, nmatchret, nmatchext; // nmatchmax
+  long totals_read = 0, totals_readext = 0, totals_match = 0, totals_matchext = 0, totals_unmatch = 0;
 
-  string ans, db_view1, db_view2, qry_str,
-         sep_unit="arcsec", origID="0";
+  double minchunksize, min_dist = -1.,
+         matchlength = 1./3600;  // def. match dist.= 1''
+
+  string sep_unit = "arcsec", origID = "0",
+	 qry_str, db_view_order2;
   char c;
 
 // Set default params
@@ -692,8 +801,8 @@ t.otab.out_db = "test";
 t.otab.x = "";
 t.use_master_id1 = false;
 t.use_master_id2 = false;
-t.orde1 = "6";
-t.orde2 = "15";
+t.order1 = "8";
+t.order2 = "14";
 t.in_full = false;
 
 /* Keywords section */
@@ -725,19 +834,12 @@ t.in_full = false;
         case 'F':
           t.in_full = true;
           break;
-        case 'I':
-          t.use_master_id2 = true;
-          t.mt_coln = "MASTERhpx6";
-          t.rn_coln = "runningnumber";
-          break;
-        case 'K':
-          t.use_master_id1 = true;
-          break;
         case 'l':
           do_list_all = 1;
           break;
         case 'm':
           use_arcmin = 1;
+	  sep_scale = 60;
           sep_unit = "arcmin";
           break;
         case 'M':
@@ -753,17 +855,28 @@ t.in_full = false;
         case 'v':
           verbose = 1;
           break;
-        case 'c':  // Pass column names for 2 IDs, Ra and Dec
+        case 'c':  // Pass column names for IDs, Ra and Dec of first catalogue
           if (argc < 5) usage();
           t.id_coln1 = string(*++argv);
           --argc;
           t.id_coln2 = string(*++argv);
           --argc;
-          t.ra_coln = string(*++argv);
+          t.ra_coln1 =  string(*++argv);
+          //t.ra_coln =  "`"+ string(*++argv) + "`";
           --argc;
-          t.de_coln = string(*++argv);
+          t.de_coln1 = string(*++argv);
+          //t.de_coln = "`"+ string(*++argv) + "`";
           --argc;
-          input_col_names = 1;
+          input_col_names1 = 1;
+          kwds=0;
+          break;
+        case 'C':  // Pass RA and Dec column names of reference catalogue
+          if (argc < 3) usage();
+          t.ra_coln2 =  string(*++argv);
+          --argc;
+          t.de_coln2 = string(*++argv);
+          --argc;
+          input_col_names2 = 1;
           kwds=0;
           break;
         case 'd':
@@ -776,9 +889,9 @@ t.in_full = false;
           break;
         case 'D':
           if (argc < 3) usage();
-          t.orde1 = string(*++argv);
+          t.order1 = string(*++argv);
           --argc;
-          t.orde2 = string(*++argv);
+          t.order2 = string(*++argv);
           --argc;
           kwds=0;
           break;
@@ -787,6 +900,24 @@ t.in_full = false;
           origID = string(*++argv);
           --argc;
           kwds=0;
+          break;
+        case 'I':
+          if (argc < 2) usage();
+          t.rf_coln2 = string(*++argv);
+          --argc;
+          t.use_master_id2 = true;
+          //t.rf_coln2 = "source_id";
+          kwds = 0;
+          break;
+        case 'K':
+          if (argc < 2) usage();
+          t.rf_coln1 = string(*++argv);
+          --argc;
+          t.use_master_id1 = true;
+          //t.use_master_id2 = true;
+          //t.rf_coln1 = "source_name";
+          //t.rf_coln2 = "source_id";
+          kwds = 0;
           break;
         case 'o':
           if (argc < 2) usage();
@@ -798,9 +929,9 @@ t.in_full = false;
           break;
         case 'O':
           if (argc < 3) usage();
-          t.orde1 = string(*++argv);
+          t.order1 = string(*++argv);
           --argc;
-          t.orde2 = string(*++argv);
+          t.order2 = string(*++argv);
           --argc;
           use_hpx = 1;
           kwds=0;
@@ -928,8 +1059,19 @@ t.in_full = false;
 
 
 
-  unsigned long inr1, nr1=0, nr2=0, i, j, ij, iin_id, n, n_unmatched, ndup=0, npix=1,
-                *id_list, *id1=NULL, *mt1=NULL, *mt2=NULL, *rn1=NULL, *rn2=NULL;
+  unsigned long inr1, nr1_old, nr2_old, nr1=0, nr2=0, i, j, ij, iin_id, n, n_unmatched, ndup=0, npix=1,
+                *id_list=NULL, *id1=NULL, *mt1=NULL, *mt2=NULL, *rn1=NULL, *rn2=NULL;
+
+
+  char **refid1 = NULL;  // catwise
+  if (t.use_master_id1)
+    refid1 = (char **) malloc(sizeof(char *));
+  //refid1[0] = (char*) malloc((STRING_SIZE+1) * sizeof(char *));
+
+  unsigned long long *refid2 = NULL;
+
+  //char (*refid1)[STRING_SIZE];  // catwise
+
   long long l_ra=0, l_de=0;
   double *ra1=NULL, *de1=NULL, *ra2=NULL, *de2=NULL, rac=0., decc=0.;
   char **row;
@@ -950,11 +1092,11 @@ t.in_full = false;
     in_id = itos(iin_id);
     unsigned long iin_id2 = atoi(*argv);
     npix = iin_id2 - iin_id + 1;
-    if (!(id_list = (unsigned long *) malloc(npix * sizeof(unsigned long)))) {
-      cerr << PROGNAME <<": id_list: error allocating memory.\n";
+    if ( !(id_list = (unsigned long *) malloc(npix * sizeof(unsigned long))) ) {
+      cerr << "-->Error: id_list: error allocating memory.\n";
       exit(-1);
     }
-    for (i=0; i<npix; i++)
+    for (i = 0; i < npix; i++)
       id_list[i] = iin_id + i;
   }
 
@@ -964,6 +1106,21 @@ t.in_full = false;
     getline(cin, db.my_passw);
   }
 
+  cout <<"     "<< PROGNAME << VERID << endl<<endl;
+
+  cout <<"===> '"<< db.cat1 <<"' vs '"<< db.cat2 <<"': matches at max sep. of "<< dtos3f(min_dist)<< bl << sep_unit <<" <===\n\n";
+
+  cout <<"---> InCat fields: "<< t.id_coln1 <<", "<< t.id_coln2 <<", "<< t.ra_coln1 <<", "<< t.de_coln1;
+
+  if (t.use_master_id1)
+	cout <<"; added reference field: "<< t.rf_coln1;
+   cout << endl;
+
+  cout <<"---> RefCat fields: "<< t.id_coln1 <<", "<< t.ra_coln2 <<", "<< t.de_coln2;
+
+  if (t.use_master_id2)
+	cout <<"; added reference field: "<< t.rf_coln2;
+   cout << endl << endl;
 
 //  DBConn db;
 //  db.connect("generic", "password", "MyCats");
@@ -989,7 +1146,7 @@ t.in_full = false;
   qry_str = "SELECT count(*) FROM "+ db.cat1;
 
 if (verbose)
-cout<<"Query: "<< qry_str<<endl;
+  cout<<"Query: "<< qry_str<<endl;
 
   if (!db_query(my_cID, qry_str.c_str())) {
     cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
@@ -1000,34 +1157,35 @@ cout<<"Query: "<< qry_str<<endl;
     cerr << PROGNAME <<": DB error or empty table '"<< db.cat1 <<"'\n";
     exit(1);
   }
+  db_free_result(my_cID);
 
 
 // Display settings
-  const int iwidth=6, dwidth=12;  // printed values widths
-  unsigned short idw1=0, idw2=0;  // ID width (TBD)
-  cout << setiosflags(ios::fixed);
-  cout << setprecision(7);
+  const int iwidth = 6, dwidth = 12;  // printed values widths
+  unsigned short refidw1 = 20, refidw2 = 22, idw1 = 0, idw2 = 0;  // ID width (TBD)
+  cout << std::setiosflags(ios::fixed);
+  cout << std::setprecision(7);
 
 // NOTE: HEALPix pixelization X-match not yet implemented
   if (use_hpx) {
-    if (! input_col_names) {
-      t.id_coln1 = "healpID_nest_"+ t.orde1;
-      t.id_coln2 = "healpID_nest_"+ t.orde2;
-      //t.id_coln1 += t.orde1;
-      //t.id_coln2 += t.orde2;
+    if (! input_col_names1) {
+      t.id_coln1 = "healpID_nest_"+ t.order1;
+      t.id_coln2 = "healpID_nest_"+ t.order2;
+      //t.id_coln1 += t.order1;
+      //t.id_coln2 += t.order2;
     }
-    idw1 = dif_hpxid_maxw(t.orde1);
+    idw1 = dif_hpxid_maxw(t.order1);
 
-    db_view1 = db.cat1 +"_healp_nest_"+ t.orde2;
+    db_view_order2 = db.cat1 +"_healp_nest_"+ t.order2;
   } else {
-    if (! input_col_names) {
+    if (! input_col_names1) {
 // HTM IDs column name
-      t.id_coln1 += t.orde1;
-      t.id_coln2 += t.orde2;
+      t.id_coln1 += t.order1;
+      t.id_coln2 += t.order2;
     }
-    idw1 = dif_htmid_maxw(t.orde1);
+    idw1 = dif_htmid_maxw(t.order1);
 
-    db_view1 = db.cat1 +"_htm_"+ t.orde2;
+    db_view_order2 = db.cat1 +"_htm_"+ t.order2;
   }
 
   idw1 = MAX(idw1, t.id_coln1.length());
@@ -1038,11 +1196,12 @@ cout<<"Query: "<< qry_str<<endl;
   dif_cat_info(my_cID, db.my_db1, db.cat1);
 
 
-  int nd=0;
 if (verbose)
   cout<< db.my_db1 <<dt<< db.cat1 <<" info in DIF.tbl: \n";
+
+  int nd=0;
   for (i=0; i<catinfo.size(); i++) {
-    if (catinfo[i].param == t.orde1 || catinfo[i].param == t.orde2)
+    if (catinfo[i].param == t.order1 || catinfo[i].param == t.order2)
       nd++;
 if (verbose)
   cout <<" id_type: "<< catinfo[i].id_type <<" id_opt: "<< catinfo[i].id_opt <<" Depth/order: "<< catinfo[i].param
@@ -1052,10 +1211,38 @@ if (verbose)
   if (nd != 2 && !full_scan)
     cout << PROGNAME <<": Warning: the 2 requested depths/orders where not found in DIF.tbl for "<< db.my_db1 <<dt<< db.cat1 << endl;
 
-  string qry_ini, difqry_ini1,
-         ra_fld1=t.ra_coln + t.deg_fac, ra_fld2=t.ra_coln + t.deg_fac,
-         de_fld1=t.de_coln + t.deg_fac, de_fld2=t.de_coln + t.deg_fac; 
+  string qry_ini, difqry_ini1, ra_fld1, de_fld1, ra_fld2, de_fld2;
+  bool fld1_type_mas = true, fld2_type_mas = true;
 
+  if ( input_col_names1 ) {
+	ra_fld1 = t.ra_coln1;
+	de_fld1 = bt+ t.de_coln1 +bt;
+// This is TODO.
+	if (ra_fld1.find("mas") == string::npos) 
+		fld1_type_mas = false; 
+	else {
+		ra_fld1 += t.deg_fac;
+		de_fld1 += t.deg_fac;
+	}
+  } else {
+	ra_fld1 = t.ra_coln1 + t.deg_fac;
+	de_fld1 = t.de_coln1 + t.deg_fac;
+  }
+
+  if ( input_col_names2 ) {
+	ra_fld2 = t.ra_coln2;
+	de_fld2 = bt+ t.de_coln2 +bt; 
+// This is TODO.
+	if (ra_fld2.find("mas") == string::npos) 
+		fld2_type_mas = false; 
+	else {
+		ra_fld2 += t.deg_fac;
+		de_fld2 += t.deg_fac;
+	}
+  } else {
+	ra_fld2 = t.ra_coln2 + t.deg_fac;
+	de_fld2 = t.de_coln2 + t.deg_fac; 
+  }
 
 // For full catalogue scan build the list of pixels (could read from the query...)
   if (full_scan) {
@@ -1068,7 +1255,8 @@ cout<<"Query: "<< qry_str<<endl;
     }
 
     npix = db_num_rows(my_cID);
-cout << db.cat1 <<": N_pixels to process: "<< npix << endl;
+    cout << db.cat1 <<": N_pixels to process: "<< npix << endl;
+
     if (npix == 0) {
       cerr << PROGNAME <<": no pixel IDs found in "<< db.cat1 << endl;
       exit(1);
@@ -1086,14 +1274,14 @@ cout << db.cat1 <<": N_pixels to process: "<< npix << endl;
     db_free_result(my_cID);
   }  // full_scan
 
-  vector<double> distance12;
+  vector<float> distance12;  // In arcsec
   vector<long> match1, match2;
 
-// Matching distance
+// Matching distance in arcsec
   if (min_dist >= 0.) {
-    matchlength = min_dist/3600;
-    if (use_arcmin)
-      matchlength *= 60;
+    matchlength = min_dist / sep_scale;
+    //if (use_arcmin)
+      //matchlength *= 60;
   } else
     min_dist = 1.;
 
@@ -1102,27 +1290,28 @@ cout << db.cat1 <<": N_pixels to process: "<< npix << endl;
 //cout << matchlength << " " << minchunksize << endl;
 
 
-for (n=0; n<npix; n++) {  // for each pixel
-  if (n==0) {
+for (n = 0; n < npix; n++) {  // for each pixel
+  if (n == 0) {
 
-    if (save_match) {
+    if (save_match)
       crea_out_tabs(my_cID, drop_prematch, verbose);
 
-    }  // end save_match
-
-  }  // end n==0
-
-  else {
+  } else {
+	  //
 //if (id_list[n] < 36979) continue;
     in_id = itos(id_list[n]);
     ret = db_select(my_cID, db.my_db1.c_str());
   }
+
 /*
 cout<<in_id<<endl;
 char c;
 printf("Enter character: ");
 c = getchar();
 */
+
+  if (! t.in_full)
+    cout <<"--> "<< t.id_coln1 <<": "<< in_id << endl;
 
   qry_str = "SELECT count(*) FROM "+ db.cat1;
   if (! t.in_full)
@@ -1142,39 +1331,74 @@ if (verbose) {
     }
 
     inr1 = atoi(db_data(my_cID, 0, 0));
-    //db_free_result(my_cID);
-
-
+    db_free_result(my_cID);
 
 // To maintain the same nr of cols use dummy input id
   //qry_str = string("SELECT ") + ra_fld1 +co+ de_fld1 +co+ in_id +co+ rn_coln +" FROM "+ cat1 +
             //" WHERE "+ t.id_coln1 +"="+ in_id;
   //difqry_ini1 = string("SELECT ") + ra_fld1 +" as RA"+co+ de_fld1 +co+ t.id_coln1;
+
   difqry_ini1 = "SELECT DISTINCT "+ ra_fld1 +co+ de_fld1 +co+ t.id_coln1;
+
   if (t.use_master_id1)
-    difqry_ini1 += co+ t.mt_coln +co+ t.rn_coln;
+    difqry_ini1 += co+ t.rf_coln1;
+    //difqry_ini1 += co+ t.mt_coln +co+ t.rn_coln;
+
 
   difqry_ini1 += " FROM ";
+
+  string tmp_tab = "tmpx_"+ t.id_coln1;
+
+  qry_str = "DROP TABLE if exists "+ tmp_tab;
+if (verbose)
+  cout<<"Query: "<< qry_str<<endl;
+  ret = db_query(my_cID, qry_str.c_str());
+
   qry_str = difqry_ini1 + db.cat1;
 
 // Note: the DIF_sNeighb can be time consuming.
   if (! t.in_full)
     qry_str += " WHERE "+ t.id_coln1 +"="+ in_id +
-               " UNION ALL "+ difqry_ini1 + db_view1 +" WHERE DIF_sNeighb("+ t.orde1 +co+ in_id +co+ t.orde2 + ")";
+               " UNION ALL "+ difqry_ini1 + db_view_order2 +" WHERE DIF_sNeighb("+ t.order1 +co+ in_id +co+ t.order2 + ")";
 
-//qry_str += " order by RA";
+  //qry_str = difqry_ini1 +" FROM "+ db.cat2 +" WHERE "+ t.id_coln1;
+
+//qry_str += " order by "+ t.ra_fld1;
+
+ qry_str = "CREATE temporary TABLE "+ tmp_tab +" "+ qry_str;
+
 
 if (verbose)
   cout<<"Query: "<< qry_str<<endl;
 
-// Note: temporary use only orde1 to bind dynamically the query buffer.
+// Note: temporary use only order1 to bind dynamically the query buffer.
 // This means we use MASTERhpx6 (smallint -> MYSQL_TYPE_SHORT) and runningnumber (long int -> MYSQL_TYPE_LONG)
-  ret = db_stmt_prepexe2(my_cID, qry_str.c_str(), t.orde1.c_str());
+  //ret = db_stmt_prepexe2(my_cID, qry_str.c_str(), t.order1.c_str(), 0);
+  ret = db_query(my_cID, qry_str.c_str());
+if (verbose)
+  cout<<"TMP table created"<<endl;
+
+  if (!ret) {
+    cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
+    exit(1);
+  }
+
+  db_free_result(my_cID);
+
+// Select from the temp table
+  qry_str = "select * from "+ tmp_tab;
+
+if (verbose)
+  cout<<"Query: "<< qry_str<<endl;
+
+
+  ret = db_stmt_prepexe2(my_cID, qry_str.c_str(), t.order1.c_str(), 0);
   if (ret) {
     cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
     exit(1);
   }
 
+  nr1_old = nr1;
   nr1 = db_num_rows(my_cID);
 
 if (verbose) {
@@ -1183,19 +1407,23 @@ if (verbose) {
   else
     cout << db.cat1 <<": distinct N_entries="<< nr1 <<" ("<< inr1<<" total)\n";
 }
+
   if (nr1 == 0) {
     mysql_stmt_close(stmt);
     db_free_result(my_cID);
     continue;
   }
 
+
   if (!(id1 = (unsigned long *) realloc(id1, nr1 * sizeof(unsigned long)))) exit(-1);
   if (!(ra1 = (double *) realloc(ra1, nr1 * sizeof(double)))) exit (-1);
   if (!(de1 = (double *) realloc(de1, nr1 * sizeof(double)))) exit(-1);
-  if (t.use_master_id1) {
-    if (!(mt1 = (unsigned long *) realloc(mt1, nr1 * sizeof(unsigned long)))) exit(-1);
-    if (!(rn1 = (unsigned long *) realloc(rn1, nr1 * sizeof(unsigned long)))) exit(-1);
-  }
+
+  //if (t.use_master_id1)
+	//if (!(refid1 = (unsigned long long *) realloc(refid1, nr1 * sizeof(unsigned long)))) exit(-1);
+
+  if (t.use_master_id1 && nr1 > nr1_old)
+	refid1 = resize2d(nr1_old, (STRING_SIZE+1), nr1, (STRING_SIZE+1), refid1);
 
   i = 0;
   while (!mysql_stmt_fetch(stmt))
@@ -1203,23 +1431,39 @@ if (verbose) {
     ra1[i] = dbl_data[0];
     de1[i] = dbl_data[1];
     id1[i] = long_data[0];
+ 
     if (t.use_master_id1) {
-      mt1[i] = long_data[1];
-      rn1[i] = long_data[2];
+	//refid1[i] = long_data[1];
+	memcpy(refid1[i], str_data, STRING_SIZE);
+	refid1[i][STRING_SIZE] = '\0';
     }
     i++;
   }
+
 
   if (do_list_all)
     for (i=0; i<nr1; i++) {
       cout <<setw(iwidth)<< i << bl <<setw(idw1)<<id1[i];
       if (t.use_master_id1)
-        cout << bl <<setw(idw1)<<mt1[i] << bl <<setw(iwidth)<<rn1[i];
+        cout << bl <<setw(refidw1)<<refid1[i];
+        //cout << bl <<setw(idw1)<<mt1[i] << bl <<setw(iwidth)<<rn1[i];
       cout << bl <<setw(dwidth)<< ra1[i]
            << bl <<setw(dwidth)<< de1[i] << endl;
     }
 
   mysql_stmt_close(stmt);
+
+  qry_str = "DROP TABLE "+ tmp_tab;
+
+if (verbose)
+  cout<<"Query: "<< qry_str<<endl;
+
+  ret = db_query(my_cID, qry_str.c_str());
+
+if (verbose)
+  cout<<"TMP table removed"<<endl;
+
+  db_free_result(my_cID);
 
 // ---  end selection from table 1  ---
 
@@ -1234,7 +1478,8 @@ if (verbose) {
 //  difqry_ini1 = string("SELECT ") + ra_fld2 +" as RA"+co+ de_fld2 +co+ in_id;
   difqry_ini1 = "SELECT "+ ra_fld2 +co+ de_fld2 +co+ in_id;
   if (t.use_master_id2)
-    difqry_ini1 += co+ t.mt_coln +co+ t.rn_coln;
+    difqry_ini1 += co+ t.rf_coln2;
+    //difqry_ini1 += co+ t.mt_coln +co+ t.rn_coln;
 
   qry_str = difqry_ini1 +" FROM "+ db.cat2 +" WHERE "+ t.id_coln1;
   if (! t.in_full)
@@ -1253,14 +1498,16 @@ if (verbose) {
 if (verbose)
   cout<<"Query: "<< qry_str<<endl;
 
-  ret = db_stmt_prepexe2(my_cID, qry_str.c_str(), t.orde1.c_str());
+  ret = db_stmt_prepexe2(my_cID, qry_str.c_str(), t.order1.c_str(), 1);
 
   if (ret) {
     cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
     exit(1);
   }
 
+  nr2_old = nr2;
   nr2 = db_num_rows(my_cID);
+
 if (verbose) {
   if (! t.in_full)
     cout << t.id_coln1 <<"="<< in_id <<", "<< db.cat2 <<": N_entries="<< nr2 << endl;
@@ -1271,20 +1518,28 @@ if (verbose) {
 
     if (!(ra2 = (double *) realloc(ra2, nr2 * sizeof(double)))) exit(-1);
     if (!(de2 = (double *) realloc(de2, nr2 * sizeof(double)))) exit(-1);
-    if (t.use_master_id2) {
-      if (!(mt2 = (unsigned long *) realloc(mt2, nr2 * sizeof(unsigned long)))) exit(-1);
-      if (!(rn2 = (unsigned long *) realloc(rn2, nr2 * sizeof(unsigned long)))) exit(-1);
-    }
-    i=0;
+
+    if (t.use_master_id2)
+	if (!(refid2 = (unsigned long long *) realloc(refid2, nr2 * sizeof(unsigned long)))) exit(-1);
+
+    //if (t.use_master_id2 && nr2 > nr2_old)
+	//refid2 = resize2d(nr2_old, (STRING_SIZE+1), nr2, (STRING_SIZE+1), refid2);
+
+    //if (t.use_master_id2)
+	  //refid2 = alloc2d(nr2, (STRING_SIZE+1), refid2);
+
+    i = 0;
 //  while ((record = mysql_fetch_row(result[0])) != NULL)
     while (! mysql_stmt_fetch(stmt))
     {
       ra2[i] = dbl_data[0];
       de2[i] = dbl_data[1];
-      if (t.use_master_id2) {
-        mt2[i] = long_data[1];
-        rn2[i] = long_data[2];
-      }
+
+    if (t.use_master_id2) {
+	refid2[i] = long_data[1];
+      //memcpy(refid2[i], str_data, STRING_SIZE);
+      //refid2[i][STRING_SIZE] = '\0';
+    }
 
 //cout<< dbl_data[0]<<" "<< dbl_data[1]<<" "<<long_data1<<" "<<long_data2<<endl; 
 //row2num(record, &ra2[i], &de2[i], &mt2[i]);
@@ -1299,7 +1554,8 @@ if (verbose) {
       for (i=0; i<nr2; i++) {
         cout <<setw(iwidth)<< i;
         if (t.use_master_id2)
-          cout << bl <<setw(idw2)<<mt2[i] << bl <<setw(iwidth)<<rn2[i];
+          cout << bl <<setw(refidw2)<<refid2[i];
+          //cout << bl <<setw(idw2)<<mt2[i] << bl <<setw(iwidth)<<rn2[i];
         //cout <<setw(iwidth)<< i << bl <<setw(iwidth)<<rn2[i]
         cout << bl <<setw(dwidth)<< ra2[i]
              << bl <<setw(dwidth)<< de2[i] << endl;
@@ -1311,6 +1567,8 @@ if (verbose) {
 
 // ---  end selection from table 2  ---
 
+  if (inr1 > nr2)  // within pixel, more objects in catalogue to be matched than in ref. cat.
+    cout <<"--> Warning: in this pixel, RefCat "<< db.cat2 <<" has less objects than "<< db.cat1 << endl;
 
   iin_id = atoi(in_id.c_str());
   nmatch = 0;
@@ -1322,30 +1580,37 @@ if (verbose) {
 // The matching
 
 // In case of 1 to 1 match, this is managed in spherematch2
-  //nmatchmax = MIN(nr1,nr2);
-  //nmatch = nmatchmax;
+//nmatchmax = MIN(nr1,nr2);
+//nmatch = nmatchmax;
+ 
     nmatch = nr1*nr2;
 
-// Make sure first list is the longest?
-//  if (nr1 < nr2) {
+//
+// TODO: Make sure first list is the longest or the other way around?
+//
+  if (nr1 > nr2) {
 //    tab_swapped = true;
-//    spherematch2(nr2, ra2, de2, nr1, ra1, de1, matchlength, minchunksize,
-//                match2, match1, distance12, &nmatch);
-//  } else {
+    if (multi_match)
+	spherematch2_mm(nr2, ra2, de2, nr1, ra1, de1, matchlength, minchunksize,
+			match2, match1, distance12, &nmatch);
+    else
+	spherematch2(nr2, ra2, de2, nr1, ra1, de1, matchlength, minchunksize,
+			match2, match1, distance12, &nmatch);
+  } else {
     //tab_swapped = false;  // Not used
     if (multi_match)
-      spherematch2_mm(nr1, ra1, de1, nr2, ra2, de2, matchlength, minchunksize,
-                  match1, match2, distance12, &nmatch);
+	spherematch2_mm(nr1, ra1, de1, nr2, ra2, de2, matchlength, minchunksize,
+			match1, match2, distance12, &nmatch);
     else
-      spherematch2(nr1, ra1, de1, nr2, ra2, de2, matchlength, minchunksize,
-                  match1, match2, distance12, &nmatch);
-//  }
-
+	spherematch2(nr1, ra1, de1, nr2, ra2, de2, matchlength, minchunksize,
+			match1, match2, distance12, &nmatch);
+  }
+//cout<<"Match done."<<endl;
 
   }  // nr1 and nr2 !=0
 
   if (nmatch == 0) {
-    cout << PROGNAME <<": no match at a separation of "<< dtos3f(min_dist) <<bl<< sep_unit << endl;
+    cout << "--> Warning: no match at a separation of "<< dtos3f(min_dist) <<bl<< sep_unit << endl;
     if (npix == 1 && ! save_match)
       return (0);
     //else
@@ -1356,11 +1621,6 @@ if (verbose) {
   //nmatchret = MIN(nmatch,nmatchmax);
   nmatchret = nmatch;
 
-  cout << db.cat1;
-  if (! t.in_full)
-    cout <<": "<< t.id_coln1 <<"="<< in_id;
-  cout <<": found "<< nmatch <<" matches at max sep. of "
-       << dtos3f(min_dist) << bl << sep_unit <<" (returned "<< nmatchret <<")\n";
 
 // Matches external to input pixel
   nmatchext = 0;
@@ -1384,65 +1644,87 @@ if (verbose) {
     }
   }
 
+  cout <<"--> In: "<< nr1;
+  if (! full_scan)
+	cout<<" (ext: "<< nr1 - inr1 <<")";
+	
+  cout << std::setprecision(1);
+  cout <<", Ref: "<< nr2 <<", X: "<< nmatch <<" ("<< std::setw(4) << (nmatch*1000/inr1) / 10. <<"%, ret: "<< nmatchret <<")";
+  cout << std::setprecision(7);
+
+  if (! t.in_full)
+    cout << ", Xext: "<< nmatchext;
+
+  cout <<", notX: "<< n_unmatched << endl;
+
   totals_read += inr1;
+  totals_readext += nr1 - inr1;
   totals_match += nmatchret;
   totals_unmatch += n_unmatched;
-  totals_ext += nmatchext;
+  totals_matchext += nmatchext;
 
+  cout <<"TOTAL: read: "<< totals_read + totals_readext;
   if (! t.in_full)
-    cout << nmatchext <<" objects matched outside pixel "<< iin_id <<", ";
-  cout << n_unmatched <<" unmatched objects\n";
+    cout <<" ("<< totals_readext <<" of which external)";
 
-  cout <<"Totals: "<< t.id_coln1 <<"="<<in_id<<": read "<< totals_read;
-  if (! t.in_full)
-    cout <<" (+ "<< totals_ext <<" ext.: "<< totals_read+totals_ext<<")";
-  cout <<", matched "<< totals_match <<", unmatched "<< totals_unmatch <<endl;
-
-  if (use_arcmin) {
-    for (i=0; i<nmatchret; i++)
-      distance12[i] *= 60;
-  } else {
-    for (i=0; i<nmatchret; i++)
-      distance12[i] *= 3600;
+  cout <<", matched: "<< totals_match <<" (external: "<< totals_matchext <<"), unmatched: "<< totals_unmatch << endl;
+// 23/06/2020: separation returned in arcsec
+/*
+  if (nmatch > 0) {
+	for (i = 0; i < nmatchret; i++)
+	  distance12[i] *= sep_scale;  // To arcsec
   }
+*/
 
 
 // Insert to be optimized
-  if (save_match && nmatch>0) {
+  if (save_match && nmatch > 0) {
     qry_ini = "INSERT INTO "+ t.otab.out_db +dt+ t.otab.x +" VALUES";
     qry_str = "";
 
-// For matched objects in Cat1 and pixel ID, save the corresponding coords and ID of ref. Cat2
-    for (i=0; i<nmatchret; i++) {
+// For matched objects in InCat and pixel ID, save the corresponding coords and ID of RefCat
+    for (i = 0; i < nmatchret; i++) {
       if (! t.in_full)
-        qry_str += "("+ in_id +co+ itos(id1[match1[i]]) +co;
+        qry_str += "("+ itos(id1[match1[i]]) +co+ in_id +co;
       else
-        qry_str += "(HTMLookup("+ t.orde1 +co+ dtos(ra2[match2[i]]) +co+ dtos(de2[match2[i]]) +"),"+ itos(id1[match1[i]]) +co;
+        qry_str += "("+ itos(id1[match1[i]]) +",HTMLookup("+ t.order1 +co+ dtos(ra2[match2[i]]) +co+ dtos(de2[match2[i]]) +"),";
 
+      if (t.use_master_id1)
+        qry_str += sq+ refid1[match1[i]] +sq+co;
       if (t.use_master_id2)
-        qry_str += itos(mt2[match2[i]]) +co+ itos(rn2[match2[i]]);
-      else {
+        qry_str += ltos(refid2[match2[i]]) +co;
+ 
+// First coords of reference cat
+     //if ( fld1_type_mas ) {
+	l_ra = (long long) (ra1[match1[i]]*3.6e6 + 0.5);
+	l_de = de1[match1[i]]>0 ? (long long) (de1[match1[i]]*3.6e6 + 0.5) : (long long) (de1[match1[i]]*3.6e6 - 0.5);
+	qry_str += ltos(l_ra) +co+ ltos(l_de);
+      //} //else {
+	//qry_str += dtos(ra2[match2[i]]) +co+ dtos(de2[match2[i]]);
+      //}
+
+     //if ( fld2_type_mas ) {
         l_ra = (long long) (ra2[match2[i]]*3.6e6 + 0.5);
         l_de = de2[match2[i]]>0 ? (long long) (de2[match2[i]]*3.6e6 + 0.5) : (long long) (de2[match2[i]]*3.6e6 - 0.5);
-        qry_str += ltos(l_ra) +co+ ltos(l_de);
-      }
+        qry_str += co+ ltos(l_ra) +co+ ltos(l_de);
+      //} //else {
+	//qry_str += co+ dtos(ra1[match1[i]]) +co+ dtos(de1[match1[i]]);
+      //}
 
-      l_ra = (long long) (ra1[match1[i]]*3.6e6 + 0.5);
-      l_de = de1[match1[i]]>0 ? (long long) (de1[match1[i]]*3.6e6 + 0.5) : (long long) (de1[match1[i]]*3.6e6 - 0.5);
-      qry_str += co+ ltos(l_ra) +co+ ltos(l_de) +co+
-                 dtos3f(distance12[i]) +co+ origID +")";
+      qry_str += co+ dtos3f(distance12[i]) +co+ origID +")";
        
       if (((i+1) % insert_Nrows) == 0) {
         qry_str = qry_ini + qry_str;
 if (verbose)
-cout <<"i: "<<i<<" "<<qry_str<<endl;
+  cout <<"i: "<<i<<" "<<qry_str<<endl;
         ret = db_query(my_cID, qry_str.c_str());
         if (!ret) {
           cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
           exit(1);
         }
         qry_str = "";
-      } else if (i != nmatchret-1) qry_str += co;
+      } else if (i != nmatchret - 1)
+	qry_str += co;
 
     }  // end for i
 
@@ -1463,17 +1745,19 @@ if (verbose)
 
 
 // Print out the matched objects
-  if (do_list_match && nmatch>0) {
+  if (do_list_match && nmatch > 0) {
     cout << "\nMatched list:\n"
 
          << setw(iwidth)<<"SeqID1"<< bl <<setw(idw1)<<t.id_coln1 << bl;
       if (t.use_master_id1)
-        cout << setw(idw1)<< t.mt_coln << bl <<setw(idw1)<< t.rn_coln << bl;
+        cout << setw(refidw1)<< t.rf_coln1 << bl;
+        //cout << setw(idw1)<< t.mt_coln << bl <<setw(idw1)<< t.rn_coln << bl;
 
       cout  <<setw(dwidth)<<"RAdeg1"<< bl <<setw(dwidth)<<"DECdeg1"<< bl
          << setw(iwidth)<<"SeqID2"<< bl;
       if (t.use_master_id2)
-        cout << setw(idw2)<< t.mt_coln << bl <<setw(idw2)<< t.rn_coln << bl;
+        cout << setw(refidw2)<< t.rf_coln2 << bl;
+        //cout << setw(idw2)<< t.mt_coln << bl <<setw(idw2)<< t.rn_coln << bl;
 
       cout << setw(dwidth)<<"RAdeg2"<< bl <<setw(dwidth)<<"DECdeg2"<< bl
          <<"  Sep ("<< sep_unit <<")"<< endl;
@@ -1481,12 +1765,14 @@ if (verbose)
     for (i=0; i<nmatchret; i++) {
       cout << setw(iwidth) << match1[i]<< bl <<setw(idw1)<<id1[match1[i]] << bl;
       if (t.use_master_id1)
-        cout << setw(idw1)<< mt1[match1[i]] << bl << setw(idw1)<< rn1[match1[i]] << bl;
+        cout << setw(refidw1)<<refid1[match1[i]]<< bl;
+        //cout << setw(idw1)<< mt1[match1[i]] << bl << setw(idw1)<< rn1[match1[i]] << bl;
 
       cout <<setw(dwidth)<<ra1[match1[i]]<< bl <<setw(dwidth)<<de1[match1[i]]<< bl
            << setw(iwidth) << match2[i]<< bl;
       if (t.use_master_id2)
-        cout << setw(idw2)<<mt2[match2[i]]<< bl << setw(idw2)<< rn2[match2[i]] << bl;
+        cout << setw(refidw2)<<refid2[match2[i]] << bl;
+        //cout << setw(idw2)<<mt2[match2[i]]<< bl << setw(idw2)<< rn2[match2[i]] << bl;
 
       cout << setw(dwidth)<<ra2[match2[i]]<< bl <<setw(dwidth)<<de2[match2[i]]<< bl
            <<setw(dwidth)<< distance12[i] << endl;
@@ -1505,13 +1791,15 @@ if (verbose)
                <<setw(iwidth)<<"SeqID1"<< bl <<setw(idw1)<<t.id_coln1 << bl;
 
           if (t.use_master_id1)
-            cout <<setw(idw1)<< t.mt_coln << bl <<setw(idw1)<< t.rn_coln << bl;
+            cout <<setw(refidw1)<< t.rf_coln1 << bl;
+            //cout <<setw(idw1)<< t.mt_coln << bl <<setw(idw1)<< t.rn_coln << bl;
 
           cout <<setw(dwidth)<<"RAdeg1"<< bl <<setw(dwidth)<<"DECdeg1"<< bl
                <<setw(iwidth)<<"SeqID2"<< bl;
 
           if (t.use_master_id2)
-            cout <<setw(idw2)<< t.mt_coln << bl <<setw(idw2)<< t.rn_coln << bl;
+            cout <<setw(refidw2)<< t.rf_coln2 << bl;
+            //cout <<setw(idw2)<< t.mt_coln << bl <<setw(idw2)<< t.rn_coln << bl;
 
           cout <<setw(dwidth)<<"RAdeg2"<< bl <<setw(dwidth)<<"DECdeg2"<< bl
                <<"  Sep ("<< sep_unit <<")"<< endl;
@@ -1519,12 +1807,14 @@ if (verbose)
 
         cout <<setw(iwidth) << match1[i]<< bl <<setw(idw1)<<id1[match1[i]] << bl;
         if (t.use_master_id1)
-          cout <<setw(idw1)<< mt1[match1[i]] << bl << setw(idw1)<< rn1[match1[i]] << bl;
+          cout <<setw(refidw1)<<refid1[match1[i]] << bl;
+          //cout <<setw(idw1)<< mt1[match1[i]] << bl << setw(idw1)<< rn1[match1[i]] << bl;
 
         cout <<setw(dwidth)<<ra1[match1[i]]<< bl <<setw(dwidth)<<de1[match1[i]]<< bl
              <<setw(iwidth) << match2[i]<< bl;
         if (t.use_master_id2)
-          cout <<setw(idw2)<< mt2[match2[i]] << bl << setw(idw2)<< rn2[match2[i]] << bl;
+          cout <<setw(refidw2)<< refid2[match2[i]] << bl;
+          //cout <<setw(idw2)<< mt2[match2[i]] << bl << setw(idw2)<< rn2[match2[i]] << bl;
 
         cout <<setw(dwidth)<<ra2[match2[i]]<< bl <<setw(dwidth)<<de2[match2[i]]<< bl
              <<setw(dwidth)<< distance12[i] << endl;
@@ -1536,38 +1826,33 @@ if (verbose)
   }
 
 
-// Need to sort array if saving/listing of unmatched objects is requested
-// Note: if all the objects in the reference catalogue are matched, just issue a warning!
-
-  if ((do_list_match || save_match) && inr1>nmatchret) {
-    sort(match1.begin(),match1.end());
-    if (inr1>nr2) { // more objects in catalogue to be matched than in ref. cat.
-      cout <<"Warning: "<< db.cat2 <<" has less objects than "<< db.cat1  <<" ("<< nr2 <<" vs "<< inr1 <<").\n";
-      if (nmatchret==nr2)  // all objects in ref. cat. matched
-        cout <<"All of them were matched. "<< n_unmatched <<" objects left unmatched in "<< db.cat1 << endl;
-      else  // more objects in catalogue to be matched than in ref. cat.
-        cout << nmatchret <<" were matched. "<< n_unmatched <<" objects left unmatched in "<< db.cat1 << endl;
-
-    }
+  if (inr1 > nr2) { // more objects in catalogue to be matched than in ref. cat.
+    if (nmatchret == nr2)  // all objects in ref. cat. matched
+      cout <<"--> All of them were matched. "<< n_unmatched <<" objects left unmatched in "<< db.cat1 << endl;
+    else  // more objects in catalogue to be matched than in ref. cat.
+      cout <<"--> "<< nmatchret <<" were matched. "<< n_unmatched <<" objects left unmatched in "<< db.cat1 << endl;
   }
 
 
 // Save external matches: for one shot match it is nmatchext=0
-  if (save_match && nmatchext>0) {
+  if (save_match && nmatchext > 0) {
     qry_ini = string("INSERT INTO ") + t.otab.out_db +dt+ t.otab.ext +" VALUES";
            //string("INSERT IGNORE INTO ") + t.otab.ext +" VALUES(";
-    qry_str = "";       
+    qry_str = "";
     ij = 0;
+    bool end_ext = false;
 
     for (i=0; i<nmatchret; i++) {
       if (id1[match1[i]] != iin_id) {
 
         qry_str += "("+ itos(id1[match1[i]]) +co;
         if (t.use_master_id1)
-          qry_str += itos(mt1[match1[i]]) +co+ itos(rn1[match1[i]]) +co;
+          qry_str += sq+ refid1[match1[i]] +sq +co;
+          //qry_str += itos(refid1[match1[i]]) +co;
+          //qry_str += itos(mt1[match1[i]]) +co+ itos(rn1[match1[i]]) +co;
 
-         l_ra = (long long) (ra1[match1[i]]*3.6e6 + 0.5);
-         l_de = de1[match1[i]]>0 ? (long long) (de1[match1[i]]*3.6e6 + 0.5) : (long long) (de1[match1[i]]*3.6e6 - 0.5);
+         l_ra = lrint(ra1[match1[i]]*3.6e6);
+         l_de = de1[match1[i]]>0 ? lrint(de1[match1[i]]*3.6e6) : lrint(de1[match1[i]]*3.6e6);
          qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ dtos3f(distance12[i]) +")";
 
         ij++;
@@ -1575,7 +1860,7 @@ if (verbose)
         if ((ij % insert_Nrows) == 0) {
           qry_str = qry_ini + qry_str;
 if (verbose)
-cout <<"ij: "<<ij<<" "<<qry_str<<endl;
+  cout <<"ij: "<<ij<<" "<<qry_str<<endl<<endl;
           ret = db_query(my_cID, qry_str.c_str());
           if (!ret) {
             cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
@@ -1585,15 +1870,19 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
           ij = 0;
         } else qry_str += co;
 
+	if (ij == nmatchext)
+		break;
+
       }  // end if != iin_id
     }  // end for i
+
 
 // The remaining rows
     if (ij) {
       qry_str.erase(qry_str.end()-1);
       qry_str = qry_ini + qry_str;
 if (verbose)
-cout <<"ij: "<<ij<<" "<<qry_str<<endl;
+  cout <<"ij: "<<ij<<" "<<qry_str<<endl;
       ret = db_query(my_cID, qry_str.c_str());
       if (!ret) {
         cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
@@ -1604,13 +1893,21 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
   }  // end if save_match
 
 
+// Need to sort array if saving/listing of unmatched objects is requested
+// Note: if all the objects in the reference catalogue are matched, just issue a warning!
+
+  if ((do_list_match || save_match) && inr1 > nmatchret) {
+    sort(match1.begin(), match1.end());
+  }
+
+
 // Unmatched objects
-  if (save_match && n_unmatched>0) {
+  if (save_match && n_unmatched > 0) {
     qry_ini = string("INSERT INTO ") + t.otab.out_db +dt+ t.otab.nx +" VALUES";
     qry_str = "";
     ij = 0;
 
-    unsigned long j0=0;
+    unsigned long j0 = 0;
 
     for (i=0; i<nr1; i++) {
       if (t.in_full || id1[i] == iin_id) {
@@ -1627,7 +1924,9 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
             qry_str += "("+ itos(id1[i]) +co;
 
           if (t.use_master_id1)
-            qry_str += itos(mt1[i]) +co+ itos(rn1[i]) +co;
+            //qry_str += itos(refid1[i]) +co;
+            qry_str += sq+ refid1[i] +sq+co;
+            //qry_str += itos(mt1[i]) +co+ itos(rn1[i]) +co;
 
           l_ra = (long long) (ra1[i]*3.6e6 + 0.5);
           l_de = de1[i]>0 ? (long long) (de1[i]*3.6e6 + 0.5): (long long) (de1[i]*3.6e6 - 0.5);
@@ -1638,7 +1937,7 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
           if ((ij % insert_Nrows) == 0) {
             qry_str = qry_ini + qry_str;
 if (verbose)
-cout <<"ij: "<<ij<<" "<<qry_str<<endl;
+  cout <<"ij: "<<ij<<" "<<qry_str<<endl;
             ret = db_query(my_cID, qry_str.c_str());
             if (!ret) {
               cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
@@ -1657,7 +1956,7 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
       qry_str.erase(qry_str.end()-1);
       qry_str = qry_ini + qry_str;
 if (verbose)
-cout <<"ij: "<<ij<<" "<<qry_str<<endl;
+  cout <<"ij: "<<ij<<" "<<qry_str<<endl;
       ret = db_query(my_cID, qry_str.c_str());
       if (!ret) {
         cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
@@ -1668,7 +1967,7 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
   }  // end save_match
 
 
-  if (do_list_match && n_unmatched>0) {
+  if (do_list_match && n_unmatched > 0) {
 // Unmatched list for Cat1
     cout <<"Unmatched in "<< db.cat1 <<":\n";
     for (i=0; i<nr1; i++) {
@@ -1679,7 +1978,8 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
         if (j == nmatchret) {  // not there
           cout << setw(iwidth)<< i << bl <<setw(idw1)<<id1[i]<<bl;
           if (t.use_master_id1)
-            cout << setw(idw1)<<mt1[i] << bl <<setw(iwidth)<<rn1[i] << bl;
+            cout << setw(refidw1)<<refid1[i] << bl;
+            //cout << setw(idw1)<<mt1[i] << bl <<setw(iwidth)<<rn1[i] << bl;
           cout << setw(dwidth)<< ra1[i] << bl <<setw(dwidth)<< de1[i] << endl;
         }
       }
@@ -1690,29 +1990,31 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
 // Unmatched list for ref. Cat2 (this is not too meaningful)
   if (do_list_match && nr2>nmatchret) {
     cout << nr2-nmatchret <<" unmatched in "<< db.cat2 <<" ("<< t.id_coln1 <<"="<< in_id <<"):\n";
-    if (verbose) {
+
+if (verbose) {
 //... need to sort
-      sort(match2.begin(),match2.end());
-      j = 0;
-      for (i=0; i<nr2; i++) {
-        if (j<nmatchret)
-          ij = match2[j];
-        else
-          ij = 0;
-        if (i != ij) {
-          cout <<setw(iwidth)<< i << bl;
-          if (t.use_master_id2)
-            cout << setw(idw1)<< mt2[i] << bl <<setw(iwidth)<<rn2[i] << bl;
-          cout << setw(dwidth)<< ra2[i] << bl <<setw(dwidth)<< de2[i] << endl;
-        } else
-          j++;
-      }
-    }
+  sort(match2.begin(),match2.end());
+  j = 0;
+  for (i=0; i<nr2; i++) {
+    if (j<nmatchret)
+      ij = match2[j];
+    else
+      ij = 0;
+    if (i != ij) {
+      cout <<setw(iwidth)<< i << bl;
+      if (t.use_master_id2)
+        cout << setw(refidw2)<< refid2[i] << bl;
+        //cout << setw(idw1)<< mt2[i] << bl <<setw(iwidth)<<rn2[i] << bl;
+      cout << setw(dwidth)<< ra2[i] << bl <<setw(dwidth)<< de2[i] << endl;
+    } else
+      j++;
+  }
+}
+
   }
 
   if (t.in_full)
     break;
-
 
 }  // end for each pixel
 
@@ -1721,14 +2023,24 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
   free(de1);
   free(ra2);
   free(de2);
+  //id1 = NULL;
+  //ra1 = NULL;
+  //de1 = NULL;
+  //ra2 = NULL;
+  //de2 = NULL;
   if (t.use_master_id1) {
-    free(mt1);
-    free(rn1);
+    for (i = 0; i < nr1; i++)
+	free(refid1[i]);
+    free(refid1);
+    //refid1 = NULL;
   }
-  if (t.use_master_id2) {
-    free(mt2);
-    free(rn2);
+  if (t.use_master_id2) {  // catwise
+    free(refid2);
+    //refid2 = NULL;
   }
+
+  if (id_list)
+	free(id_list);
 
 // Now we can clean up the unmatched tables (only for full scan or match in one shot)
 // Always first drop the tables
@@ -1742,36 +2054,26 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
       }
     }
 
-    string qry_str_x, qry_str_xe, qry_str_nx, qry_str_nxc, qry_str_e;
-    qry_str_x  = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.x +" ADD KEY ("+ t.id_coln1 +co+ t.ra_coln +")";
-    qry_str_nx = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nx +" ADD KEY ("+ t.id_coln1 +co+ t.ra_coln +")";
+    string qry_str_x, qry_str_xe, qry_str_nx, qry_str_nxc, qry_str_e, qry_str_crea = "";
+    qry_str_x  = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.x +" ADD KEY ("+ t.id_coln1 +co+ "RAmas)";
+    qry_str_nx = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nx +" ADD KEY ("+ t.id_coln1 +co+ "RAmas)";
 
 // Now create the clean table from a join of the unmatched and external tables, or simply rename the unmatched one
-    if (totals_ext > 0) {
-      qry_str_e = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.ext +" ADD KEY ("+ t.id_coln1 +co+ t.ra_coln +")";
+    if (totals_matchext > 0) {
+      qry_str_e = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.ext +" ADD KEY ("+ t.id_coln1 +co+ "RAmas)";
 
-      qry_str = "CREATE TABLE "+ t.otab.out_db +dt+ t.otab.nxc +" SELECT u.* FROM "+
+      qry_str_crea = "CREATE TABLE "+ t.otab.out_db +dt+ t.otab.nxc +" LIKE "+ t.otab.out_db +dt+ t.otab.nx;
+      qry_str = "INSERT INTO "+ t.otab.out_db +dt+ t.otab.nxc +" SELECT u.* FROM "+
                 t.otab.out_db +dt+ t.otab.nx +" AS u LEFT JOIN "+
                 t.otab.out_db +dt+ t.otab.ext +" AS e ON u."+ t.id_coln1 +"=e."+t.id_coln1 +
-                " AND u."+ t.ra_coln +"=e."+ t.ra_coln +" AND u."+ t.de_coln +"=e."+ t.de_coln +" WHERE e."+t.id_coln1 +" IS NULL";
+                " AND u.RAmas=e.RAmas AND u.DECmas=e.DECmas WHERE e."+t.id_coln1 +" IS NULL";
+                //" AND u."+ t.ra_coln2 +"=e."+ t.ra_coln2 +" AND u."+ t.de_coln2 +"=e."+ t.de_coln2 +" WHERE e."+t.id_coln1 +" IS NULL";
 
-//select count(htmID_6) as n, ref_htmID_6,htmID_6,RAmas,DECmas,Sep from (SELECT u.ref_htmID_6,u.htmID_6,u.RAmas,u.DECmas,u.Sep FROM test.p1 AS u INNER JOIN test.pe AS e ON u.htmID_6=e.htmID_6 AND u.RAmas=e.RAmas AND u.DECmas=e.DECmas group by u.ref_htmID_6,u.htmID_6 order by u.htmID_6,u.Sep asc) as t group by htmID_6 having n>1;
-/*
-      qry_str_xe = string("SELECT COUNT(")+ t.id_coln1 +") AS n, ref_"+ t.id_coln1 +co+ t.id_coln1 +co+ t.ra_coln +co+ t.de_coln +
-                ", Sep FROM(SELECT u.ref_"+ t.id_coln1 +",u."+ t.id_coln1 +",u."+ t.ra_coln +",u."+ t.de_coln +",u.Sep FROM "+
-                t.otab.out_db +"."+ t.otab.x +" AS u INNER JOIN "+ t.otab.out_db +"."+ t.otab.ext +" AS e ON u."+
-                t.id_coln1 +"=e."+t.id_coln1 +
-                " AND u."+ t.ra_coln +"=e."+ t.ra_coln +" AND u."+ t.de_coln +"=e."+ t.de_coln +
-                " GROUP BY ref_"+ t.id_coln1 +",u."+ t.id_coln1 +" ORDER BY u."+ t.id_coln1 +",u.Sep ASC) AS t GROUP BY "+
-                t.id_coln1 +co+ t.ra_coln +" HAVING n>1";
-*/
-//SELECT count(e.htmID_6) as n, e.* FROM test.temptable2 AS u LEFT JOIN test.temptable2_external AS e ON u.htmID_6=e.htmID_6 AND u.RAmas=e.RAmas AND u.DECmas=e.DECmas WHERE e.htmID_6 IS not NULL group by e.htmID_6,e.ramas,e.decmas having n>1;
-//SELECT count(u.htmID_6) as n, u.ref_htmID_6,u.htmID_6,u.RAmas,u.DECmas,u.Sep FROM test.temptable2 AS u LEFT JOIN test.temptable2_external AS e ON u.htmID_6=e.htmID_6 AND u.RAmas=e.RAmas AND u.DECmas=e.DECmas WHERE e.htmID_6 IS not NULL group by e.htmID_6,e.ramas,e.decmas having n>1;
-      qry_str_xe = "SELECT COUNT(u."+ t.id_coln1 +") AS n, u.ref_"+ t.id_coln1 +",u."+ t.id_coln1 +",u."+ t.ra_coln +",u."+ t.de_coln +
+      qry_str_xe = "SELECT COUNT(u."+ t.id_coln1 +") AS n, u.ref_"+ t.id_coln1 +",u."+ t.id_coln1 +",u.RAmas,u.DECmas"+
                 ", u.Sep FROM "+ t.otab.out_db +dt+ t.otab.x +" AS u LEFT JOIN "+ t.otab.out_db +dt+ t.otab.ext +" AS e ON u."+
                 t.id_coln1 +"=e."+ t.id_coln1 +
-                " AND u."+ t.ra_coln +"=e."+ t.ra_coln +" AND u."+ t.de_coln +"=e."+ t.de_coln +
-                " WHERE e."+ t.id_coln1 +" IS NOT NULL GROUP BY e."+ t.id_coln1 +",e."+ t.ra_coln +",e."+ t.de_coln +
+                " AND u.RAmas=e.RAmas AND u.DECmas=e.DECmas"+
+                " WHERE e."+ t.id_coln1 +" IS NOT NULL GROUP BY e."+ t.id_coln1 +",e.RAmas,e.DECmas" +
                 " HAVING n>1";
 
 
@@ -1787,10 +2089,12 @@ cout <<"ij: "<<ij<<" "<<qry_str<<endl;
       qry_str_e = "-- No object in the external pixels table";
       qry_str_xe = "-- No cleaning required for matched and unmatched tables";
       qry_str = "RENAME TABLE "+ t.otab.out_db +dt+ t.otab.nx +" TO "+ t.otab.out_db +dt+ t.otab.nxc;
-    }  // total_ext > 0
+    }  // totals_imatchext > 0
+
 if (verbose)
   cout <<qry_str_x<<endl
        <<qry_str_nx<<endl
+       <<qry_str_crea<<endl
        <<qry_str<<endl
        <<qry_str_e<<endl
        <<qry_str_xe<<endl;
@@ -1806,7 +2110,8 @@ if (verbose)
         cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
         exit(1);
       }
-      if (totals_ext > 0) {
+
+      if (totals_matchext > 0) {
 
         cout <<"Adding position key to externally matched objects table...\n";
         if (!db_query(my_cID, qry_str_e.c_str())) {
@@ -1844,9 +2149,13 @@ if (verbose)
             ras = db_data(my_cID, i, 3);
             des = db_data(my_cID, i, 4);
 
-            qry_str_x = "SELECT ref_"+ t.id_coln1 +co+ t.id_coln1 +co+ t.ra_coln +co+ t.de_coln +
+            qry_str_x = "SELECT ref_"+ t.id_coln1 +co+ t.id_coln1 +co+ "RAmas, DECmas, "+
                      " FROM "+ t.otab.out_db +dt+ t.otab.x +" WHERE "+ t.id_coln1 +"="+ in_id +" AND "+
-                     t.ra_coln +"="+ ras +" AND "+ t.de_coln +"="+ des +" ORDER BY Sep ASC limit 1";
+                     t.ra_coln2 +"RAmas="+ ras +" AND DECmas="+ des +" ORDER BY Sep ASC limit 1";
+
+            //qry_str_x = "SELECT ref_"+ t.id_coln1 +co+ t.id_coln1 +co+ t.ra_coln2 +co+ t.de_coln +
+                     //" FROM "+ t.otab.out_db +dt+ t.otab.x +" WHERE "+ t.id_coln1 +"="+ in_id +" AND "+
+                     //t.ra_coln2 +"="+ ras +" AND "+ t.de_coln +"="+ des +" ORDER BY Sep ASC limit 1";
 if (verbose)
   cout<<qry_str_x<<endl;
             if (!db_query(cid, qry_str_x.c_str())) {
@@ -1857,7 +2166,8 @@ if (verbose)
             in_id = db_data(cid, 0, 1);
 
             qry_str_x = "DELETE FROM "+ t.otab.out_db +dt+ t.otab.x +" WHERE "+ t.id_coln1 +"="+ in_id +
-                      " AND "+ t.ra_coln +"="+ ras +" AND "+ t.de_coln +"="+ des +" AND ref_"+ t.id_coln1 +"!= "+ re_id;
+                      " AND RAmas="+ ras +" AND DECmas="+ des +" AND ref_"+ t.id_coln1 +"!= "+ re_id;
+                      //" AND "+ t.ra_coln2 +"="+ ras +" AND "+ t.de_coln +"="+ des +" AND ref_"+ t.id_coln1 +"!= "+ re_id;
 // DELETE FROM temptable WHERE htmID_6=53993 and RAmas=850976111 and DECmas=14497050 and ref_htmID_6 != 53993;
 if (verbose)
   cout<<qry_str_x<<endl;
@@ -1877,9 +2187,15 @@ if (verbose)
         } else
           cout <<"No duplicated entry found in matched objects table\n";
 
-        db_free_result(my_cID);
+	db_free_result(my_cID);
 
-        cout <<"Merging unmatched and externally matched objects tables...\n";
+	cout <<"Merging unmatched and externally matched objects tables...\n";
+// First create the unmatched clean table (to use same conf as _unmatched tab) 
+	ret = db_query(my_cID, qry_str_crea.c_str());
+	if (!ret) {
+	  cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
+	  exit(1);
+	}
 
       } else
         cout <<"Renaming unmatched objects table...\n";
@@ -1890,9 +2206,9 @@ if (verbose)
         exit(1);
       }
 
-      if (totals_ext > 0) {
+      if (totals_matchext > 0) {
         cout <<"Adding position key to cleaned unmatched objects table...\n";
-        qry_str_nxc = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nxc +" ADD KEY ("+ t.id_coln1 +co+ t.ra_coln +")";
+        qry_str_nxc = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nxc +" ADD KEY ("+ t.id_coln1 +co+ t.ra_coln2 +")";
         if (!db_query(my_cID, qry_str_nxc.c_str())) {
           cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
           exit(1);
@@ -1904,7 +2220,8 @@ if (verbose)
         cout <<"Creating extended unmatched objects table...\n";
         qry_str_nxc = "CREATE TABLE "+ t.otab.out_db +dt+ t.otab.nxcf +" SELECT t1.* FROM "+ 
                       db.my_db1 +dt+ db.cat1 + " AS t1, "+  t.otab.out_db +dt+ t.otab.nxc +" AS t2 WHERE t1."+
-                      t.id_coln1 +"=t2."+ t.id_coln1 +" AND t1."+ t.ra_coln +"=t2."+ t.ra_coln +" AND t1."+ t.de_coln +"=t2."+ t.de_coln;
+                      t.id_coln1 +"=t2."+ t.id_coln1 +" AND t1.RAmas=t2.RAmas AND t1.DECmas=t2.DECmas";
+                      //t.id_coln1 +"=t2."+ t.id_coln1 +" AND t1."+ t.ra_coln2 +"=t2."+ t.ra_coln2 +" AND t1."+ t.de_coln +"=t2."+ t.de_coln;
 if (verbose)
   cout<<qry_str_nxc<<endl;
         if (!db_query(my_cID, qry_str_nxc.c_str())) {
@@ -1912,7 +2229,7 @@ if (verbose)
           exit(1);
         }
         cout <<"Adding position key to extended unmatched objects table...\n";
-        qry_str_nxc = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nxcf +" ADD KEY ("+ t.id_coln1 +co+ t.ra_coln +")";
+        qry_str_nxc = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nxcf +" ADD KEY ("+ t.id_coln1 +co+ t.ra_coln2 +")";
         if (!db_query(my_cID, qry_str_nxc.c_str())) {
           cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
           exit(1);
@@ -1924,11 +2241,12 @@ if (verbose)
       cout <<"\nYou did not use a single full catalogues match.\n"
              "At your convenience you need to merge manually unmatched and externally matched objects tables.\n"
              "For the current run the queries could be:\n\n"
-           << qry_str_nx <<";\n" 
-           << qry_str_e <<";\n" 
-           << qry_str <<";\n"; 
+           << qry_str_nx <<";\n"
+           << qry_str_e <<";\n"
+           << qry_str_crea <<";\n"
+           << qry_str <<";\n";
       cout <<"\nYou can also consider indexing the matched table:\n"
-           << qry_str_x <<";\n"; 
+           << qry_str_x <<";\n";
     }
 
     cout <<"\nYou can now use 'dif' on the output tables to create views and perform sky queries.\n";
@@ -1940,7 +2258,7 @@ if (verbose)
       cout <<"Unmatched objects table: "<< t.otab.out_db <<dt<< t.otab.nxc << endl;
       if (out_unmatched_full)
         cout <<"Unmatched extended objects table: "<< t.otab.out_db <<dt<< t.otab.nxcf << endl;
-      if (totals_ext > 0) {  // this is a cross-check
+      if (totals_matchext > 0) {  // this is a cross-check
         qry_str = "SELECT COUNT(*) FROM "+ t.otab.out_db +dt+ t.otab.nxc;
         if (!db_query(my_cID, qry_str.c_str())) {
           cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;

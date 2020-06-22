@@ -30,24 +30,29 @@ typedef bool   my_bool;
 //#define PASSWORD "12345678"
 #define DEFAULT_TIMEOUT "5"   /* Timeout in seconds: must be char */
 
-/* pix_myXmatch specific: 5 cols: 2 DOUBLE + 3 INT  */
-//#define NCOLS 5
-static int NCOLS[] = {5, 3};
+
+/* Customize these definitions for your query! */
+
+/* pix_myXmatch specific: 3 or 4 cols: 2 DOUBLE + 1 INT (RA, Dec, HTM/HPX id) + 1 optional INT (gaiadr2 source_id) or STRING (catwise source_name) */
+
+static int NCOLS[] = {3, 4};
 MYSQL_STMT *stmt;
-MYSQL_BIND bind[5];
+MYSQL_BIND bind[4];
 //MYSQL_BIND bind5[5];
 //MYSQL_BIND bind3[3];
 MYSQL_RES  *metadata;
+
 int           param_count;
-unsigned long length[5];
-my_bool       is_null[5];
-my_bool       error[5];
+unsigned long length[4];
+my_bool       is_null[4];
+my_bool       error[4];
 
 double dbl_data[2];
-unsigned long long long_data[3];
+unsigned long long long_data[2];
 //unsigned long long long_data2;
 //unsigned long long long_data3;
-
+#define STRING_SIZE 21  // catwise source_name
+char   str_data[STRING_SIZE]; 
 
 MYSQL conn[2];
 MYSQL_RES *result[2];
@@ -63,7 +68,6 @@ int db_select(int ID, const char *db);
 const char * db_error(int ID);
 int db_return_row(int ID);
 int db_query(int ID, const char *query);
-int db_uquery(int ID, const char *query);
 unsigned int db_num_fields(int ID);
 unsigned int db_num_rows(int ID);
 char *db_fieldname(int ID, int ord);
@@ -75,8 +79,8 @@ short db_unsigned(int ID, int ord);
 void db_free_result(int ID);
 void db_close(int ID);
 
-int db_stmt_prepexe2(int ID, const char *query, const char *param);
-int my_difbind2(unsigned int n_fields, const char *param, MYSQL_BIND bind[5]);
+int db_stmt_prepexe2(int ID, const char *query, const char *param, const unsigned short tid);
+int my_difbind2(unsigned int n_fields, const char *param, MYSQL_BIND bind[4], const unsigned short tid);
 
 __END_DECLS
 
