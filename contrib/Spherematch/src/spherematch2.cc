@@ -99,7 +99,7 @@ long spherematch2(
    unsigned long npoints1, double *ra1, double *dec1,
    unsigned long npoints2, double *ra2, double *dec2,
    double matchlength, double minchunksize,
-   vector<long> &match1s, vector<long> &match2s, vector<float> &distance12s,
+   std::vector<long> &match1s, std::vector<long> &match2s, std::vector<float> &distance12s,
    unsigned long *nmatch )
 {
 
@@ -128,8 +128,9 @@ cout<<"Spherematch2: Error: matchlength = "<< matchlength <<", minchunksize = "<
 // Use temp vectors and tranfer unique entries after cleaning.
   std::vector<long> match1;
   std::vector<long> match2;
-  std::vector<double> distance12;
+  std::vector<float> distance12;
 
+// Temporary vectors
   multi im;
   std::vector<multi> m;
   m.clear();
@@ -228,8 +229,6 @@ cout<<"Spherematch2: Error: matchlength = "<< matchlength <<", minchunksize = "<
   free_memory();
 
 
-// List for more than 1 object within given radius
-
 cout <<"--> spherematch2: total (multi) Xmatch = "<< *nmatch;
 
 
@@ -242,16 +241,32 @@ if (*nmatch > 0) {
 
   unsigned long n_rm = 0, m_marked = 0, n_unique = 0;
 
-  if (*nmatch > 1) {
+  if (*nmatch == 0) {
+	cout << endl;
+	return 1;
 
-// Array with just the multiple matches
-    std::vector<multi> mm;
-    mm.clear();
+  } else if (*nmatch == 1) {
+	match1s.push_back(match1[0]);
+	match2s.push_back(match2[0]);
+	distance12s.push_back(distance12[0]);
+	cout << endl;
+
+	return 0;
+  }
+
+
+//
+// --  More than 1 match: do the 1to1 cleaning job
+//
+
+// Array holding the multiple matches
+  std::vector<multi> mm;
+  mm.clear();
 
 
 //cout<<"Identifying unique/multiple matches...\n";
 // Identify unique and multiple matches
-    for (i = 0; i < *nmatch; i++) {
+  for (i = 0; i < *nmatch; i++) {
 	if (refcount[i] > 1) { // multiple RefObjects for this object
 //cout<<"MultiRefCat: "<< i <<": "<< m[i].id1 <<" has "<< refcount[i] << " ref-matches, one is "<<  m[i].id2 <<endl;
 		mm.push_back(m[i]);
@@ -268,14 +283,13 @@ if (*nmatch > 0) {
 		n_unique++;
 //cout<<"Unique: "<< m[i].id2 <<"  "<< m[i].id1 << endl;
 	}
-    }
+  }  // end for i
 
 
-// Clear old vector
-//m.clear();
-    std::vector<multi>().swap(m);
+// No need for the original vector: clear it
+  std::vector<multi>().swap(m);
 
-    cout <<", "<< n_unique <<" of which unique\n";
+  cout <<", "<< n_unique <<" of which unique\n";
 
 // Remove all the InCat objects with a single RefCat counterpart ?
 
@@ -287,15 +301,15 @@ cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12 
 #endif
 
 //cout<<"Sorting multi-matches vector by distance...\n";
-    sort(mm.begin(), mm.end(), mm_by_d12());
+  sort(mm.begin(), mm.end(), mm_by_d12());
 
 //cout <<"Sorted mm:\n";
 //for (i = 0; i < mm.size(); i++)
 //cout <<"mm[i].id1: "<<m[i].id1<<", mm[i].id2: "<<m[i].id2<<", d: "<<m[i].d12 <<endl;
 
 // Mark duplicated matches with distance > min
-cout <<"--> spherematch2: marking multi-matches to be checked... ";
-    for (i = 0; i < mm.size(); i++) {
+  cout <<"--> spherematch2: marking multi-matches to be checked... ";
+  for (i = 0; i < mm.size(); i++) {
 	if (mm[i].d12 < 0)
 	continue;
 
@@ -306,9 +320,9 @@ cout <<"--> spherematch2: marking multi-matches to be checked... ";
         	continue;
 	  }
 	}
-    }
+  }
 
-cout << m_marked << endl;
+  cout << m_marked << endl;
 
 
 // Sorting on distance and checking for negative values does not speed up much things, still...
@@ -318,8 +332,8 @@ cout << m_marked << endl;
 //for (i = 0; i < mm.size(); i++)
 //cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12<<endl;
 
-cout <<"--> spherematch2: multi-matches marking larger distances... ";
-    if (m_marked > 0) {
+  cout <<"--> spherematch2: multi-matches marking larger distances... ";
+  if (m_marked > 0) {
 	i = 0;
 	while (mm[i].d12 < 0) {
 
@@ -330,18 +344,18 @@ cout <<"--> spherematch2: multi-matches marking larger distances... ";
           }
 	  i++;
       }  // end while
-    }  // end if m_marked > 0
+  }  // end if m_marked > 0
 
-cout << n_rm <<" to remove... ";
+  cout << n_rm <<" to remove... ";
 
 // This is not too different from push_back.
-    match1s.reserve(*nmatch - n_rm);
-    match2s.reserve(*nmatch - n_rm);
-    distance12s.reserve(*nmatch - n_rm);
-    j = 0;
+  match1s.reserve(*nmatch - n_rm);
+  match2s.reserve(*nmatch - n_rm);
+  distance12s.reserve(*nmatch - n_rm);
+  j = 0;
 
 // Transfer final unique values into the passed vectors.
-    for (i = 0; i < *nmatch; i++) {
+  for (i = 0; i < *nmatch; i++) {
 	if (distance12[i] >= 0.) {
 //cout<< i <<": "<< match1[i] <<" "<< match2[i] <<" "<< distance12[i] << endl;
 		match1s[j] = match1[i];
@@ -349,24 +363,26 @@ cout << n_rm <<" to remove... ";
 		distance12s[j] = distance12[i];
 		j++;
 	}
-    }
+  }  // end for i
 
 
-    *nmatch -= n_rm;
+  *nmatch -= n_rm;
 
-cout <<"removed, left "<< *nmatch << endl;
+  cout <<"done. Left "<< *nmatch << endl;
 
 //cout<<"Nmatch="<< *nmatch <<"  match1.size() = "<< match1.size() <<", match2.size() = "<< match1.size() <<", distance12.size() = "<< distance12.size()<<endl;
 
-    if (*nmatch > npoints1 || *nmatch > npoints2) {
+  if (*nmatch > npoints1 || *nmatch > npoints2) {
 	cout<<"Spherematch2: Error: more matched objects than input objects:\n"<< 
 	"Nmatch="<< *nmatch <<"  npoints1 = "<< npoints1 <<", npoints2 = "<< npoints2 << endl;
 	return -3;
-    }
+  }
 
-    std::vector<multi>().swap(mm);
-  } // if *nmatch > 1
-
+// Clear local vector
+  std::vector<multi>().swap(mm);
+  std::vector<long>().swap(match1);
+  std::vector<long>().swap(match2);
+  std::vector<float>().swap(distance12);
 
   return 0;
 }

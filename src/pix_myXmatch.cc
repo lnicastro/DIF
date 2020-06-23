@@ -62,7 +62,7 @@
     pix_myXmatch -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 8 14 -qA -I source_id 524288 1048575
 
 
-  LN @ INAF-OAS, June 2013                         Last changed: 19/06/2020
+  LN @ INAF-OAS, June 2013                         Last changed: 23/06/2020
 */
 
 using namespace std;
@@ -396,7 +396,7 @@ inline char** resize2d(int oldHeight, int oldWidth, int height, int width, char 
   char** tmpr = NULL;
   char* tmpc = NULL;
   if ( !(tmpr = (char**) realloc(arr, sizeof(char*) * height)) ) {
-	  cout<<"Could not realloc "<< height <<" rows."<<endl;
+	  cout <<"Could not realloc "<< height <<" rows."<<endl;
 	  exit (-1);
   }
   arr = tmpr;
@@ -411,7 +411,7 @@ cout<<oldHeight<<" "<<oldWidth<<" "<<height<<" "<<width<<endl;
 //for (i = 0; i < height; i++) {
   for (i = oldHeight; i < height; i++) {  // Assume constant width -> field with fixed Nr of chars
 	if ( !(tmpc = (char*) realloc(arr[i], sizeof(char*) * width)) ) {
-	  cout<<"Could not realloc elements of "<< height <<" rows."<<endl;
+	  cout <<"Could not realloc elements of "<< height <<" rows."<<endl;
 	  exit (-1);
 	}
 	arr[i] = tmpc;
@@ -1641,7 +1641,7 @@ if (verbose) {
 
 // Matches external to input pixel
   nmatchext = 0;
-  if (! t.in_full)
+  if (!t.in_full)
     for (i=0; i<nmatchret; i++)
       if (id1[match1[i]] != iin_id)
         nmatchext++;
@@ -1651,9 +1651,9 @@ if (verbose) {
     n_unmatched = inr1 - nmatchret + nmatchext;
   else {
     n_unmatched = 0;
-    for (i=0; i<nr1; i++) {
+    for (i = 0; i < nr1; i++) {
       if (t.in_full || id1[i] == iin_id) {
-        for (j=0; j<nmatchret; j++)
+        for (j = 0; j < nmatchret; j++)
           if (match1[j] == i)
             break;
         if (j == nmatchret) n_unmatched++;
@@ -1662,14 +1662,19 @@ if (verbose) {
   }
 
   cout <<"--> In: "<< nr1;
-  if (! full_scan)
+  if (!full_scan)
 	cout<<" (ext: "<< nr1 - inr1 <<")";
 	
-  cout << std::setprecision(1);
-  cout <<", Ref: "<< nr2 <<", X: "<< nmatch <<" ("<< std::setw(4) << (nmatch*1000/inr1) / 10. <<"%, ret: "<< nmatchret <<")";
+  cout <<", Ref: "<< nr2 <<", X: "<< nmatch <<" (";
+  if (inr1 > 0) {
+    cout << std::setprecision(1);
+    cout << std::setw(5) << (nmatch*1000/inr1) / 10.;
+  } else
+    cout <<"0";
   cout << std::setprecision(7);
+  cout << "%, ret: "<< nmatchret <<")";
 
-  if (! t.in_full)
+  if (!t.in_full)
     cout << ", Xext: "<< nmatchext;
 
   cout <<", notX: "<< n_unmatched << endl;
