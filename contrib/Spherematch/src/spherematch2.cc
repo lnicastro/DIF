@@ -7,7 +7,7 @@
 
    - Separation returned in arcsec!
 
-  Last change: 22 June 2020 
+  Last change: 23 June 2020 
  */
 
 #include <cstdlib>
@@ -20,8 +20,9 @@
 using namespace std;
 
 struct multi { 
-    long id1;
-    long id2;
+    unsigned int index;
+    unsigned int id1;
+    unsigned int id2;
     int d12;
     //float d12;
     //size_t index;
@@ -143,15 +144,15 @@ cout<<"Spherematch2: Error: matchlength = "<< matchlength <<", minchunksize = "<
 
 /* 3. make x, y, z coords -- compute (x,y,z)1 on the fly - DPF */
   if ( !(xx2 = (double *) malloc(npoints2 * sizeof(double))) ) {
-	cerr <<"Error: spherematch: error allocating memory.\n";
+	cerr <<"Error: spherematch2: error allocating memory.\n";
 	return 1;
   };
   if ( !(yy2 = (double *) malloc(npoints2 * sizeof(double))) ) {
-	cerr <<"Error: spherematch: error allocating memory.\n";
+	cerr <<"Error: spherematch2: error allocating memory.\n";
 	return 1;
   };
   if ( !(zz2 = (double *) malloc(npoints2 * sizeof(double))) ) {
-	cerr <<"Error: spherematch: error allocating memory.\n";
+	cerr <<"Error: spherematch2: error allocating memory.\n";
 	return 1;
   };
  
@@ -193,12 +194,12 @@ cout<<"Spherematch2: Error: matchlength = "<< matchlength <<", minchunksize = "<
 		im.id1 = i;
 		im.id2 = k;
 		im.d12 = sep * 3.6e6;  // To mas
-		//im.index = (*nmatch);
+		im.index = (*nmatch);
 		m.push_back(im);
 
 		match1.push_back(i);
 		match2.push_back(k);
-		distance12.push_back(sep * 3600.);
+		distance12.push_back(sep * 3600.);  // To arcsec
 
 		(*nmatch)++;
 	}
@@ -229,7 +230,7 @@ cout<<"Spherematch2: Error: matchlength = "<< matchlength <<", minchunksize = "<
 
 // List for more than 1 object within given radius
 
-cout<<"Total (multi) Nmatch = "<< *nmatch << endl;
+cout <<"--> spherematch2: total (multi) Xmatch = "<< *nmatch;
 
 
 #ifdef DEBUG
@@ -248,7 +249,7 @@ if (*nmatch > 0) {
     mm.clear();
 
 
-cout<<"Identifying unique/multiple matches...\n";
+//cout<<"Identifying unique/multiple matches...\n";
 // Identify unique and multiple matches
     for (i = 0; i < *nmatch; i++) {
 	if (refcount[i] > 1) { // multiple RefObjects for this object
@@ -274,10 +275,9 @@ cout<<"Identifying unique/multiple matches...\n";
 //m.clear();
     std::vector<multi>().swap(m);
 
-// Remove all the InCat objects with a single RefCat counterpart ?
+    cout <<", "<< n_unique <<" of which unique\n";
 
-    if (n_unique > 0)
-	cout <<"--> "<< n_unique <<" unique matches found\n";
+// Remove all the InCat objects with a single RefCat counterpart ?
 
  
 #ifdef DEBUG
@@ -286,16 +286,15 @@ for (i = 0; i < mm.size(); i++)
 cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12 <<endl;
 #endif
 
-cout<<"Sorting multiple matches vector by distance...\n";
+//cout<<"Sorting multi-matches vector by distance...\n";
     sort(mm.begin(), mm.end(), mm_by_d12());
-    //insertion_sort(mm.begin(), mm.end(), mm_by_d12());
 
 //cout <<"Sorted mm:\n";
 //for (i = 0; i < mm.size(); i++)
 //cout <<"mm[i].id1: "<<m[i].id1<<", mm[i].id2: "<<m[i].id2<<", d: "<<m[i].d12 <<endl;
 
 // Mark duplicated matches with distance > min
-//cout<<"Marking multiple matches to be checked... ";
+cout <<"--> spherematch2: marking multi-matches to be checked... ";
     for (i = 0; i < mm.size(); i++) {
 	if (mm[i].d12 < 0)
 	continue;
@@ -309,49 +308,33 @@ cout<<"Sorting multiple matches vector by distance...\n";
 	}
     }
 
-//cout << m_marked << endl;
+cout << m_marked << endl;
 
 
-// Sorting on distance and checking for negative values does not speed up things
+// Sorting on distance and checking for negative values does not speed up much things, still...
 //cout<<"Sorting multiple matches vector by d12...\n";
-//sort(mm.begin(), mm.end(), mm_by_d12());
+  sort(mm.begin(), mm.end(), mm_by_d12());
 
 //for (i = 0; i < mm.size(); i++)
 //cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12<<endl;
 
-//cout<<"Multi-matches marking larger distances start... ";
+cout <<"--> spherematch2: multi-matches marking larger distances... ";
     if (m_marked > 0) {
+	i = 0;
+	while (mm[i].d12 < 0) {
 
-      for (i = 0; i < mm.size(); i++) {
-
-	if (mm[i].d12 < 0) {
-
-	  for (j = 0; j < *nmatch; j++) {
-
-	    if (match1[j] == mm[i].id1 && match2[j] == mm[i].id2) {
+	  if (match1[mm[i].index] == mm[i].id1 && match2[mm[i].index] == mm[i].id2) {
 //cout<<"Erase match1: i: "<< i <<", j: "<< j <<",  "<< match1[j] <<" match2: "<< match2[j] <<", d: "<< distance12[j] <<endl<<endl;
-
-// This is quite time consuming. Better copy unmarked values into the passed vectors.
-              //match1.erase(match1.begin() + j);
-              //match2.erase(match2.begin() + j);
-              //distance12.erase(distance12.begin() + j);
-              //(*nmatch)--;
-		distance12[j] = -1;
+		distance12[mm[i].index] = -1;
 		n_rm++;
-		break;
-            }
-
-          }  // end for j
-
-	}  // mm[i].d12 < 0
-
-      }  // end for i
-
+          }
+	  i++;
+      }  // end while
     }  // end if m_marked > 0
 
-//cout<< n_rm <<" to remove.\n";
+cout << n_rm <<" to remove... ";
 
-// Tjis is not too different from push_back.
+// This is not too different from push_back.
     match1s.reserve(*nmatch - n_rm);
     match2s.reserve(*nmatch - n_rm);
     distance12s.reserve(*nmatch - n_rm);
@@ -371,7 +354,7 @@ cout<<"Sorting multiple matches vector by distance...\n";
 
     *nmatch -= n_rm;
 
-cout<<"--> "<< n_rm <<" duplicated entries removed\n";
+cout <<"removed, left "<< *nmatch << endl;
 
 //cout<<"Nmatch="<< *nmatch <<"  match1.size() = "<< match1.size() <<", match2.size() = "<< match1.size() <<", distance12.size() = "<< distance12.size()<<endl;
 
@@ -435,15 +418,15 @@ long spherematch2_mm(
 
 /* 3. make x, y, z coords -- compute (x,y,z)1 on the fly - DPF */
   if ( !(xx2 = (double *) malloc(npoints2 * sizeof(double))) ) {
-	cerr <<"Error: spherematch: error allocating memory.\n";
+	cerr <<"Error: spherematch2_mm: error allocating memory.\n";
 	return 1;
   };
   if ( !(yy2 = (double *) malloc(npoints2 * sizeof(double))) ) {
-	cerr <<"Error: spherematch: error allocating memory.\n";
+	cerr <<"Error: spherematch2_mm: error allocating memory.\n";
 	return 1;
   };
   if ( !(zz2 = (double *) malloc(npoints2 * sizeof(double))) ) {
-	cerr <<"Error: spherematch: error allocating memory.\n";
+	cerr <<"Error: spherematch2_mm: error allocating memory.\n";
 	return 1;
   };
 
