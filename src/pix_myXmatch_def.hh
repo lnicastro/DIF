@@ -1,7 +1,7 @@
 /*
    Definitions for pix_myXmatch
 
-   LN@IASF-INAF, January 2016                   ( Last change: 22/06/2020 )
+   LN@IASF-INAF, January 2016                   ( Last change: 23/06/2020 )
 */
 
 #define MIN(a,b) ( ((a) < (b)) ? (a) : (b) )
@@ -18,7 +18,7 @@ static const string bt = "`";
 const char PROGNAME[] = "pix_myXmatch";
 
 // Version ID string
-static string VERID="Ver 0.2b, 22-06-2020, LN@INAF-OAS";
+static string VERID="Ver 0.2d, 30-06-2020, LN@INAF-OAS";
 
 extern "C" {
   double deg_ra(char *ra_str);
@@ -30,11 +30,11 @@ extern "C" {
 long spherematch2(unsigned long npoints1, double *ra1, double *dec1,
                  unsigned long npoints2, double *ra2, double *dec2,
                  double matchlength, double minchunksize,
-                 vector<long> &match1, vector<long>&match2, vector<float>&distance12, unsigned long *nmatch);
+                 std::vector<long> &match1, std::vector<long>&match2, std::vector<float>&distance12, unsigned long *nmatch);
 long spherematch2_mm(unsigned long npoints1, double *ra1, double *dec1,
                  unsigned long npoints2, double *ra2, double *dec2,
                  double matchlength, double minchunksize,
-                 vector<long> &match1, vector<long>&match2, vector<float>&distance12, unsigned long *nmatch);
+                 std::vector<long> &match1, std::vector<long>&match2, std::vector<float>&distance12, unsigned long *nmatch);
 /* Unused
    MYSQL_ROW record;
  
