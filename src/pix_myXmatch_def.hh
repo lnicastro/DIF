@@ -1,7 +1,7 @@
 /*
    Definitions for pix_myXmatch
 
-   LN@IASF-INAF, January 2016                   ( Last change: 23/06/2020 )
+   LN@IASF-INAF, January 2016                   ( Last change: 10/07/2020 )
 */
 
 #define MIN(a,b) ( ((a) < (b)) ? (a) : (b) )
@@ -14,11 +14,15 @@ static const string dt = ".";
 static const string sq = "'";
 static const string bt = "`";
 
-// Progran name
+// Program name
 const char PROGNAME[] = "pix_myXmatch";
 
 // Version ID string
-static string VERID="Ver 0.2d, 30-06-2020, LN@INAF-OAS";
+static string VERID="Ver 0.3a, 10-07-2020, LN@INAF-OAS";
+
+// From degrees to milli-arcseconds
+static const double D2MS = 3.6e6;
+
 
 extern "C" {
   double deg_ra(char *ra_str);

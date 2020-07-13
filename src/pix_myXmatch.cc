@@ -62,7 +62,7 @@
     pix_myXmatch -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 8 14 -qA -I source_id 524288 1048575
 
 
-  LN @ INAF-OAS, June 2013                         Last changed: 30/06/2020
+  LN @ INAF-OAS, June 2013                         Last changed: 10/07/2020
 */
 
 using namespace std;
@@ -77,6 +77,7 @@ using namespace std;
 
 #include <vector>
 #include <algorithm>
+#include <unistd.h>
 
 #include "my_stmt_db2.h"
 
@@ -1070,24 +1071,12 @@ int main(int argc, char *argv[])
 
   cout <<"     "<< PROGNAME << VERID << endl<<endl;
 
-  cout <<"===> '"<< db.cat1 <<"' vs '"<< db.cat2 <<"': matches at max sep. of "<< dtos3f(min_dist)<< bl << sep_unit <<" <===\n\n";
-
-  cout <<"---> InCat fields: "<< t.id_coln1 <<", "<< t.id_coln2 <<", "<< t.ra_coln1 <<", "<< t.de_coln1;
-
-  if (t.use_master_id1)
-	cout <<"; added reference field: "<< t.rf_coln1;
-   cout << endl;
-
-  cout <<"---> RefCat fields: "<< t.id_coln1 <<", "<< t.ra_coln2 <<", "<< t.de_coln2;
-
-  if (t.use_master_id2)
-	cout <<"; added reference field: "<< t.rf_coln2;
-   cout << endl << endl;
+  cout <<"===> '"<< db.my_db1 +dt+ db.cat1 <<"' vs '"<< db.my_db2 +"."+ db.cat2 <<"': matches at max sep. of "<< dtos3f(min_dist)<< bl << sep_unit <<" <===\n\n";
 
 //  DBConn db;
 //  db.connect("generic", "password", "MyCats");
 //  Query qry(&db);
-//  qry.query("SELECT RAmas/3.6e6, DECmas/3.6e6 FROM GSC23_htm_6 where DIF_Circle("+
+//  qry.query("SELECT RAmas/D2MS, DECmas/D2MS FROM GSC23_htm_6 where DIF_Circle("+
 //    coords +")", true);
 //  nr1 = qry.nRows();
 
@@ -1105,7 +1094,7 @@ int main(int argc, char *argv[])
   }
 
 // First get the total number of entries in the table to be matched
-  qry_str = "SELECT count(*) FROM "+ db.cat1;
+  qry_str = "SELECT count(*) FROM "+ db.my_db1 +dt+ db.cat1;
 
 if (verbose)
   cout <<"Query: "<< qry_str << endl;
@@ -1116,7 +1105,7 @@ if (verbose)
   }
 
   if (atol(db_data(my_cID, 0, 0)) < 1) {
-    cerr << PROGNAME <<": DB error or empty table '"<< db.cat1 <<"'\n";
+    cerr << PROGNAME <<": DB error or empty table '"<< db.my_db1 +dt+ db.cat1 <<"'\n";
     exit(1);
   }
   db_free_result(my_cID);
@@ -1138,7 +1127,7 @@ if (verbose)
     }
     idw1 = dif_hpxid_maxw(t.order1);
 
-    db_view_order2 = db.cat1 +"_healp_nest_"+ t.order2;
+    db_view_order2 = db.my_db1 +dt+ db.cat1 +"_healp_nest_"+ t.order2;
   } else {
     if (!input_col_names1) {
 // HTM IDs column name
@@ -1147,15 +1136,27 @@ if (verbose)
     }
     idw1 = dif_htmid_maxw(t.order1);
 
-    db_view_order2 = db.cat1 +"_htm_"+ t.order2;
+    db_view_order2 = db.my_db1 +dt+ db.cat1 +"_htm_"+ t.order2;
   }
 
   idw1 = MAX(idw1, t.id_coln1.length());
 
+  cout <<"---> InCat fields: "<< t.id_coln1 <<", "<< t.id_coln2 <<", "<< t.ra_coln1 <<", "<< t.de_coln1;
+
+  if (t.use_master_id1)
+	cout <<"; added reference field: "<< t.rf_coln1;
+   cout << endl;
+
+  cout <<"---> RefCat fields: "<< t.id_coln1 <<", "<< t.ra_coln2 <<", "<< t.de_coln2;
+
+  if (t.use_master_id2)
+	cout <<"; added reference field: "<< t.rf_coln2;
+   cout << endl << endl;
+
 // Preliminary check in DIF.tbl to see if the requested indices are available.
 // Should also check for reference catalogue...
   //dif_cat_info(my_cID, my_db1, cat1, &catinfo);
-  dif_cat_info(my_cID, db.my_db1, db.cat1);
+  dif_cat_info(my_cID, db.my_db1, db.cat1, true);  // TODO. HTM only
 
 
 if (verbose)
@@ -1208,7 +1209,7 @@ if (verbose)
 
 // For full catalogue scan build the list of pixels (could read from the query...)
   if (full_scan) {
-    qry_str = "SELECT DISTINCT "+ t.id_coln1 +" FROM "+ db.cat1;
+    qry_str = "SELECT DISTINCT "+ t.id_coln1 +" FROM "+ db.my_db1 +dt+ db.cat1;
 cout<<"Query: "<< qry_str<<endl;
 
     if ( !db_query(my_cID, qry_str.c_str()) ) {
@@ -1235,6 +1236,32 @@ cout<<"Query: "<< qry_str<<endl;
 
     db_free_result(my_cID);
   }  // full_scan
+
+ 
+// Create the temporary table for main pixel+border pixels selection storage only once
+  string tmp_tab = "tmp_"+ db.cat1 +"X"+ db.cat2 +"_"+ itos(getpid());
+
+  qry_str = "CREATE TEMPORARY TABLE "+ tmp_tab +
+		" SELECT "+ ra_fld1 +" as RAdeg, "+ de_fld1 +" as DEdeg, "+ t.id_coln1;
+  if (t.use_master_id1)
+    qry_str += co+ t.rf_coln1;
+
+  qry_str += " FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
+
+if (verbose)
+  cout <<"Query: "<< qry_str << endl;
+
+  if ( !db_query(my_cID, qry_str.c_str()) ) {
+    cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
+    exit (1);
+  }
+
+  qry_str = "ALTER TABLE "+ tmp_tab +" engine=memory charset=ascii";
+
+  if ( !db_query(my_cID, qry_str.c_str()) ) {
+    cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
+    exit (1);
+  }
 
   vector<float> distance12;  // In arcsec
   vector<long> match1, match2;
@@ -1275,17 +1302,11 @@ c = getchar();
   if (!t.in_full)
     cout <<"--> "<< t.id_coln1 <<": "<< in_id << endl;
 
-  qry_str = "SELECT count(*) FROM "+ db.cat1;
+  qry_str = "SELECT COUNT(DISTINCT "+ t.id_coln1 +co+ ra_fld1 +co+ de_fld1 +") FROM "+ db.my_db1 +dt+ db.cat1;
   if (!t.in_full)
 // First get only objects in given pixel
     qry_str += " WHERE "+ t.id_coln1 +"="+ in_id;
 
-if (verbose) {
-  if (!t.in_full)
-    cout << n <<" ("<< in_id <<"): Query: "<< qry_str << endl;
-  else
-    cout <<"Query: "<< qry_str << endl;
-}
     if ( !db_query(my_cID, qry_str.c_str()) ) {
       cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
       exit (1);
@@ -1294,19 +1315,16 @@ if (verbose) {
     inr1 = atoi(db_data(my_cID, 0, 0));
     db_free_result(my_cID);
 
-// To maintain the same nr of cols use dummy input id
+if (verbose) {
+  if (!t.in_full)
+    cout <<"n: "<< n <<", Query: "<< qry_str << endl;
+  else
+    cout <<"Query: "<< qry_str << endl;
+}
 
-  difqry_ini1 = "SELECT DISTINCT "+ ra_fld1 +co+ de_fld1 +co+ t.id_coln1;
+// Clear temporary table
+  qry_str = "DELETE FROM "+ tmp_tab;
 
-  if (t.use_master_id1)
-    difqry_ini1 += co+ t.rf_coln1;
-
-
-  difqry_ini1 += " FROM ";
-
-  string tmp_tab = "tmpx_"+ t.id_coln1;
-
-  qry_str = "DROP TABLE if exists "+ tmp_tab;
 if (verbose)
   cout <<"Query: "<< qry_str << endl;
 
@@ -1315,7 +1333,20 @@ if (verbose)
     exit (1);
   }
 
-  qry_str = difqry_ini1 + db.cat1;
+  db_free_result(my_cID);
+
+
+// To maintain the same nr of cols use dummy input id
+
+  qry_str = "INSERT INTO "+ tmp_tab;
+  difqry_ini1 = " SELECT DISTINCT "+ ra_fld1 +co+ de_fld1 +co+ t.id_coln1;
+
+  if (t.use_master_id1)
+    difqry_ini1 += co+ t.rf_coln1;
+
+  difqry_ini1 += " FROM ";
+
+  qry_str += difqry_ini1 + db.my_db1 +dt+ db.cat1;
 
 // Note: the DIF_sNeighb can be time consuming.
   if (!t.in_full)
@@ -1324,22 +1355,17 @@ if (verbose)
 
 //qry_str += " order by "+ t.ra_fld1;
 
- qry_str = "CREATE temporary TABLE "+ tmp_tab +bl+ qry_str;
 
 
 if (verbose)
   cout <<"Query: "<< qry_str << endl;
-
-// Note: temporary use only order1 to bind dynamically the query buffer.
-// This means we use MASTERhpx6 (smallint -> MYSQL_TYPE_SHORT) and runningnumber (long int -> MYSQL_TYPE_LONG)
-  //ret = db_stmt_prepexe2(my_cID, qry_str.c_str(), t.order1.c_str(), 0);
 
   if ( !db_query(my_cID, qry_str.c_str()) ) {
     cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
     exit (1);
   }
 if (verbose)
-  cout <<"TMP table created"<< endl;
+  cout <<"TMP table populated"<< endl;
 
   db_free_result(my_cID);
 
@@ -1372,17 +1398,20 @@ if (verbose) {
   }
 
 
-  if ( !(id1 = (unsigned long *) realloc(id1, nr1 * sizeof(unsigned long))) ) {
+  if (nr1 > nr1_old) {
+    if ( !(id1 = (unsigned long *) realloc(id1, nr1 * sizeof(unsigned long))) ) {
 	cerr << PROGNAME <<": error re-allocating memory.\n";
 	exit (-1);
-  }
-  if ( !(ra1 = (double *) realloc(ra1, nr1 * sizeof(double))) ) {
+    }
+    if ( !(ra1 = (double *) realloc(ra1, nr1 * sizeof(double))) ) {
 	cerr << PROGNAME <<": error re-allocating memory.\n";
 	exit (-1);
-  }
-  if ( !(de1 = (double *) realloc(de1, nr1 * sizeof(double))) ) {
+    }
+    if ( !(de1 = (double *) realloc(de1, nr1 * sizeof(double))) ) {
 	cerr << PROGNAME <<": error re-allocating memory.\n";
 	exit (-1);
+    }
+
   }
 
   if (t.use_master_id1 && nr1 > nr1_old)
@@ -1416,6 +1445,7 @@ if (verbose) {
 
   mysql_stmt_close(stmt);
 
+/*
   qry_str = "DROP TABLE "+ tmp_tab;
 
 if (verbose)
@@ -1430,6 +1460,7 @@ if (verbose)
   cout <<"TMP table removed"<< endl;
 
   db_free_result(my_cID);
+*/
 
 // ---  end selection from table 1  ---
 
@@ -1440,12 +1471,12 @@ if (verbose)
   }
 
 //  difqry_ini1 = string("SELECT ") + ra_fld2 +" as RA"+co+ de_fld2 +co+ in_id;
-  difqry_ini1 = "SELECT "+ ra_fld2 +co+ de_fld2 +co+ in_id;
+  difqry_ini1 = "SELECT DISTINCT "+ ra_fld2 +co+ de_fld2 +co+ in_id;
   if (t.use_master_id2)
     difqry_ini1 += co+ t.rf_coln2;
     //difqry_ini1 += co+ t.mt_coln +co+ t.rn_coln;
 
-  qry_str = difqry_ini1 +" FROM "+ db.cat2 +" WHERE "+ t.id_coln1;
+  qry_str = difqry_ini1 +" FROM "+ db.my_db2 +dt+ db.cat2 +" WHERE "+ t.id_coln1;
   if (!t.in_full)
     qry_str += "="+ in_id;
   else {
@@ -1532,9 +1563,9 @@ if (verbose) {
 
 // ---  end selection from table 2  ---
 
-  cout <<"--> In: "<< nr1;
+  cout <<"--> In: "<< inr1;
   if (!full_scan)
-	cout <<" ("<< nr1 - inr1 <<" of which ext.)";
+	cout <<" (+ "<< nr1 - inr1 <<" ext)";
 	
   cout <<", Ref: "<< nr2 << endl;
 
@@ -1597,8 +1628,8 @@ if (verbose) {
   nmatchext = 0;
   if (!t.in_full)
     for (i = 0; i < nmatchret; i++)
-      if (id1[match1[i]] != iin_id)
-        nmatchext++;
+	if (id1[match1[i]] != iin_id)
+          nmatchext++;
 
 // Are considered unmatched only those objects within the input pixel
   if (!multi_match)
@@ -1622,10 +1653,10 @@ if (verbose) {
   } else
     cout <<"0";
   cout << std::setprecision(7);
-  cout << "%, ret: "<< nmatchret <<")";
+  cout <<"%, ret: "<< nmatchret <<")";
 
   if (!t.in_full)
-    cout << ", Xext: "<< nmatchext;
+    cout <<", Xext: "<< nmatchext;
 
   cout <<", notX: "<< n_unmatched << endl;
 
@@ -1637,9 +1668,12 @@ if (verbose) {
 
   cout <<"TOTAL: read: "<< totals_read + totals_readext;
   if (!t.in_full)
-    cout <<" ("<< totals_readext <<" of which external)";
+    cout <<" ("<< totals_read <<" in pix, "<< totals_readext <<" ext)";
 
-  cout <<", matched: "<< totals_match <<" (external: "<< totals_matchext <<"), unmatched: "<< totals_unmatch << endl;
+  cout << std::setprecision(1);
+  cout <<", X: "<< totals_match <<" ("<< std::setw(5) << (totals_match*1000/totals_read) / 10. <<"%, "<< totals_matchext <<" ext), notX: "<< totals_unmatch << endl;
+  cout << std::setprecision(7);
+
 // 23/06/2020: separation returned in arcsec
 /*
   if (nmatch > 0) {
@@ -1647,6 +1681,7 @@ if (verbose) {
 	  distance12[i] *= sep_scale;  // To arcsec
   }
 */
+
 
 
 // Insert to be optimized
@@ -1668,16 +1703,16 @@ if (verbose) {
  
 // First coords of reference cat
      //if ( fld1_type_mas ) {
-	l_ra = (long long) (ra1[match1[i]] * 3.6e6 + 0.5);
-	l_de = de1[match1[i]]>0 ? (long long) (de1[match1[i]]*3.6e6 + 0.5) : (long long) (de1[match1[i]]*3.6e6 - 0.5);
+	l_ra = lrint(ra1[match1[i]] * D2MS);
+	l_de = de1[match1[i]]>0 ? lrint(de1[match1[i]] * D2MS) : lrint(de1[match1[i]] * D2MS);
 	qry_str += ltos(l_ra) +co+ ltos(l_de);
       //} //else {
 	//qry_str += dtos(ra2[match2[i]]) +co+ dtos(de2[match2[i]]);
       //}
 
      //if ( fld2_type_mas ) {
-        l_ra = (long long) (ra2[match2[i]] * 3.6e6 + 0.5);
-        l_de = de2[match2[i]]>0 ? (long long) (de2[match2[i]]*3.6e6 + 0.5) : (long long) (de2[match2[i]]*3.6e6 - 0.5);
+        l_ra = lrint(ra2[match2[i]] * D2MS);
+        l_de = de2[match2[i]]>0 ? lrint(de2[match2[i]] * D2MS) : lrint(de2[match2[i]] * D2MS);
         qry_str += co+ ltos(l_ra) +co+ ltos(l_de);
       //} //else {
 	//qry_str += co+ dtos(ra1[match1[i]]) +co+ dtos(de1[match1[i]]);
@@ -1792,6 +1827,8 @@ if (verbose)
   }
 
 
+
+
 // Save external matches: for one shot match it is nmatchext=0
   if (save_match && nmatchext > 0) {
     qry_ini = string("INSERT INTO ") + t.otab.out_db +dt+ t.otab.ext +" VALUES";
@@ -1806,8 +1843,8 @@ if (verbose)
         if (t.use_master_id1)
           qry_str += sq+ refid1[match1[i]] +sq +co;
 
-         l_ra = lrint(ra1[match1[i]]*3.6e6);
-         l_de = de1[match1[i]]>0 ? lrint(de1[match1[i]]*3.6e6) : lrint(de1[match1[i]]*3.6e6);
+         l_ra = lrint(ra1[match1[i]] * D2MS);
+         l_de = de1[match1[i]]>0 ? lrint(de1[match1[i]] * D2MS) : lrint(de1[match1[i]] * D2MS);
          qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ dtos3f(distance12[i]) +")";
 
         ij++;
@@ -1846,6 +1883,7 @@ if (verbose)
   }  // end if save_match
 
 
+
 // Returned lists follow the first passed catalogue order, which can be swapped (see above).
 // Note: if all the objects in the reference catalogue are matched, just issue a warning!
 
@@ -1860,24 +1898,25 @@ if (verbose)
     qry_str = "";
     ij = 0;
 
-    unsigned long j0 = 0;
-    std::vector<long> *vr;
+    unsigned long j0 = 0, nu_count=0;
+    //std::vector<long> *vr;
 
-    if (tab_swapped)
-	vr = &match2;
-    else
-	vr = &match1;
+    //if (tab_swapped)
+	//vr = &match2;
+    //else
+	//vr = &match1;
 
     for (i = 0; i < nr1; i++) {
       if (t.in_full || id1[i] == iin_id) {
         for (j = j0; j < nmatchret; j++)
-          if ((*vr)[j] == i) {
-          //if (match1[j] == i) {
-            j0 = j + 1;
+          //if ((*vr)[j] == i) {
+          if (match1[j] == i) {
+            //j0 = j + 1;
             break;
           }
 
         if (j == nmatchret) {  // not there
+		nu_count++;
           if (!t.in_full)
             qry_str += "("+ in_id +co;
           else
@@ -1888,8 +1927,8 @@ if (verbose)
             qry_str += sq+ refid1[i] +sq+co;
             //qry_str += itos(mt1[i]) +co+ itos(rn1[i]) +co;
 
-          l_ra = (long long) (ra1[i] * 3.6e6 + 0.5);
-          l_de = de1[i] > 0 ? (long long) (de1[i] * 3.6e6 + 0.5) : (long long) (de1[i] * 3.6e6 - 0.5);
+          l_ra = lrint(ra1[i] * D2MS);
+          l_de = de1[i] > 0 ? lrint(de1[i] * D2MS) : lrint (de1[i] * D2MS);
           qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ origID +")";
 
           ij++;
@@ -1920,6 +1959,11 @@ if (verbose)
         cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
         exit (1);
       }
+    }
+
+    if (n_unmatched != nu_count) {
+	cout <<"ERROR: umatched mismatch. Reported "<<n_unmatched <<" but found "<< nu_count <<endl;
+	exit (1);
     }
 
   }  // end save_match
@@ -1974,6 +2018,17 @@ if (verbose) {
     break;
 
 }  // end for each pixel
+
+// Remove temporary table
+  qry_str = "DROP TABLE IF EXISTS "+ tmp_tab;
+
+if (verbose)
+  cout <<"Query: "<< qry_str << endl;
+
+  if ( !db_query(my_cID, qry_str.c_str()) ) {
+    cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
+    exit (1);
+  }
 
   free(id1);
   free(ra1);
