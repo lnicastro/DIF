@@ -89,7 +89,7 @@ tar zxvf mysql-boost-5.7.31.tar.gz
 cd mysql-5.7.31
 
 pwd
-*directory_name*
+/directory/full/path
 ```
 Annotate the directory name and [go to install section](#dif_compile)!
 If instead the installed version is e.g. 8.0.21 (in a temporary directory):
@@ -103,7 +103,7 @@ cd bld
 cmake .. -DWITH_BOOST=../boost
 
 pwd
-*directory_name*
+/directory/full/path
 ```
 Note that we run `cmake` in a scratch `bld` sub-directory.
 Annotate the directory name and then you are ready to [install DIF](#dif_compile).
@@ -122,7 +122,7 @@ cmake .. -DENABLE_DTRACE=0 -DDEBUG_ON=0 -DWITH_DEBUG=0 -DPLUGIN_EXAMPLE=YES -DPL
    -DPLUGIN_SPHINX=NO -DPLUGIN_CONNECT=NO -DPLUGIN_SPIDER=NO
 
 pwd
-*directory_name*
+/directory/full/path
 ```
 The `-DENABLE_DTRACE=0` on some systems is necessary to avoid the compilation error.
 ```
