@@ -1703,16 +1703,16 @@ if (verbose) {
  
 // First coords of reference cat
      //if ( fld1_type_mas ) {
-	l_ra = lrint(ra1[match1[i]] * D2MS);
-	l_de = de1[match1[i]]>0 ? lrint(de1[match1[i]] * D2MS) : lrint(de1[match1[i]] * D2MS);
+	l_ra = round(ra1[match1[i]] * D2MS);
+	l_de = de1[match1[i]] > 0 ? round(de1[match1[i]] * D2MS) : round(de1[match1[i]] * D2MS);
 	qry_str += ltos(l_ra) +co+ ltos(l_de);
       //} //else {
 	//qry_str += dtos(ra2[match2[i]]) +co+ dtos(de2[match2[i]]);
       //}
 
      //if ( fld2_type_mas ) {
-        l_ra = lrint(ra2[match2[i]] * D2MS);
-        l_de = de2[match2[i]]>0 ? lrint(de2[match2[i]] * D2MS) : lrint(de2[match2[i]] * D2MS);
+        l_ra = round(ra2[match2[i]] * D2MS);
+        l_de = de2[match2[i]] > 0 ? round(de2[match2[i]] * D2MS) : round(de2[match2[i]] * D2MS);
         qry_str += co+ ltos(l_ra) +co+ ltos(l_de);
       //} //else {
 	//qry_str += co+ dtos(ra1[match1[i]]) +co+ dtos(de1[match1[i]]);
@@ -1843,8 +1843,8 @@ if (verbose)
         if (t.use_master_id1)
           qry_str += sq+ refid1[match1[i]] +sq +co;
 
-         l_ra = lrint(ra1[match1[i]] * D2MS);
-         l_de = de1[match1[i]]>0 ? lrint(de1[match1[i]] * D2MS) : lrint(de1[match1[i]] * D2MS);
+         l_ra = round(ra1[match1[i]] * D2MS);
+         l_de = de1[match1[i]] > 0 ? round(de1[match1[i]] * D2MS) : round(de1[match1[i]] * D2MS);
          qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ dtos3f(distance12[i]) +")";
 
         ij++;
@@ -1927,8 +1927,8 @@ if (verbose)
             qry_str += sq+ refid1[i] +sq+co;
             //qry_str += itos(mt1[i]) +co+ itos(rn1[i]) +co;
 
-          l_ra = lrint(ra1[i] * D2MS);
-          l_de = de1[i] > 0 ? lrint(de1[i] * D2MS) : lrint (de1[i] * D2MS);
+          l_ra = round(ra1[i] * D2MS);
+          l_de = de1[i] > 0 ? round(de1[i] * D2MS) : round(de1[i] * D2MS);
           qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ origID +")";
 
           ij++;
