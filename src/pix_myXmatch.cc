@@ -62,7 +62,7 @@
     pix_myXmatch -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 8 14 -qA -I source_id 524288 1048575
 
 
-  LN @ INAF-OAS, June 2013                         Last changed: 10/07/2020
+  LN @ INAF-OAS, June 2013                         Last changed: 16/07/2020
 */
 
 using namespace std;
@@ -761,7 +761,7 @@ int main(int argc, char *argv[])
   unsigned long i, nmatch, nmatchret, nmatchext; // nmatchmax
   long totals_read = 0, totals_readext = 0, totals_match = 0, totals_matchext = 0, totals_unmatch = 0;
 
-  double minchunksize, min_dist = -1.,
+  double minchunksize, min_dist = 1.,
          matchlength = 1./3600;  // def. match dist.= 1''
 
   string sep_unit = "arcsec", origID = "0",
@@ -1069,7 +1069,7 @@ int main(int argc, char *argv[])
     getline(cin, db.my_passw);
   }
 
-  cout <<"     "<< PROGNAME << VERID << endl<<endl;
+  cout <<"     "<< PROGNAME <<bl<<bl<< VERID << endl<<endl;
 
   cout <<"===> '"<< db.my_db1 +dt+ db.cat1 <<"' vs '"<< db.my_db2 +"."+ db.cat2 <<"': matches at max sep. of "<< dtos3f(min_dist)<< bl << sep_unit <<" <===\n\n";
 
