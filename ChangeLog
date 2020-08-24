@@ -1,3 +1,6 @@
+2020-08-24 LN, ver. 0.5.5
+	- Added -fno-rtti for MariaBD only in configure.ac
+
 2020-03-17 LN, ver. 0.5.5
 	- Added getRaDec and RADECcol SQL functions.
 	- Minor change to configure.ac, RAcol and DECcol.

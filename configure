@@ -8767,16 +8767,11 @@ $as_echo "$lt_cv_ld_force_load" >&6; }
       _lt_dar_allow_undefined='$wl-undefined ${wl}suppress' ;;
     darwin1.*)
       _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
-    darwin*) # darwin 5.x on
-      # if running on 10.5 or later, the deployment target defaults
-      # to the OS version, if on x86, and 10.4, the deployment
-      # target defaults to 10.4. Don't you love it?
-      case ${MACOSX_DEPLOYMENT_TARGET-10.0},$host in
-	10.0,*86*-darwin8*|10.0,*-darwin[91]*)
-	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
-	10.[012][,.]*)
+    darwin*)
+      case ${MACOSX_DEPLOYMENT_TARGET},$host in
+	10.[012],*|,*powerpc*)
 	  _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
-	10.*)
+	*)
 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
       esac
     ;;
@@ -17004,9 +16999,10 @@ if test "x$mypath_mysql_source" != "x" ; then
   fi
 
 
-# MariaDB
+# MariaDB: -fno-rtti required to avoid
+# ERROR 1126 (HY000): Can't open shared library '/usr/lib64/mysql/plugin/ha_dif.so' (errno: 13, undefined symbol: _ZTI7handler)
   if test $MY_VERSION_ID -gt "100000" ; then
-    CPPFLAGS="$CPPFLAGS -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/libmariadb/include -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/yassl/include"
+    CPPFLAGS="$CPPFLAGS -fno-rtti -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/libmariadb/include -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/yassl/include"
   else
     CPPFLAGS="-I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS"
   fi

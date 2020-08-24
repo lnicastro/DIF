@@ -137,9 +137,10 @@ if test "x$mypath_mysql_source" != "x" ; then
   fi
 
 
-# MariaDB
+# MariaDB: -fno-rtti required to avoid 
+# ERROR 1126 (HY000): Can't open shared library '/usr/lib64/mysql/plugin/ha_dif.so' (errno: 13, undefined symbol: _ZTI7handler)
   if test $MY_VERSION_ID -gt "100000" ; then
-    CPPFLAGS="$CPPFLAGS -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/libmariadb/include -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/yassl/include"
+    CPPFLAGS="$CPPFLAGS -fno-rtti -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/libmariadb/include -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/yassl/include"
   else
     CPPFLAGS="-I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS"
   fi
