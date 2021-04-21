@@ -72,7 +72,7 @@ Debian/Ubuntu). In this case you only need to be sure that you have:
 Check your installed version:
 ```
 mysql_config --version
-5.7.24
+5.7.32
 ```
 
 Now we need to prepare some additional MySQL include files via `cmake`.
@@ -82,21 +82,21 @@ Now we need to prepare some additional MySQL include files via `cmake`.
 
 The easiest way is to download the source code.
 
-Assuming the installed version is 5.7.31 (in a temporary directory):
+Assuming the installed version is 5.7.32 (in a temporary directory):
 ```shell
-wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.31.tar.gz
-tar zxvf mysql-boost-5.7.31.tar.gz
-cd mysql-5.7.31
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.32.tar.gz
+tar zxvf mysql-boost-5.7.32.tar.gz
+cd mysql-5.7.32
 
 pwd
 /directory/full/path
 ```
 Annotate the directory name and [go to install section](#dif_compile)!
-If instead the installed version is e.g. 8.0.21 (in a temporary directory):
+If instead the installed version is e.g. 8.0.24 (in a temporary directory):
 ```shell
-wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.21.tar.gz
-tar zxvf mysql-boost-8.0.21.tar.gz
-cd mysql-8.0.21
+wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.24.tar.gz
+tar zxvf mysql-boost-8.0.24.tar.gz
+cd mysql-8.0.24
 
 mkdir bld
 cd bld
@@ -139,7 +139,7 @@ Eventually rerun the `cmake` command.
 
 <a name="dif_compile"></a>**Compile and install**
 
-Below we assume you installed a prebuilt MySQL 5.7.31. In any case, remember that the
+Below we assume you installed a prebuilt MySQL 5.7.32. In any case, remember that the
 `--with-mysql-source` argument must point to the dir where you eventually run `cmake`
 (so e.g. add `/bld` for the examples above).
 
@@ -147,7 +147,7 @@ Below we assume you installed a prebuilt MySQL 5.7.31. In any case, remember tha
 ```
 git clone https://github.com/lnicastro/DIF.git
 cd DIF
-./configure --with-mysql-source=/path_to/mysql-5.7.31
+./configure --with-mysql-source=/path_to/mysql-5.7.32
 make
 sudo make install
 ```
@@ -156,7 +156,7 @@ sudo make install
 ```
 unzip DIF-master.zip
 cd DIF-master
-./configure --with-mysql-source=/path_to/mysql-5.7.31
+./configure --with-mysql-source=/path_to/mysql-5.7.32
 make
 sudo make install
 ```
@@ -165,7 +165,7 @@ sudo make install
 ```
 tar zxvf dif-0.5.5.tar.gz
 cd dif-0.5.5
-./configure --with-mysql-source=/path_to/mysql-5.7.31
+./configure --with-mysql-source=/path_to/mysql-5.7.32
 make
 sudo make install
 ```
@@ -173,7 +173,7 @@ sudo make install
 Again, if you compiled MySQL in a build sub-directory `bld` rather than in its
 root source directory, then the configure command would be
 ```
-  ./configure --with-mysql-source=/path_to/mysql-5.7.31/bld
+  ./configure --with-mysql-source=/path_to/mysql-5.7.32/bld
 ```
 
 ## Installing DIF facilities in MySQL

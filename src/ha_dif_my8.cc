@@ -306,7 +306,8 @@ int ha_dif::rnd_next(uchar *)
 void ha_dif::position(const uchar *)
 {
   DBUG_ENTER("ha_dif::position");
-  DBUG_ASSERT(0);
+  // 8.0.24 removed DBUG_ASSERT(0);
+  assert(0);
   DBUG_VOID_RETURN;
 }
 
@@ -317,7 +318,8 @@ int ha_dif::rnd_pos(uchar *, uchar *)
   DBUG_ENTER("ha_dif::rnd_pos");
   //rc = HA_ERR_WRONG_COMMAND;
   //DBUG_RETURN(rc);
-  DBUG_ASSERT(0);
+  // 8.0.24 removed DBUG_ASSERT(0);
+  assert(0);
   DBUG_RETURN(0);
 }
 

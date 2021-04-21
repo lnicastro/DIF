@@ -1,3 +1,6 @@
+2021-04-21 LN, ver. 0.5.5
+	- commented DEBUG_ASSERT in ha_dif_my8.cc because removed in MySQL v. 8.0.24.
+
 2020-08-24 LN, ver. 0.5.5
 	- Added -fno-rtti for MariaBD only in configure.ac
 
