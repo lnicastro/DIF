@@ -92,7 +92,7 @@ CPPFLAGS="-D MY_VERSION_ID=$MY_VERSION_ID $CPPFLAGS"
 # NOT MariaDB
 if test $MY_VERSION_ID -lt "100000" ; then
   CPPFLAGS="$CPPFLAGS $MYSQL_INCLUDE"
-  # CXXFLAGS="-std=c++11"
+  #CXXFLAGS="-std=c++11"
 else
 
 # Exclude unnecessary libssl and libcrypto that could cause linking errors
@@ -111,7 +111,7 @@ AC_SUBST(MYSQL_LIBS)
 AX_COMPARE_VERSION([$MYSQL_VERSION],[gt],[5.2])
 if test "$ax_compare_version" = "true" ; then
 
-  CPPFLAGS="-DDBUG_OFF $CPPFLAGS"
+  CPPFLAGS="-DDBUG_OFF -DNDEBUG $CPPFLAGS"
 
 if test "x$mypath_mysql_source" != "x" ; then
   echo "Warning: MySQL version $MYSQL_VERSION (greater than 5.1). Version ID $MY_VERSION_ID. When compiling mysql check debug mode is off, e.g use 'cmake -DWITH_DEBUG=0 ...'"
@@ -137,10 +137,9 @@ if test "x$mypath_mysql_source" != "x" ; then
   fi
 
 
-# MariaDB: -fno-rtti required to avoid 
-# ERROR 1126 (HY000): Can't open shared library '/usr/lib64/mysql/plugin/ha_dif.so' (errno: 13, undefined symbol: _ZTI7handler)
+# MariaDB
   if test $MY_VERSION_ID -gt "100000" ; then
-    CPPFLAGS="$CPPFLAGS -fno-rtti -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/libmariadb/include -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/yassl/include"
+    CPPFLAGS="$CPPFLAGS -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/libmariadb/include -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/yassl/include"
   else
     CPPFLAGS="-I$mypath_mysql_source/zlib -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/export -I$cmake_MySQL_SOURCE_DIR/libbinlogevents/include -I$cmake_MySQL_SOURCE_DIR/sql -I$cmake_MySQL_SOURCE_DIR/include/mysql -I$cmake_MySQL_SOURCE_DIR/include -I$cmake_MySQL_SOURCE_DIR/extra/rapidjson/include -I$cmake_MySQL_SOURCE_DIR $CPPFLAGS"
   fi
@@ -177,11 +176,5 @@ AC_CONFIG_FILES([
    sql/funcdesc.sql
    scripts/dif
 ])
-
-# Touch aclocal managed files - ignore returned status
-AC_MSG_NOTICE([])
-AC_MSG_NOTICE([...touching 'configure aclocal.m4 Makefile.in src/config.h.in'])
-  dummy=`touch configure aclocal.m4 Makefile.in src/config.h.in`
-AC_MSG_NOTICE([])
 
 AC_OUTPUT
