@@ -177,4 +177,10 @@ AC_CONFIG_FILES([
    scripts/dif
 ])
 
+# Touch aclocal managed files - ignore returned status
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([...touching 'configure aclocal.m4 Makefile.in src/config.h.in'])
+  dummy=`touch configure aclocal.m4 Makefile.in src/config.h.in`
+AC_MSG_NOTICE([])
+
 AC_OUTPUT
