@@ -39,12 +39,20 @@ src/*.dSYM
 # More stuff
 ./Makefile
 contrib/Makefile
+contrib/dummy
 doc/Makefile
 scripts/Makefile
+scripts/dif
 sql/Makefile
 sql/Messier.sql
 sql/funcdesc.sql
 src/Makefile
+src/fakesky_H6
+src/fakesky_HPx
+src/fakesky_RND
+src/myXmatch
+src/pix_myXmatch
+src/testMySearch
 src/stamp-*
 contrib/Spherematch/Save
 autom4te.cache
@@ -52,3 +60,4 @@ aclocal.m4
 config.log
 config.status
 libtool
+.DS_Store

@@ -2202,9 +2202,10 @@ if (verbose)
             ras = db_data(my_cID, i, 3);
             des = db_data(my_cID, i, 4);
 
-            qry_str_x = "SELECT ref_"+ t.id_coln1 +co+ t.id_coln1 +co+ "RAmas, DECmas, "+
-			" FROM "+ t.otab.out_db +dt+ t.otab.x +" WHERE "+ t.id_coln1 +"="+ in_id +" AND "+
-			t.ra_coln2 +"RAmas="+ ras +" AND DECmas="+ des +" ORDER BY Sep ASC limit 1";
+            qry_str_x = "SELECT ref_"+ t.id_coln1 +co+ t.id_coln1 +co+ "RAmas, DECmas"+
+			" FROM "+ t.otab.out_db +dt+ t.otab.x +" WHERE "+ t.id_coln1 +"="+ in_id +
+			" AND RAmas="+ ras +" AND DECmas="+ des +" ORDER BY Sep ASC limit 1";
+			//t.ra_coln2 +"RAmas="+ ras +" AND DECmas="+ des +" ORDER BY Sep ASC limit 1";
 
 if (verbose)
   cout << qry_str_x << endl;
@@ -2216,7 +2217,7 @@ if (verbose)
             in_id = db_data(cid, 0, 1);
 
             qry_str_x = "DELETE FROM "+ t.otab.out_db +dt+ t.otab.x +" WHERE "+ t.id_coln1 +"="+ in_id +
-			" AND RAmas="+ ras +" AND DECmas="+ des +" AND ref_"+ t.id_coln1 +"!= "+ re_id;
+			" AND RAmas="+ ras +" AND DECmas="+ des +" AND ref_"+ t.id_coln1 +"!="+ re_id;
 if (verbose)
   cout << qry_str_x << endl;
             if ( !db_query(cid, qry_str_x.c_str()) ) {
