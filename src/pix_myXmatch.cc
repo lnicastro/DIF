@@ -18,7 +18,7 @@
        +---------------+-------------------+
        | htmID_6       | smallint unsigned |
        | ref_htmID_6   | smallint unsigned |
-       | source_id     | bigint unsigned   |  <-- this is for "gaiadr2"
+       | source_id     | bigint unsigned   |  <-- this is e.g. for "gaiadr2 / gaiaedr3"
        | RAmas         | int unsigned      |
        | DECmas        | int               |
        | ref_RAmas     | int unsigned      |
@@ -33,7 +33,7 @@
        +---------------+-------------------+
        | htmID_6       | smallint unsigned |
        | ref_htmID_6   | smallint unsigned |
-       | source_name   | char(22)          |  <-- this is for "catwise"
+       | source_name   | char(22)          |  <-- this is e.g. for "catwise"
        | source_id     | bigint unsigned   |
        | RAmas         | int unsigned      |
        | DECmas        | int               |
@@ -62,7 +62,7 @@
     pix_myXmatch -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 8 14 -qA -I source_id 524288 1048575
 
 
-  LN @ INAF-OAS, June 2013                         Last changed: 16/07/2020
+  LN@INAF-OAS, June 2013                         Last changed: 15/06/2021
 */
 
 using namespace std;
@@ -71,6 +71,8 @@ using namespace std;
 #include <cstdio>
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <algorithm>
 #include <iomanip>
 #include <string>
 #include <cstring>
@@ -677,8 +679,8 @@ int dif_cat_info(const int cID, string dbname, string catname, bool htm_only=fal
 void set_dif_params(bool use_hpx=false)
 {
   db.my_host = "localhost";
-  db.my_user = "generic";
-  db.my_passw = "password";
+  db.my_user = "";
+  db.my_passw = "";
   db.my_db1 = "test";
   db.my_db2 = "test";
   db.cat1 = "";
@@ -730,10 +732,10 @@ void usage()
        << "  -d DBnane: use 'DBnane' as input database (def. '"<< t.otab.out_db <<"', implies one of -aAB)\n"
        << "  -i catID: set 'catID' as user defined catalogue ID for 'RefCat' (e.g. sky2000 = 1, def. 0)\n"
        << "  -o OutDB: use 'OutDB' as output database (def. test, implies one of -aAB)\n"
-       << "  -p Password: MySQL user password is 'Password' (def. '"<< db.my_passw <<"')\n"
+       << "  -p Password: MySQL user password is 'Password' (def. from ~/.my.cnf)\n"
        << "  -s Server: send query to DB server 'Server' (def. '"<< db.my_host <<"')\n"
        << "  -t Table: root matched objects table will be 'Table' (def. pix_Xmatch_User_InCat_x_RefCat)\n"
-       << "  -u User: MySQL user name is 'User' (def. '"<< db.my_user <<"')\n"
+       << "  -u User: MySQL user name is 'User' (def. from ~/.my.cnf)\n"
        << "  -x InCat RefCat: cross match catalogue 'InCat' against reference 'RefCat'\n"
        << "  -D Depth1 Depth2: HTM pixelization depths to use are 'Depth1' and 'Depth2' (def. 8 14 : excludes -O)\n"
        << "  -I refIdField: field Id (e.g. source_id in Gaia) to read from RefCat and add to out table (integer type)\n"
@@ -742,6 +744,7 @@ void usage()
        << "  -R nRows: process 'nRows' per INSERT query to increase speed (def. 300 : require -A or -a)\n"
        << "  -S Sep: max separation defining a positive match is 'Sep' arcsec (def. 1 : see -m)\n"
        << "\nNote:\n"
+       << "   If User or Password not given then try to read MySQL them from [client] section in ~/.my.cnf\n"
        << "   Option -O is not implemented yet.\n"
        << "   Options -D and -O apply to both catalogues.\n"
        << "   If -O not given then assume both catalogues are HTM indexed.\n"
@@ -962,6 +965,46 @@ int main(int argc, char *argv[])
   }
 
 
+// If user or password not passed the try to read them from ~/.my.cnf
+  if ( db.my_user.length() == 0 || db.my_passw.length() == 0 ) {
+    std::ifstream cFile(getenv("HOME") + string("/.my.cnf"));
+
+    if ( cFile.is_open() ) {
+        std::string line, sect, scli = "client";
+	bool sfound = false;
+
+        while ( getline(cFile, line) ) {
+// Skip to the [client] section
+		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
+		if ( line[0] == '#' || line.empty() )
+		  continue;
+		if ( !sfound && line[0] == '[' ) {
+		  sect = line.substr(1, line.find("]") - 1);
+		  if ( sect == scli )
+		    sfound = true;
+		  continue;
+		}
+
+		if ( sfound ) {
+		  auto delimiterPos = line.find("=");
+		  auto name = line.substr(0, delimiterPos);
+		  auto value = line.substr(delimiterPos + 1);
+
+		  if ( name == "user" )
+		    db.my_user = value;
+		  else if ( name == "password" )
+		    db.my_passw = value;
+		  else if ( line[0] == '[' )
+		    break;
+		}
+	}
+    } else {
+	std::cerr << "Couldn't open ~/.my.cnf config file for reading.\n";
+	usage();
+    }
+  }
+
+
   if (argc > 2)  // max 2 params
     usage();
 
@@ -1141,13 +1184,13 @@ if (verbose)
 
   idw1 = MAX(idw1, t.id_coln1.length());
 
-  cout <<"---> InCat fields: "<< t.id_coln1 <<", "<< t.id_coln2 <<", "<< t.ra_coln1 <<", "<< t.de_coln1;
+  cout <<"---> InCat ("<< db.cat1 <<") fields: "<< t.id_coln1 <<", "<< t.id_coln2 <<", "<< t.ra_coln1 <<", "<< t.de_coln1;
 
   if (t.use_master_id1)
 	cout <<"; added reference field: "<< t.rf_coln1;
    cout << endl;
 
-  cout <<"---> RefCat fields: "<< t.id_coln1 <<", "<< t.ra_coln2 <<", "<< t.de_coln2;
+  cout <<"---> RefCat ("<< db.cat2 <<") fields: "<< t.id_coln1 <<", "<< t.ra_coln2 <<", "<< t.de_coln2;
 
   if (t.use_master_id2)
 	cout <<"; added reference field: "<< t.rf_coln2;
@@ -1239,7 +1282,7 @@ cout<<"Query: "<< qry_str<<endl;
 
  
 // Create the temporary table for main pixel+border pixels selection storage only once
-  string tmp_tab = "tmp_"+ db.cat1 +"X"+ db.cat2 +"_"+ itos(getpid());
+  string tmp_tab = db.my_db1 +".tmp_"+ db.cat1 +"X"+ db.cat2 +"_"+ itos(getpid());
 
   qry_str = "CREATE TEMPORARY TABLE "+ tmp_tab +
 		" SELECT "+ ra_fld1 +" as RAdeg, "+ de_fld1 +" as DEdeg, "+ t.id_coln1;
@@ -2139,10 +2182,10 @@ if (verbose)
         ndup = db_num_rows(my_cID);
 
         if (ndup > 0) {
-          cout<<"Number of duplicates to clean: "<< ndup <<endl;
+          cout <<"Number of duplicates to clean: "<< ndup <<endl;
           int cid = 1;
 
-          if (!db_init(cid)) {
+          if ( !db_init(cid) ) {
             cerr << PROGNAME <<": cannot set CONNECT_TIMEOUT for MySQL connection.\n";
             exit(1);
           }
@@ -2211,7 +2254,7 @@ if (verbose)
 
       if (totals_matchext > 0) {
         cout <<"Adding position key to cleaned unmatched objects table...\n";
-        qry_str_nxc = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nxc +" ADD KEY ("+ t.id_coln1 +co+ t.ra_coln2 +")";
+        qry_str_nxc = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nxc +" ADD KEY ("+ t.id_coln1 +co+ "RAmas)";
         if ( !db_query(my_cID, qry_str_nxc.c_str()) ) {
           cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
           exit (1);
@@ -2219,7 +2262,7 @@ if (verbose)
       }
 
 // If a full input catalogue columns must be saved for unmatched objetcs
-      if (out_unmatched_full && totals_unmatch > 0) {
+      if ( out_unmatched_full && totals_unmatch > 0 ) {
         cout <<"Creating extended unmatched objects table...\n";
         qry_str_nxc = "CREATE TABLE "+ t.otab.out_db +dt+ t.otab.nxcf +" SELECT t1.* FROM "+ 
                       db.my_db1 +dt+ db.cat1 + " AS t1, "+  t.otab.out_db +dt+ t.otab.nxc +" AS t2 WHERE t1."+
@@ -2256,7 +2299,7 @@ if (verbose)
       cout <<"Because all the tables are already indexed, you should use the option '--views-only'.\n";
     cout <<"\nMatched objects table: "<< t.otab.out_db <<dt<< t.otab.x<<endl;
 
-    if (full_scan || t.in_full) {
+    if ( full_scan || t.in_full ) {
       cout <<"Unmatched objects table: "<< t.otab.out_db <<dt<< t.otab.nxc << endl;
       if (out_unmatched_full)
         cout <<"Unmatched extended objects table: "<< t.otab.out_db <<dt<< t.otab.nxcf << endl;

@@ -1,4 +1,4 @@
-/* LN modif: 8/10/2014
+/* LN@INAF-OAS modif: 8/10/2014
  
   Note:
    - This version filters multiple matches within the search distance returning only the closest one.
@@ -7,7 +7,7 @@
 
    - Separation returned in arcsec!
 
-  Last change: 23 June 2020 
+  Last change: 15/06/2021 
  */
 
 #include <cstdlib>
@@ -229,7 +229,7 @@ cout<<"Spherematch2: Error: matchlength = "<< matchlength <<", minchunksize = "<
   free_memory();
 
 
-cout <<"--> spherematch2: total (multi) Xmatch = "<< *nmatch;
+cout <<"--> spherematch2: multi-Xm total: "<< *nmatch;
 
 
 #ifdef DEBUG
@@ -300,7 +300,7 @@ for (i = 0; i < mm.size(); i++)
 cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12 <<endl;
 #endif
 
-//cout<<"Sorting multi-matches vector by distance...\n";
+//cout<<"Sorting multi-Xm vector by distance...\n";
   sort(mm.begin(), mm.end(), mm_by_d12());
 
 //cout <<"Sorted mm:\n";
@@ -308,7 +308,7 @@ cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12 
 //cout <<"mm[i].id1: "<<m[i].id1<<", mm[i].id2: "<<m[i].id2<<", d: "<<m[i].d12 <<endl;
 
 // Mark duplicated matches with distance > min
-  cout <<"--> spherematch2: marking multi-matches to be checked... ";
+  cout <<"--> spherematch2: marking multi-Xm to be checked... ";
   for (i = 0; i < mm.size(); i++) {
 	if (mm[i].d12 < 0)
 	continue;
@@ -332,7 +332,7 @@ cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12 
 //for (i = 0; i < mm.size(); i++)
 //cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12<<endl;
 
-  cout <<"--> spherematch2: multi-matches marking larger distances... ";
+  cout <<"--> spherematch2: multi-Xm marking larger distances... ";
   if (m_marked > 0) {
 	i = 0;
 	while (mm[i].d12 < 0) {
@@ -368,13 +368,13 @@ cout <<"mm[i].id1: "<<mm[i].id1<<", mm[i].id2: "<<mm[i].id2<<", d: "<<mm[i].d12 
 
   *nmatch -= n_rm;
 
-  cout <<"done. Left "<< *nmatch << endl;
+  cout <<"done. "<< *nmatch << " left\n";
 
 //cout<<"Nmatch="<< *nmatch <<"  match1.size() = "<< match1.size() <<", match2.size() = "<< match1.size() <<", distance12.size() = "<< distance12.size()<<endl;
 
   if (*nmatch > npoints1 || *nmatch > npoints2) {
 	cout<<"Spherematch2: Error: more matched objects than input objects:\n"<< 
-	"Nmatch="<< *nmatch <<"  npoints1 = "<< npoints1 <<", npoints2 = "<< npoints2 << endl;
+	"Nmatch = "<< *nmatch <<",  npoints1 = "<< npoints1 <<", npoints2 = "<< npoints2 <<endl;
 	return -3;
   }
 
