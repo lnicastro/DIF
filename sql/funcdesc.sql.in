@@ -58,4 +58,5 @@ INSERT INTO `func` VALUES ('HTMnameById','(Id INT)','string','function','ha_dif.
 ('getDec','(db_name CHAR(64), tab_name CHAR(64))','VARCHAR(100)','function','void','Return the table field name, or its conversion, used to get DEC in degrees '),
 ('RAcol','(db_name CHAR(64), tab_name CHAR(64))','VARCHAR(64)','function','void','Return the table field name for RA'),
 ('DECcol','(db_name CHAR(64), tab_name CHAR(64))','VARCHAR(64)','function','void','Return the table field name for DEC'),
+('RADECcol','(db_name CHAR(64), tab_name CHAR(64))','VARCHAR(64)','function','void','Return the table field names for RA, DEC'),
 ('difInfo','(IN udf VARCHAR(64))','void','procedure','void','Show info for a DIF function or procedure')//

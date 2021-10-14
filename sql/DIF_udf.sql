@@ -437,18 +437,20 @@ DETERMINISTIC
 BEGIN
   DECLARE RAfield VARCHAR(100);
   DECLARE colname VARCHAR(64);
-  DECLARE eof INT DEFAULT 0;
+  DECLARE ra_oper, eof INT DEFAULT 0;
   DECLARE c CURSOR FOR SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=p_db AND TABLE_NAME=p_name;
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET eof = 1;
 
   SELECT Ra_field INTO RAfield FROM DIF.tbl WHERE db=p_db AND name=p_name LIMIT 1;
+
+  SET ra_oper = ( locate('/',RAfield) OR locate('*',RAfield) );
 
   OPEN c;
 
   REPEAT
     FETCH c INTO colname;
     IF NOT eof THEN
-      IF ((locate(colname,RAfield)) > 0) THEN
+      IF ( (colname = RAfield) OR ((locate(colname,RAfield)) > 0 AND ra_oper > 0) ) THEN
         RETURN CONCAT('`', colname, '`');
       END IF;
     END IF;
@@ -469,18 +471,20 @@ DETERMINISTIC
 BEGIN
   DECLARE DECfield VARCHAR(100);
   DECLARE colname VARCHAR(64);
-  DECLARE eof INT DEFAULT 0;
+  DECLARE dec_oper, eof INT DEFAULT 0;
   DECLARE c CURSOR FOR SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=p_db AND TABLE_NAME=p_name;
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET eof = 1;
 
   SELECT Dec_field INTO DECfield FROM DIF.tbl WHERE db=p_db AND name=p_name LIMIT 1;
+
+  SET dec_oper = ( locate('/',DECfield) OR locate('*',DECfield) );
 
   OPEN c;
 
   REPEAT
     FETCH c INTO colname;
     IF NOT eof THEN
-      IF ((locate(colname,DECfield)) > 0) THEN
+      IF ( (colname = DECfield) OR ((locate(colname,DECfield)) > 0 AND dec_oper > 0) ) THEN
         RETURN CONCAT('`', colname, '`');
       END IF;
     END IF;
@@ -504,23 +508,26 @@ BEGIN
   DECLARE colRA VARCHAR(64) DEFAULT '';
   DECLARE colDE VARCHAR(64) DEFAULT '';
   DECLARE colname VARCHAR(64);
-  DECLARE eof INT DEFAULT 0;
+  DECLARE ra_oper, dec_oper, eof INT DEFAULT 0;
   DECLARE c CURSOR FOR SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=p_db AND TABLE_NAME=p_name;
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET eof = 1;
 
   SELECT Ra_field, Dec_field INTO RAfield, DECfield FROM DIF.tbl WHERE db=p_db AND name=p_name LIMIT 1;
+
+  SET ra_oper = ( locate('/',RAfield) OR locate('*',RAfield) );
+  SET dec_oper = ( locate('/',DECfield) OR locate('*',DECfield) );
 
   OPEN c;
 
   REPEAT
     FETCH c INTO colname;
     IF NOT eof THEN
-      IF ((locate(colname,RAfield)) > 0) THEN
+      IF ( (colname = RAfield) OR ((locate(colname,RAfield)) > 0 AND ra_oper > 0) ) THEN
 	SET colRA = CONCAT('`', colname, '`');
 	IF (colDE != '') THEN
 	  RETURN CONCAT(colRA, ',', colDE);
 	END IF;
-      ELSEIF ((locate(colname,DECfield)) > 0) THEN
+      ELSEIF ( (colname = DECfield) OR ((locate(colname,DECfield)) > 0 AND dec_oper > 0) ) THEN
         SET colDE = CONCAT('`', colname, '`');
 	IF (colRA != '') THEN
 	  RETURN CONCAT(colRA, ',', colDE);
