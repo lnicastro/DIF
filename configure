@@ -16969,6 +16969,9 @@ CPPFLAGS="-D MY_VERSION_ID=$MY_VERSION_ID $CPPFLAGS"
 if test $MY_VERSION_ID -lt "100000" ; then
   CPPFLAGS="$CPPFLAGS $MYSQL_INCLUDE"
   #CXXFLAGS="-std=c++11"
+  if test $MY_VERSION_ID -gt "80026" ; then
+	CXXFLAGS="-std=c++1z"
+  fi
 else
 
 # Exclude unnecessary libssl and libcrypto that could cause linking errors
