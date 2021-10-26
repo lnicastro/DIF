@@ -1,14 +1,14 @@
 # DIF
 DIF is a collection of tools aimed at implementing a powerful indexing system
-for astronomical catalogs and other data with spherical coordinates, stored
+for astronomical catalogues and other data with spherical coordinates, stored
 into MySQL / MariaDB databases.
 DIF is able to use both [HTM](http://www.skyserver.org/htm/) and
-[HEALPix](https://healpix.sourceforge.io/) pixelization schemas and it allows very
-fast query execution even on billion-row tables. 
+[HEALPix](https://healpix.sourceforge.io/) pixelization schemas simultaneously
+and it allows very fast query execution even on billion-row tables. 
 
 **Note:** as of DIF version 0.5.5, you do not need to compile and install the
-  MySQL source version anymore. It's enough to get the source code and execute
-  a `cmake` configuration. See below.
+  MySQL source version anymore. It's enough to get the MySQL / MariaDB source
+  code and execute a `cmake` configuration. Please see below.
 
 See also the [documentation](doc/) or the [web page](http://ross.oas.inaf.it/dif/)
 and the [reference paper](http://www.hindawi.com/journals/aa/2010/524534.html).
@@ -28,7 +28,7 @@ This is the **Version 0.5.5** development tree.
 5. Perl `DBI/DBD-MySQL` modules
 
 ## Compile and install
-Compiling DIF depends on how you installed MySQL/MariaDB on your machine.
+Compiling DIF depends on how you installed MySQL / MariaDB on your machine.
 Typically.
 ```shell
 ./configure --with-mysql-source=/path_to/mysql_source_directory
@@ -58,7 +58,7 @@ sudo make install
 ```
 Let's now consider the two possible MySQL installations.
 
-**Case 1: MySQL/MariaDB installed via prebuilt package**
+**Case 1: MySQL / MariaDB installed via prebuilt package**
 
 This is the typical installation on any system, that is when
 you have installed MySQL using a precompiled package (e.g. a `.dmg` file on Mac
@@ -72,7 +72,7 @@ Debian/Ubuntu). In this case you only need to be sure that you have:
 Check your installed version:
 ```
 mysql_config --version
-5.7.32
+5.7.35
 ```
 
 Now we need to prepare some additional MySQL include files via `cmake`.
@@ -82,21 +82,21 @@ Now we need to prepare some additional MySQL include files via `cmake`.
 
 The easiest way is to download the source code.
 
-Assuming the installed version is 5.7.32 (in a temporary directory):
+Assuming the installed version is 5.7.35 (in a temporary directory):
 ```shell
-wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.32.tar.gz
-tar zxvf mysql-boost-5.7.32.tar.gz
-cd mysql-5.7.32
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-boost-5.7.35.tar.gz
+tar zxvf mysql-boost-5.7.35.tar.gz
+cd mysql-5.7.35
 
 pwd
 /directory/full/path
 ```
 Annotate the directory name and [go to install section](#dif_compile)!
-If instead the installed version is e.g. 8.0.24 (in a temporary directory):
+If instead the installed version is e.g. 8.0.27 (in a temporary directory):
 ```shell
-wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.24.tar.gz
-tar zxvf mysql-boost-8.0.24.tar.gz
-cd mysql-8.0.24
+wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.27.tar.gz
+tar zxvf mysql-boost-8.0.27.tar.gz
+cd mysql-8.0.27
 
 mkdir bld
 cd bld
@@ -130,16 +130,17 @@ The `-DENABLE_DTRACE=0` on some systems is necessary to avoid the compilation er
 ```
 Annotate the directory name and then you are ready to [install DIF](#dif_compile).
 
-**Case 2: MySQL/MariaDB installed via source code**
+**Case 2: MySQL / MariaDB installed via source code**
 
 Assuming that you have downloaded, configured, compiled and **installed**
-MySQL/MariaDB from source, then you only need to know the directory name with the code and be sure that
-you have not cleaned the required include files after compilation.
+MySQL / MariaDB from source, then you only need to know the directory name with
+the code and be sure that you have not cleaned the required include files after
+compilation.
 Eventually rerun the `cmake` command.
 
 <a name="dif_compile"></a>**Compile and install**
 
-Below we assume you installed a prebuilt MySQL 5.7.32. In any case, remember that the
+Below we assume you installed a prebuilt MySQL 5.7.35. In any case, remember that the
 `--with-mysql-source` argument must point to the dir where you eventually run `cmake`
 (so e.g. add `/bld` for the examples above).
 
@@ -147,7 +148,7 @@ Below we assume you installed a prebuilt MySQL 5.7.32. In any case, remember tha
 ```
 git clone https://github.com/lnicastro/DIF.git
 cd DIF
-./configure --with-mysql-source=/path_to/mysql-5.7.32
+./configure --with-mysql-source=/path_to/mysql-5.7.35
 make
 sudo make install
 ```
@@ -156,7 +157,7 @@ sudo make install
 ```
 unzip DIF-master.zip
 cd DIF-master
-./configure --with-mysql-source=/path_to/mysql-5.7.32
+./configure --with-mysql-source=/path_to/mysql-5.7.35
 make
 sudo make install
 ```
@@ -165,7 +166,7 @@ sudo make install
 ```
 tar zxvf dif-0.5.5.tar.gz
 cd dif-0.5.5
-./configure --with-mysql-source=/path_to/mysql-5.7.32
+./configure --with-mysql-source=/path_to/mysql-5.7.35
 make
 sudo make install
 ```
@@ -173,7 +174,7 @@ sudo make install
 Again, if you compiled MySQL in a build sub-directory `bld` rather than in its
 root source directory, then the configure command would be
 ```
-  ./configure --with-mysql-source=/path_to/mysql-5.7.32/bld
+  ./configure --with-mysql-source=/path_to/mysql-5.7.35/bld
 ```
 
 ## Installing DIF facilities in MySQL
