@@ -25,7 +25,7 @@
        | ref_RAmas     | int unsigned      |
        | ref_DECmas    | int               |
        | Sep           | float             |
-       | origID        | tinyint           |
+       | refcatID      | tinyint           |
        +---------------+-------------------+
 
     4. Notice the various defaults in the help text.
@@ -43,7 +43,7 @@
     pix_myXmatch_id -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 8 14 -qA 524288 1048575
 
 
-  LN@INAF-OAS, June 2013                         Last changed: 15/10/2021
+  LN@INAF-OAS, June 2013                         Last changed: 28/10/2021
 */
 
 using namespace std;
@@ -477,9 +477,9 @@ if (verbose)
 // Matched objects table
 /*
 
-+---------+-------------+-----+--------+-------+--------+-----------+------------+-------+--------+
-| htmID_8 | ref_htmID_8 | _id | ref_id | RAmas | DECmas | ref_RAmas | ref_DECmas | Sep   | origID |
-+---------+-------------+-----+--------+-------+--------+-----------+------------+-------+--------+
++---------+-------------+-----+--------+-------+--------+-----------+------------+-------+----------+
+| htmID_8 | ref_htmID_8 | _id | ref_id | RAmas | DECmas | ref_RAmas | ref_DECmas | Sep   | refcatID |
++---------+-------------+-----+--------+-------+--------+-----------+------------+-------+----------+
 
 */
 
@@ -512,11 +512,11 @@ if (verbose)
 
 // What to alter for matched/unmatched/external catalogue
       if (i == 0)
-        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD ref_RAmas int unsigned not null, ADD ref_DECmas int not null, ADD Sep FLOAT NOT NULL DEFAULT 0, ADD origID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
+        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD ref_RAmas int unsigned not null, ADD ref_DECmas int not null, ADD Sep FLOAT NOT NULL DEFAULT 0, ADD refcatID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
 
       else if (i == 1) 
 
-        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD origID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
+        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD refcatID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
 
       else 
 
@@ -722,7 +722,7 @@ int main(int argc, char *argv[])
   double minchunksize, min_dist = 1.,
          matchlength = 1./3600;  // def. match dist.= 1''
 
-  string sep_unit = "arcsec", origID = "0",
+  string sep_unit = "arcsec", refcatID = "0",
 	 qry_str, db_view_order2;
   char c;
 
@@ -826,7 +826,7 @@ int main(int argc, char *argv[])
           break;
         case 'i':
           if (argc < 2) usage();
-          origID = string(*++argv);
+          refcatID = string(*++argv);
           --argc;
           kwds = 0;
           break;
@@ -1656,7 +1656,7 @@ if (verbose) {
 	//qry_str += co+ dtos(ra1[match1[i]]) +co+ dtos(de1[match1[i]]);
       //}
 
-      qry_str += co+ dtos3f(distance12[i]) +co+ origID +")";
+      qry_str += co+ dtos3f(distance12[i]) +co+ refcatID +")";
        
       if (((i+1) % insert_Nrows) == 0) {
         qry_str = qry_ini + qry_str;
@@ -1860,7 +1860,7 @@ if (verbose)
 
           l_ra = round(ra1[i] * D2MS);
           l_de = de1[i] > 0 ? round(de1[i] * D2MS) : round(de1[i] * D2MS);
-          qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ origID +")";
+          qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ refcatID +")";
 
           ij++;
 // Insert query every insert_Nrows

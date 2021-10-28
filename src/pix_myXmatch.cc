@@ -24,7 +24,7 @@
        | ref_RAmas     | int unsigned      |
        | ref_DECmas    | int               |
        | Sep           | float             |
-       | origID        | tinyint           |
+       | refcatID      | tinyint           |
        +---------------+-------------------+
 
        whereas in the second, default case:
@@ -40,7 +40,7 @@
        | ref_RAmas     | int unsigned      |
        | ref_DECmas    | int               |
        | Sep           | float             |
-       | origID        | tinyint           |
+       | refcatID      | tinyint           |
        +---------------+-------------------+
 
     4. Notice the various defaults in the help text.
@@ -62,7 +62,7 @@
     pix_myXmatch -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 8 14 -qA -I source_id 524288 1048575
 
 
-  LN@INAF-OAS, June 2013                         Last changed: 15/06/2021
+  LN@INAF-OAS, June 2013                         Last changed: 28/10/2021
 */
 
 using namespace std;
@@ -326,6 +326,7 @@ typedef struct OTabs_st {
 
 //OTabs_st otab;
 typedef struct TabInfo_st {
+  bool use_master_ids1;
   bool use_master_id1;
   bool use_master_id2;
   bool in_full;
@@ -504,24 +505,24 @@ if (verbose)
     if (!tab_exists[i]) {
       if (i == 0) {
 
-// Matched objects table
+// Matched objects table, e.g. for catwise vs Gaia
 /*
 
-+---------+-------------+-------------+-----------+-------+--------+-----------+------------+-------+--------+
-| htmID_8 | ref_htmID_8 | source_name | source_id | RAmas | DECmas | ref_RAmas | ref_DECmas | Sep   | origID |
-+---------+-------------+-------------+-----------+-------+--------+-----------+------------+-------+--------+
++---------+-------------+-------------+---------------+-------+--------+-----------+------------+-------+----------+
+| htmID_8 | ref_htmID_8 | source_name | ref_source_id | RAmas | DECmas | ref_RAmas | ref_DECmas | Sep   | refcatID |
++---------+-------------+-------------+---------------+-------+--------+-----------+------------+-------+----------+
 
 source_name, source_id -> optional
 
 */
 
 	tabname = t.otab.x;
-	qry_str = qry_str_i + tabname +" SELECT i."+  t.id_coln1 +" AS "+ t.id_coln1 +",r."+ t.id_coln1 +" AS ref_"+ t.id_coln1;
+	qry_str = qry_str_i + tabname +" SELECT i."+ t.id_coln1 +" AS "+ t.id_coln1 +",r."+ t.id_coln1 +" AS ref_"+ t.id_coln1;
 
-	if (t.use_master_id1)
+	if (t.use_master_id1 || t.use_master_ids1)
 	  qry_str += ",i."+ t.rf_coln1;
 	if (t.use_master_id2)
-	  qry_str += ",r."+ t.rf_coln2;
+	  qry_str += ",r."+ t.rf_coln2 +" AS ref_"+ t.rf_coln2;
 
 	qry_str += " FROM "+ db.my_db1 +dt+ db.cat1 +" AS i,"+ db.my_db2 +dt+ db.cat2 +" AS r LIMIT 0";
 
@@ -530,7 +531,7 @@ source_name, source_id -> optional
 // Unmatched objects table
 	tabname = t.otab.nx;
 	qry_str = qry_str_i + tabname +" SELECT "+ t.id_coln1;
-	if (t.use_master_id1)
+	if (t.use_master_id1 || t.use_master_ids1)
 	  qry_str += co+ t.rf_coln1;
 
 	qry_str += " FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
@@ -540,7 +541,7 @@ source_name, source_id -> optional
 // External objects table
 	tabname = t.otab.ext;
 	qry_str = qry_str_i + tabname +" SELECT "+ t.id_coln1;
-	if (t.use_master_id1)
+	if (t.use_master_id1 || t.use_master_ids1)
 	  qry_str += co+ t.rf_coln1;
 
 	 qry_str += " FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
@@ -555,11 +556,11 @@ if (verbose)
 
 // What to alter for matched/unmatched/external catalogue
       if (i == 0)
-        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD ref_RAmas int unsigned not null, ADD ref_DECmas int not null, ADD Sep FLOAT NOT NULL DEFAULT 0, ADD origID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
+        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD ref_RAmas int unsigned not null, ADD ref_DECmas int not null, ADD Sep FLOAT NOT NULL DEFAULT 0, ADD refcatID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
 
       else if (i == 1) 
 
-        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD origID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
+        qry_str = "ALTER TABLE "+ t.otab.out_db +dt+ tabname +" ADD RAmas int unsigned not null, ADD DECmas int not null, ADD refcatID TINYINT NOT NULL DEFAULT 0, ENGINE=MyISAM, CHARSET=ASCII";
 
       else 
 
@@ -739,7 +740,8 @@ void usage()
        << "  -x InCat RefCat: cross match catalogue 'InCat' against reference 'RefCat'\n"
        << "  -D Depth1 Depth2: HTM pixelization depths to use are 'Depth1' and 'Depth2' (def. 8 14 : excludes -O)\n"
        << "  -I refIdField: field Id (e.g. source_id in Gaia) to read from RefCat and add to out table (integer type)\n"
-       << "  -K inIdField: field Id (e.g. source_name in catwise) to read from InCat and add to out table (char type - TODO)\n"
+       << "  -J inIdField: field Id to read from InCat and add to out table (integer type)\n"
+       << "  -K inIdField: field Id (e.g. source_name in catwise) to read from InCat and add to out table (char type)\n"
        << "  [-O Order1 Order2]: HEALPix pixelization order (NESTED) to use are 'Order1' and 'Order2' (def. 6 14 : excludes -D)\n"
        << "  -R nRows: process 'nRows' per INSERT query to increase speed (def. 300 : require -A or -a)\n"
        << "  -S Sep: max separation defining a positive match is 'Sep' arcsec (def. 1 : see -m)\n"
@@ -758,7 +760,8 @@ int main(int argc, char *argv[])
 {
   unsigned short full_scan = 1, do_list_match = 1, do_list_external = 1, do_list_all = 0, do_list_cats = 0,
                  use_arcmin = 0, save_match = 0, drop_prematch = 0, out_unmatched_full = 0, idb_set = 0, odb_set = 0,
-                 input_col_names1 = 0, input_col_names2 = 0, kwds = 0, use_hpx = 0, multi_match = 0, verbose = 0;
+                 input_col_names1 = 0, input_col_names2 = 0, kwds = 0, use_hpx = 0, multi_match = 0, verbose = 0,
+		 refid1_is_int = 0;  // inCat ref column integer or string
   static const int my_cID = 0;  // MySQL connection ID
   int insert_Nrows = 300, sep_scale = 3600;
   unsigned long i, nmatch, nmatchret, nmatchext; // nmatchmax
@@ -767,7 +770,7 @@ int main(int argc, char *argv[])
   double minchunksize, min_dist = 1.,
          matchlength = 1./3600;  // def. match dist.= 1''
 
-  string sep_unit = "arcsec", origID = "0",
+  string sep_unit = "arcsec", refcatID = "0",
 	 qry_str, db_view_order2;
   char c;
 
@@ -776,6 +779,7 @@ int main(int argc, char *argv[])
 
   t.otab.out_db = "test";
   t.otab.x = "";
+  t.use_master_ids1 = false;
   t.use_master_id1 = false;
   t.use_master_id2 = false;
   t.order1 = "8";
@@ -874,7 +878,7 @@ int main(int argc, char *argv[])
           break;
         case 'i':
           if (argc < 2) usage();
-          origID = string(*++argv);
+          refcatID = string(*++argv);
           --argc;
           kwds = 0;
           break;
@@ -886,11 +890,19 @@ int main(int argc, char *argv[])
           //t.rf_coln2 = "source_id";
           kwds = 0;
           break;
-        case 'K':
+        case 'J':
           if (argc < 2) usage();
           t.rf_coln1 = string(*++argv);
           --argc;
           t.use_master_id1 = true;
+	  refid1_is_int = 1;
+          kwds = 0;
+          break;
+        case 'K':
+          if (argc < 2) usage();
+          t.rf_coln1 = string(*++argv);
+          --argc;
+          t.use_master_ids1 = true;
           //t.use_master_id2 = true;
           //t.rf_coln1 = "source_name";
           //t.rf_coln2 = "source_id";
@@ -1073,11 +1085,11 @@ int main(int argc, char *argv[])
   unsigned long inr1, nr1_old, nr2_old, nr1 = 0, nr2 = 0, j, ij, iin_id, n, n_unmatched, ndup = 0, npix = 1,
                 *id_list = NULL, *id1 = NULL, *mt1 = NULL, *mt2 = NULL, *rn1 = NULL, *rn2 = NULL;
 
-  char **refid1 = NULL;  // catwise
-  if (t.use_master_id1)
-    refid1 = (char **) malloc(sizeof(char *));
+  char **refids1 = NULL;  // e.g. catwise
+  if (t.use_master_ids1)
+	refids1 = (char **) malloc(sizeof(char *));
 
-  unsigned long long *refid2 = NULL;
+  unsigned long long *refid1 = NULL, *refid2 = NULL;
 
   long long l_ra = 0, l_de = 0;
   double *ra1 = NULL, *de1 = NULL, *ra2 = NULL, *de2 = NULL, rac = 0., decc = 0.;
@@ -1186,7 +1198,7 @@ if (verbose)
 
   cout <<"---> InCat ("<< db.cat1 <<") fields: "<< t.id_coln1 <<", "<< t.id_coln2 <<", "<< t.ra_coln1 <<", "<< t.de_coln1;
 
-  if (t.use_master_id1)
+  if (t.use_master_id1 || t.use_master_ids1)
 	cout <<"; added reference field: "<< t.rf_coln1;
    cout << endl;
 
@@ -1286,7 +1298,7 @@ cout<<"Query: "<< qry_str<<endl;
 
   qry_str = "CREATE TEMPORARY TABLE "+ tmp_tab +
 		" SELECT "+ ra_fld1 +" as RAdeg, "+ de_fld1 +" as DEdeg, "+ t.id_coln1;
-  if (t.use_master_id1)
+  if (t.use_master_id1 || t.use_master_ids1)
     qry_str += co+ t.rf_coln1;
 
   qry_str += " FROM "+ db.my_db1 +dt+ db.cat1 +" LIMIT 0";
@@ -1384,7 +1396,7 @@ if (verbose)
   qry_str = "INSERT INTO "+ tmp_tab;
   difqry_ini1 = " SELECT DISTINCT "+ ra_fld1 +co+ de_fld1 +co+ t.id_coln1;
 
-  if (t.use_master_id1)
+  if (t.use_master_id1 || t.use_master_ids1)
     difqry_ini1 += co+ t.rf_coln1;
 
   difqry_ini1 += " FROM ";
@@ -1394,7 +1406,7 @@ if (verbose)
 // Note: the DIF_sNeighb can be time consuming.
   if (!t.in_full)
     qry_str += " WHERE "+ t.id_coln1 +"="+ in_id +
-               " UNION ALL "+ difqry_ini1 + db_view_order2 +" WHERE DIF_sNeighb("+ t.order1 +co+ in_id +co+ t.order2 + ")";
+               " UNION ALL "+ difqry_ini1 + db_view_order2 +" WHERE DIF_sNeighb("+ t.order1 +co+ in_id +co+ t.order2 +")";
 
 //qry_str += " order by "+ t.ra_fld1;
 
@@ -1419,7 +1431,7 @@ if (verbose)
   cout <<"Query: "<< qry_str << endl;
 
 
-  if ( db_stmt_prepexe2(my_cID, qry_str.c_str(), t.order1.c_str(), 0) ) {
+  if ( db_stmt_prepexe2(my_cID, qry_str.c_str(), t.order1.c_str(), refid1_is_int) ) {
     cerr << PROGNAME <<": DB error: "<< db_error(my_cID) << endl;
     exit (1);
   }
@@ -1429,9 +1441,9 @@ if (verbose)
 
 if (verbose) {
   if (!t.in_full)
-    cout << db.cat1 <<": "<< t.id_coln1 <<"="<< in_id <<": distinct N_entries="<< nr1 <<" ("<< inr1<<" within pixel)\n";
+    cout << db.cat1 <<": "<< t.id_coln1 <<"="<< in_id <<": distinct N_entries="<< nr1 <<" ("<< inr1 <<" within pixel)\n";
   else
-    cout << db.cat1 <<": distinct N_entries="<< nr1 <<" ("<< inr1<<" total)\n";
+    cout << db.cat1 <<": distinct N_entries="<< nr1 <<" ("<< inr1 <<" total)\n";
 }
 
   if (nr1 == 0) {
@@ -1455,10 +1467,18 @@ if (verbose) {
 	exit (-1);
     }
 
+    if (t.use_master_id1) {
+	if ( !(refid1 = (unsigned long long *) realloc(refid1, nr1 * sizeof(unsigned long))) ) {
+	  cerr << PROGNAME <<": error re-allocating memory.\n";
+	  exit (-1);
+	}
+    } else if (t.use_master_ids1)
+	refids1 = resize2d(nr1_old, (STRING_SIZE+1), nr1, (STRING_SIZE+1), refids1);
+
   }
 
-  if (t.use_master_id1 && nr1 > nr1_old)
-	refid1 = resize2d(nr1_old, (STRING_SIZE+1), nr1, (STRING_SIZE+1), refid1);
+  //if (t.use_master_ids1 && nr1 > nr1_old)
+	//refid1 = resize2d(nr1_old, (STRING_SIZE+1), nr1, (STRING_SIZE+1), refids1);
 
   i = 0;
   while (!mysql_stmt_fetch(stmt))
@@ -1467,11 +1487,14 @@ if (verbose) {
     de1[i] = dbl_data[1];
     id1[i] = long_data[0];
  
-    if (t.use_master_id1) {
+    if (t.use_master_id1)
+	refid1[i] = long_data[1];
+    else if (t.use_master_ids1) {
 	//refid1[i] = long_data[1];
-	memcpy(refid1[i], str_data, STRING_SIZE);
-	refid1[i][STRING_SIZE] = '\0';
+	memcpy(refids1[i], str_data, STRING_SIZE);
+	refids1[i][STRING_SIZE] = '\0';
     }
+
     i++;
   }
 
@@ -1480,10 +1503,12 @@ if (verbose) {
     for (i = 0; i < nr1; i++) {
       cout <<setw(iwidth)<< i << bl <<setw(idw1)<<id1[i];
       if (t.use_master_id1)
-        cout << bl <<setw(refidw1)<<refid1[i];
+        cout << bl << setw(refidw1) << refid1[i];
+      else if (t.use_master_ids1)
+        cout << bl <<setw(refidw1)<< refids1[i];
         //cout << bl <<setw(idw1)<<mt1[i] << bl <<setw(iwidth)<<rn1[i];
-      cout << bl <<setw(dwidth)<< ra1[i]
-           << bl <<setw(dwidth)<< de1[i] << endl;
+      cout << bl << setw(dwidth) << ra1[i]
+           << bl << setw(dwidth) << de1[i] << endl;
     }
 
   mysql_stmt_close(stmt);
@@ -1740,7 +1765,10 @@ if (verbose) {
         qry_str += "("+ itos(id1[match1[i]]) +",HTMLookup("+ t.order1 +co+ dtos(ra2[match2[i]]) +co+ dtos(de2[match2[i]]) +"),";
 
       if (t.use_master_id1)
-        qry_str += sq+ refid1[match1[i]] +sq+co;
+        qry_str += ltos(refid1[match1[i]]) +co;
+      else if (t.use_master_ids1)
+        qry_str += sq+ refids1[match1[i]] +sq+co;
+
       if (t.use_master_id2)
         qry_str += ltos(refid2[match2[i]]) +co;
  
@@ -1761,7 +1789,7 @@ if (verbose) {
 	//qry_str += co+ dtos(ra1[match1[i]]) +co+ dtos(de1[match1[i]]);
       //}
 
-      qry_str += co+ dtos3f(distance12[i]) +co+ origID +")";
+      qry_str += co+ dtos3f(distance12[i]) +co+ refcatID +")";
        
       if (((i+1) % insert_Nrows) == 0) {
         qry_str = qry_ini + qry_str;
@@ -1797,7 +1825,7 @@ if (verbose)
     cout << "\nMatched list:\n"
 
          << setw(iwidth)<<"SeqID1"<< bl << setw(idw1) << t.id_coln1 << bl;
-      if (t.use_master_id1)
+      if (t.use_master_id1 || t.use_master_ids1)
         cout << setw(refidw1) << t.rf_coln1 << bl;
 
       cout  << setw(dwidth) <<"RAdeg1"<< bl << setw(dwidth) <<"DECdeg1"<< bl
@@ -1812,6 +1840,8 @@ if (verbose)
       cout << setw(iwidth) << match1[i] << bl <<setw(idw1) << id1[match1[i]] << bl;
       if (t.use_master_id1)
         cout << setw(refidw1) << refid1[match1[i]] << bl;
+      else if (t.use_master_ids1)
+        cout << setw(refidw1) << refids1[match1[i]] << bl;
 
       cout <<setw(dwidth)<< ra1[match1[i]] << bl << setw(dwidth) << de1[match1[i]]<< bl
            << setw(iwidth) << match2[i] << bl;
@@ -1834,7 +1864,7 @@ if (verbose)
           cout <<"\nExternal to pixel matched list:"<< endl
                << setw(iwidth) <<"SeqID1"<< bl << setw(idw1) << t.id_coln1 << bl;
 
-          if (t.use_master_id1)
+          if (t.use_master_id1 || t.use_master_ids1)
             cout << setw(refidw1) << t.rf_coln1 << bl;
             //cout <<setw(idw1)<< t.mt_coln << bl <<setw(idw1)<< t.rn_coln << bl;
 
@@ -1852,6 +1882,8 @@ if (verbose)
         cout << setw(iwidth) << match1[i] << bl << setw(idw1) << id1[match1[i]] << bl;
         if (t.use_master_id1)
           cout << setw(refidw1) << refid1[match1[i]] << bl;
+        else if (t.use_master_ids1)
+          cout << setw(refidw1) << refids1[match1[i]] << bl;
           //cout <<setw(idw1)<< mt1[match1[i]] << bl << setw(idw1)<< rn1[match1[i]] << bl;
 
         cout << setw(dwidth) << ra1[match1[i]] << bl << setw(dwidth) << de1[match1[i]] << bl
@@ -1884,7 +1916,9 @@ if (verbose)
 
         qry_str += "("+ itos(id1[match1[i]]) +co;
         if (t.use_master_id1)
-          qry_str += sq+ refid1[match1[i]] +sq +co;
+          qry_str += ltos(refid1[match1[i]]) +co;
+	else if (t.use_master_ids1)
+          qry_str += sq+ refids1[match1[i]] +sq+co;
 
          l_ra = round(ra1[match1[i]] * D2MS);
          l_de = de1[match1[i]] > 0 ? round(de1[match1[i]] * D2MS) : round(de1[match1[i]] * D2MS);
@@ -1967,12 +2001,14 @@ if (verbose)
 
           if (t.use_master_id1)
             //qry_str += itos(refid1[i]) +co;
-            qry_str += sq+ refid1[i] +sq+co;
+            qry_str += ltos(refid1[i]) +co;
             //qry_str += itos(mt1[i]) +co+ itos(rn1[i]) +co;
+	  else if (t.use_master_ids1)
+            qry_str += sq+ refids1[i] +sq+co;
 
           l_ra = round(ra1[i] * D2MS);
           l_de = de1[i] > 0 ? round(de1[i] * D2MS) : round(de1[i] * D2MS);
-          qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ origID +")";
+          qry_str += ltos(l_ra) +co+ ltos(l_de) +co+ refcatID +")";
 
           ij++;
 // Insert query every insert_Nrows
@@ -2005,7 +2041,7 @@ if (verbose)
     }
 
     if (n_unmatched != nu_count) {
-	cout <<"ERROR: umatched mismatch. Reported "<<n_unmatched <<" but found "<< nu_count <<endl;
+	cout <<"ERROR: umatched mismatch. Reported "<< n_unmatched <<" but found "<< nu_count <<endl;
 	exit (1);
     }
 
@@ -2023,7 +2059,9 @@ if (verbose)
         if (j == nmatchret) {  // not there
           cout << setw(iwidth)<< i << bl << setw(idw1) << id1[i] << bl;
           if (t.use_master_id1)
-            cout << setw(refidw1)<<refid1[i] << bl;
+            cout << setw(refidw1) << refid1[i] << bl;
+          else if (t.use_master_ids1)
+            cout << setw(refidw1) << refids1[i] << bl;
           cout << setw(dwidth) << ra1[i] << bl << setw(dwidth) << de1[i] << endl;
         }
       }
@@ -2083,16 +2121,16 @@ if (verbose)
   //de1 = NULL;
   //ra2 = NULL;
   //de2 = NULL;
-  if (t.use_master_id1) {
-    for (i = 0; i < nr1; i++)
-	free(refid1[i]);
+  if (t.use_master_id1)
     free(refid1);
-    //refid1 = NULL;
+  else if (t.use_master_ids1) {
+    for (i = 0; i < nr1; i++)
+	free(refids1[i]);
+    free(refids1);
   }
-  if (t.use_master_id2) {  // catwise
+
+  if (t.use_master_id2)
     free(refid2);
-    //refid2 = NULL;
-  }
 
   if (id_list)
 	free(id_list);
