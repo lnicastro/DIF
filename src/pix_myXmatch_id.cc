@@ -12,6 +12,11 @@
     2. Unless a specific pixel ID (or range) is given, the full catalogue is
        processed.
 
+    HTM:
+      Npix = 8 * 4^d  ( => 1 << (2*d + 3) )
+      ID range = [Npix, 2*Npix - 1]
+
+
     Returned DB table (if requsted)
 
        | Field         | Type              |
@@ -43,7 +48,7 @@
     pix_myXmatch_id -d TOCats -x ascc25 tycho2 -t DBout.xout_tab -D 8 14 -qA 524288 1048575
 
 
-  LN@INAF-OAS, June 2013                         Last changed: 28/10/2021
+  LN@INAF-OAS, June 2013                         Last changed: 29/10/2021
 */
 
 using namespace std;
@@ -718,6 +723,7 @@ int main(int argc, char *argv[])
   int insert_Nrows = 300, sep_scale = 3600;
   unsigned long i, nmatch, nmatchret, nmatchext; // nmatchmax
   long totals_read = 0, totals_readext = 0, totals_match = 0, totals_matchext = 0, totals_unmatch = 0;
+  float totals_match_pc;
 
   double minchunksize, min_dist = 1.,
          matchlength = 1./3600;  // def. match dist.= 1''
@@ -1028,6 +1034,9 @@ int main(int argc, char *argv[])
     in_id = itos(iin_id);
     unsigned long iin_id2 = atoi(*argv);
     npix = iin_id2 - iin_id + 1;
+
+    cout << db.cat1 <<": N_pixels to go through: "<< npix << endl;
+
     if ( !(id_list = (unsigned long *) malloc(npix * sizeof(unsigned long))) ) {
       cerr << "--> Error: id_list: error allocating memory.\n";
       exit (-1);
@@ -1168,8 +1177,10 @@ if (verbose)
 	de_fld2 = t.de_coln2 + t.deg_fac; 
   }
 
+
 // For full catalogue scan build the list of pixels (could read from the query...)
   if (full_scan) {
+/* This is not correct because of possible objects in the external boudary
     qry_str = "SELECT DISTINCT "+ t.id_coln1 +" FROM "+ db.my_db1 +dt+ db.cat1;
 cout<<"Query: "<< qry_str<<endl;
 
@@ -1196,6 +1207,20 @@ cout<<"Query: "<< qry_str<<endl;
       id_list[i] = atoi(db_data(my_cID, i, 0));
 
     db_free_result(my_cID);
+*/
+
+    npix = 1 << (2*atoi(t.order1.c_str()) + 3);
+    iin_id = npix;
+    in_id = itos(iin_id);
+
+    cout << db.cat1 <<": N_pixels to process: "<< npix << endl;
+
+    if ( !(id_list = (unsigned long *) malloc(npix * sizeof(unsigned long))) ) {
+	cerr << "--> Error: id_list: error allocating memory.\n";
+	exit (-1);
+    }
+    for (i = 0; i < npix; i++)
+	id_list[i] = iin_id + i;
   }  // full_scan
 
  
@@ -1604,13 +1629,14 @@ if (verbose) {
   totals_match += nmatchret;
   totals_unmatch += n_unmatched;
   totals_matchext += nmatchext;
+  totals_match_pc = totals_read > 0 ? (totals_match*1000/totals_read) / 10. : 100.;
 
   cout <<"TOTAL: read: "<< totals_read + totals_readext;
   if (!t.in_full)
     cout <<" ("<< totals_read <<" in pix, "<< totals_readext <<" ext)";
 
   cout << std::setprecision(1);
-  cout <<", X: "<< totals_match <<" ("<< std::setw(5) << (totals_match*1000/totals_read) / 10. <<"%, "<< totals_matchext <<" ext), notX: "<< totals_unmatch << endl;
+  cout <<", X: "<< totals_match <<" ("<< std::setw(5) << totals_match_pc <<"%, "<< totals_matchext <<" ext), notX: "<< totals_unmatch << endl;
   cout << std::setprecision(7);
 
 // 23/06/2020: separation returned in arcsec
