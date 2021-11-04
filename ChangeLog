@@ -1,3 +1,6 @@
+2021-11-02 LN, ver. 0.5.5
+	- Avoid duplicated indexing of unmatched objects table in pix_myXmatch.cc and pix_myXmatch_id.cc
+
 2021-10-29 LN, ver. 0.5.5
 	- pix_myXmatch.cc and pix_myXmatch_id.cc bug fixes for full catalogue scan
 

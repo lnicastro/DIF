@@ -2160,6 +2160,7 @@ if (verbose)
         exit (1);
       }
 
+/* The key already exists
       if (totals_matchext > 0) {
         cout <<"Adding position key to cleaned unmatched objects table...\n";
         qry_str_nxc = "ALTER TABLE "+ t.otab.out_db +dt+ t.otab.nxc +" ADD KEY ("+ t.id_coln1 +co+ "RAmas)";
@@ -2168,6 +2169,7 @@ if (verbose)
           exit (1);
         }
       }
+*/
 
 // If a full input catalogue columns must be saved for unmatched objetcs
       if ( out_unmatched_full && totals_unmatch > 0 ) {
