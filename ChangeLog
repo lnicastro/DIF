@@ -1,4 +1,7 @@
-2021-11-02 LN, ver. 0.5.5
+2021-12-14 LN, ver. 0.5.5
+	- Fixed string offset value in the SQL procedure difview_healp
+
+2021-10-29 LN, ver. 0.5.5
 	- Avoid duplicated indexing of unmatched objects table in pix_myXmatch.cc and pix_myXmatch_id.cc
 
 2021-10-29 LN, ver. 0.5.5

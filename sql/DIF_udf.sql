@@ -331,7 +331,7 @@ BEGIN
     IF NOT eof THEN
       SET @undl = locate("_healp_", viewtab);
       SET tabname = left(viewtab,@undl-1);
-      SET depth = substr(viewtab,@undl+14);
+      SET depth = substr(viewtab,@undl+12);
       IF (depth > 0) THEN
         SELECT COUNT(*) INTO in_dif FROM DIF.tbl WHERE db=viewdb AND name=tabname AND id_type=2 AND param=depth;
       ELSE
