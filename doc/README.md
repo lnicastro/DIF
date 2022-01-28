@@ -773,7 +773,7 @@ command `dif --grant-user`.
 
 ### dif options
 
-As version 0.5.4, available options are (for current list see `dif -h`):
+As version 0.5.5, available options are (for current list see `dif -h`):
 
     -h | --help     print this usage message.
     -v | --ver      print version number.
@@ -787,7 +787,7 @@ As version 0.5.4, available options are (for current list see `dif -h`):
     --views-only    recreate all the table views and trigger but do not touch table
                     and indices. Must preceed --index-htm or --index-healpix-xxx comm.
     --readonly      do not execute any query that would modify the database.
-    --cnf           read user and/or password from "~/.my.cnf".
+    -c | --cnf      read user and/or password from "~/.my.cnf".
     --ra-key        add RA field to the index (i.e. ID+RA, def. ID only).
 
     -u | --user <User>

@@ -1,4 +1,4 @@
-#!@PERL@ -W -l
+11251125#!@PERL@ -W -l
 
 # ----------------------------------------------------------------------^
 # Copyright (C) 2004 - 2018
@@ -116,7 +116,7 @@ Options are:
    --views-only    recreate all the table views and trigger but do not touch table and indices.
                    Must preceed "--index-htm" or "--index-healpix-xxx" commands.
    --readonly      do not execute any query that would modify the database.
-   --cnf           read user and/or password from "~/.my.cnf".
+   -c | --cnf      read user and/or password from "~/.my.cnf".
    --ra-key        add RA field to the index (i.e. ID+RA, def. ID only).
 
    -u | --user <User>
@@ -1117,6 +1117,10 @@ sub dif_Index {
 
     #Range check 
     foreach $param (@param_list) {
+	if ( ! length( do { no warnings "numeric"; $x & "" } ) ) {
+	  print "$param is not numeric\n";
+	  return 1;
+	}
 	if ($id_type == 1) {
 	    if (($param < 0)   ||   ($param > 25))
 	    { return 1; }
@@ -1440,7 +1444,7 @@ while ($#ARGV >= 0) {
     } elsif ($opt eq "--readonly") {
 	$optreadonly = 1;
 
-    } elsif ($opt eq "--cnf") {
+    } elsif ($opt eq "-c" || $opt eq "--cnf") {
 	$read_cnf = 1;
 
     } elsif ($opt eq "--ra-key") {

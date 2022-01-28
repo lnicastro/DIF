@@ -1,3 +1,6 @@
+2022-01-28 LN, ver. 0.5.5
+	- Minor changes to the dif script
+
 2021-12-14 LN, ver. 0.5.5
 	- Fixed string offset value in the SQL procedure difview_healp
 
