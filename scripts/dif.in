@@ -1,4 +1,4 @@
-11251125#!@PERL@ -W -l
+#!@PERL@ -W -l
 
 # ----------------------------------------------------------------------^
 # Copyright (C) 2004 - 2018
@@ -1117,8 +1117,8 @@ sub dif_Index {
 
     #Range check 
     foreach $param (@param_list) {
-	if ( ! length( do { no warnings "numeric"; $x & "" } ) ) {
-	  print "$param is not numeric\n";
+	if ( ($param =~ /^[0-9]+$/) !~ '1' ) {
+	  print "$param is not integer\n";
 	  return 1;
 	}
 	if ($id_type == 1) {
