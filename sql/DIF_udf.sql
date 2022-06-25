@@ -477,6 +477,10 @@ BEGIN
 
   SELECT Dec_field INTO DECfield FROM DIF.tbl WHERE db=p_db AND name=p_name LIMIT 1;
 
+  IF ( locate('`',DECfield) ) THEN
+    RETURN DECfield;
+  END IF;
+
   SET dec_oper = ( locate('/',DECfield) OR locate('*',DECfield) );
 
   OPEN c;
@@ -485,7 +489,7 @@ BEGIN
     FETCH c INTO colname;
     IF NOT eof THEN
       IF ( (colname = DECfield) OR ((locate(colname,DECfield)) > 0 AND dec_oper > 0) ) THEN
-        RETURN CONCAT('`', colname, '`');
+	RETURN CONCAT('`', colname, '`');
       END IF;
     END IF;
   UNTIL eof END REPEAT;
@@ -514,8 +518,21 @@ BEGIN
 
   SELECT Ra_field, Dec_field INTO RAfield, DECfield FROM DIF.tbl WHERE db=p_db AND name=p_name LIMIT 1;
 
-  SET ra_oper = ( locate('/',RAfield) OR locate('*',RAfield) );
-  SET dec_oper = ( locate('/',DECfield) OR locate('*',DECfield) );
+  IF ( locate('`',RAfield) ) THEN
+    SET colRA = RAfield;
+  ELSE
+    SET ra_oper = ( locate('/',RAfield) OR locate('*',RAfield) );
+  END IF;
+
+  IF ( locate('`',DECfield) ) THEN
+    SET colDE = DECfield;
+  ELSE
+    SET dec_oper = ( locate('/',DECfield) OR locate('*',DECfield) );
+  END IF;
+
+  IF ( colRA != '' AND colDE != '' ) THEN
+    RETURN CONCAT(colRA, ',', colDE);
+  END IF;
 
   OPEN c;
 
@@ -524,12 +541,12 @@ BEGIN
     IF NOT eof THEN
       IF ( (colname = RAfield) OR ((locate(colname,RAfield)) > 0 AND ra_oper > 0) ) THEN
 	SET colRA = CONCAT('`', colname, '`');
-	IF (colDE != '') THEN
+	IF ( colDE != '' ) THEN
 	  RETURN CONCAT(colRA, ',', colDE);
 	END IF;
       ELSEIF ( (colname = DECfield) OR ((locate(colname,DECfield)) > 0 AND dec_oper > 0) ) THEN
         SET colDE = CONCAT('`', colname, '`');
-	IF (colRA != '') THEN
+	IF ( colRA != '' ) THEN
 	  RETURN CONCAT(colRA, ',', colDE);
 	END IF;
       END IF;
