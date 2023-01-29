@@ -2,7 +2,7 @@
   A simple implementation of the "spherematch" algorithm querying DIF
   indexed catalogues.
 
-  LN @ IASF-INAF, Sep. 2010                         Last changed: 22/06/2020 
+  LN @ IASF-INAF, Sep. 2010                         Last changed: 28/01/2023 
 */
 
 using namespace std;
@@ -17,6 +17,9 @@ using namespace std;
 #include <vector>
 
 #include "my_stmt_db.h"
+extern MYSQL_STMT* stmt;
+extern double dbl_data[2];
+extern unsigned long long long_data;
 
 #define MIN(a,b) ( ((a) < (b)) ? (a) : (b) )
 #define MAX(a,b) ( ((a) > (b)) ? (a) : (b) )

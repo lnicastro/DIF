@@ -1,3 +1,6 @@
+2023-01-28 LN, ver. 0.5.5
+	- Various changes to fix "multiple definition" of functions detected by gcc version >= 10
+
 2022-03-29 LN, ver. 0.5.5
 	- Fixed integer check in dif.in
 

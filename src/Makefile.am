@@ -61,23 +61,21 @@ ha_dif_la_LIBADD = ../contrib/htmIndex/lib/libSpatialIndex.a \
                    ../contrib/Healpix/HealP3/lib/libHealP3.a \
                    ../contrib/Spherematch/lib/libspheregroup.a
 
-noinst_LIBRARIES = libMyUtils.a libdif_alone.a
-libMyUtils_a_SOURCES = \
-   my_stmt_db.c my_stmt_db2.c deg_radec.c
+noinst_LIBRARIES = libdif_alone.a
 
 libdif_alone_a_SOURCES = $(ha_dif_la_SOURCES)
 
 bin_PROGRAMS = testMySearch fakesky_H6 fakesky_RND fakesky_HPx myXmatch pix_myXmatch
-fakesky_H6_SOURCES = fakesky_H6.cc
-fakesky_RND_SOURCES = fakesky_RND.cc
-fakesky_HPx_SOURCES = fakesky_HPx.cc
-myXmatch_SOURCES = myXmatch.cc
-pix_myXmatch_SOURCES = pix_myXmatch.cc
-myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a @MYSQL_LIBS@
-pix_myXmatch_LDADD = ./libMyUtils.a ../contrib/Spherematch/lib/libspheregroup.a @MYSQL_LIBS@
-fakesky_H6_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a @MYSQL_LIBS@
-fakesky_RND_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/htmIndex/lib/libSpatialIndex.a @MYSQL_LIBS@
-fakesky_HPx_LDADD = ./libdif_alone.a ./libMyUtils.a ../contrib/Healpix/HealP3/lib/libHealP3.a @MYSQL_LIBS@
+fakesky_H6_SOURCES = my_stmt_db.c fakesky_H6.cc
+fakesky_RND_SOURCES = my_stmt_db.c fakesky_RND.cc
+fakesky_HPx_SOURCES = my_stmt_db.c fakesky_HPx.cc
+myXmatch_SOURCES = deg_radec.c my_stmt_db.c myXmatch.cc
+pix_myXmatch_SOURCES = my_stmt_db2.c pix_myXmatch.cc
+myXmatch_LDADD = ../contrib/Spherematch/lib/libspheregroup.a @MYSQL_LIBS@
+pix_myXmatch_LDADD = ../contrib/Spherematch/lib/libspheregroup.a @MYSQL_LIBS@
+fakesky_H6_LDADD = ./libdif_alone.a ../contrib/htmIndex/lib/libSpatialIndex.a @MYSQL_LIBS@
+fakesky_RND_LDADD = ./libdif_alone.a ../contrib/htmIndex/lib/libSpatialIndex.a @MYSQL_LIBS@
+fakesky_HPx_LDADD = ./libdif_alone.a ../contrib/Healpix/HealP3/lib/libHealP3.a @MYSQL_LIBS@
 testMySearch_SOURCES = testMySearch.cc
 testMySearch_LDADD = ./libdif_alone.a ../contrib/htmIndex/lib/libSpatialIndex.a \
                      ../contrib/Healpix/HealP3/lib/libHealP3.a \

@@ -88,6 +88,13 @@ using namespace std;
 
 #include "my_stmt_db2.h"
 
+#define STRING_SIZE 21
+extern MYSQL_STMT* stmt;
+extern double dbl_data[2];
+extern unsigned long long long_data[2];
+extern char str_data[STRING_SIZE];
+
+
 #include "pix_myXmatch_def.hh"
 
 

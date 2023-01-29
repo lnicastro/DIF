@@ -3,12 +3,13 @@
 
   Note: here use "myXmatch" custom bind function "my_difbind"
 
-  LN @ IASF-INAF, Sep. 2010                         Last changed: 03/02/2016
+  LN @ IASF-INAF, Sep. 2010                         Last changed: 28/01/2023
 */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "my_stmt_db_defs.h"
 #include "my_stmt_db.h"
 
 

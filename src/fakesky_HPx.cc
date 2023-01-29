@@ -4,7 +4,7 @@
   Use "fakesky_HPx -h" to see options.
 
 
-  LN @ IASF-INAF March 2009                         Last changed: 16/05/2016
+  LN @ IASF-INAF March 2009                         Last changed: 28/01/2023
 */
 
 using namespace std;
@@ -46,7 +46,7 @@ static const double ARCSEC_RAD = 4.848136811095359935899141;
 
 // MySQL interface functions
 
-#include <my_stmt_db.h>
+#include "my_stmt_db.h"
 
 // --
 

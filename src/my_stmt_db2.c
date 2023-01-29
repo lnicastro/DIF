@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "my_stmt_db2_defs.h"
 #include "my_stmt_db2.h"
 
 
@@ -241,4 +242,182 @@ int my_difbind2(unsigned int n_fields, const char *param, MYSQL_BIND *bind, cons
   }
 
   return (0);
+}
+
+
+/* Functions below are from my_stmt_db.c */
+
+int db_init(int ID) {
+  int iret;
+
+  iret=0;
+  if (mysql_init(&conn[ID])) {
+    iret=mysql_options(&conn[ID], MYSQL_OPT_CONNECT_TIMEOUT, DEFAULT_TIMEOUT);
+    if (iret == 0) iret=1;
+    else iret=0;
+  }
+  return iret;
+}
+
+int db_connect(int ID, const char *host, const char *username, const char *password, const char *db) {
+  MYSQL *ret;
+
+  ret=mysql_real_connect(&conn[ID], host, username, password, db, 0, MYSQL_SOCK, 0);
+  if (ret) return 1;
+  else return 0;
+}
+
+const char * db_error(int ID) {
+  return mysql_error(&conn[ID]);
+}
+
+int db_return_row(int ID) {
+  return return_row[ID];
+}
+
+int db_select(int ID, const char *db) {
+  int ret;
+
+  ret=mysql_select_db(&conn[ID], db);
+  if (ret) return 1;
+  else return 0;
+}
+
+
+
+
+
+int db_query(int ID, const char *query) {
+  if (mysql_query(&conn[ID], query))
+    return 0;
+  else {
+    /* query succeeded, process any data returned by it*/
+    result[ID] = mysql_store_result(&conn[ID]);
+    if (result[ID]) {
+      /* there are rows*/
+      return_row[ID]=1;
+
+      num_fields[ID] = mysql_num_fields(result[ID]);
+      num_rows[ID] = mysql_num_rows(result[ID]);
+
+      return 1;
+    }
+    else {
+        return_row[ID]=0;
+        num_rows[ID] = mysql_affected_rows(&conn[ID]);
+        return 1;
+    }
+  }
+}
+
+int db_uquery(int ID, const char *query) {
+  if (mysql_query(&conn[ID], query))
+    return 0;
+  else {
+    /* query succeeded, process any data returned by it*/
+//    result[ID] = mysql_store_result(&conn[ID]);
+    result[ID] = mysql_use_result(&conn[ID]);
+    if (result[ID]) {
+      /* there are rows*/
+      return_row[ID]=1;
+
+      num_fields[ID] = mysql_num_fields(result[ID]);
+      //num_rows[ID] = mysql_num_rows(result[ID]);
+
+      return 1;
+    }
+    else {
+        return_row[ID]=0;
+        num_rows[ID] = mysql_affected_rows(&conn[ID]);
+        return 1;
+    }
+  }
+}
+
+unsigned int db_num_fields(int ID) {
+  return num_fields[ID];
+}
+
+unsigned int db_num_rows(int ID) {
+  return num_rows[ID];
+}
+
+char *db_fieldname(int ID, int ord) {
+  MYSQL_FIELD *fields;
+
+  if ((unsigned int)ord < num_fields[ID]) {
+    fields = mysql_fetch_fields(result[ID]);
+    return fields[ord].name;
+  }
+  else
+    return NULL;
+}
+
+enum enum_field_types db_fieldtype(int ID, int ord) {
+  MYSQL_FIELD *fields;
+
+  if ((unsigned int)ord < num_fields[ID]) {
+    fields = mysql_fetch_fields(result[ID]);
+    return fields[ord].type;
+  }
+  else
+    return FIELD_TYPE_NULL;
+}
+
+unsigned int db_fieldlength(int ID, int ord) {
+  MYSQL_FIELD *fields;
+
+  if ((unsigned int)ord < num_fields[ID]) {
+    fields = mysql_fetch_fields(result[ID]);
+    return fields[ord].length;
+  }
+  else
+    return 0;
+}
+
+char *db_data(int ID, unsigned int row, unsigned int field) {
+  MYSQL_ROW record;
+
+  if ((field < num_fields[ID]) && (row < num_rows[ID])) {
+
+
+    mysql_data_seek(result[ID], row);
+    record = mysql_fetch_row(result[ID]);
+    return record[field];
+  }
+  else
+    return NULL;
+}
+
+char **db_row(int ID, unsigned int row) {
+  MYSQL_ROW record;
+
+  if (row < num_rows[ID]) {
+    mysql_data_seek(result[ID], row);
+    record = mysql_fetch_row(result[ID]);
+    return record;
+  }
+  return NULL;
+}
+
+short db_unsigned(int ID, int ord) {
+  MYSQL_FIELD *fields;
+
+  if ((unsigned int)ord < num_fields[ID]) {
+    fields = mysql_fetch_fields(result[ID]);
+    if  (fields[ord].flags & UNSIGNED_FLAG)
+      return 1;
+    else
+      return 0;
+  }
+  else
+    return 0;
+}
+
+void db_free_result(int ID) {
+  mysql_free_result(result[ID]);
+}
+
+void db_close(int ID) {
+  mysql_close(&conn[ID]);
 }
