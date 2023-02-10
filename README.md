@@ -16,6 +16,10 @@ and the [reference paper](http://www.hindawi.com/journals/aa/2010/524534.html).
 If you want to use almost all of the DIF capabilities but avoid to use MySQL /
 MariaDB source code, please use [SID](https://github.com/lnicastro/SID) instead.
 
+
+[![DOI](https://zenodo.org/badge/134399282.svg)](https://zenodo.org/badge/latestdoi/134399282)
+
+
 This is the **Version 0.5.5** development tree.
 
 ## Requirements
