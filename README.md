@@ -11,7 +11,7 @@ and it allows very fast query execution even on billion-row tables.
   code and execute a `cmake` configuration. Please see below.
 
 See also the [documentation](doc/) or the [web page](http://ross.oas.inaf.it/dif/)
-and the [reference paper](http://www.hindawi.com/journals/aa/2010/524534.html).
+and the [reference paper](https://onlinelibrary.wiley.com/doi/10.1155/2010/524534).
 
 If you want to use almost all of the DIF capabilities but avoid to use MySQL /
 MariaDB source code, please use [SID](https://github.com/lnicastro/SID) instead.
